@@ -1,109 +1,126 @@
 import React from "react";
 import {
-  MDBContainer,
-  MDBCol,
-  MDBRow,
   MDBBtn,
-  MDBIcon,
+  MDBContainer,
+  MDBRow,
+  MDBCol,
   MDBInput,
-  MDBCheckbox,
 } from "mdb-react-ui-kit";
 
-export default function Login() {
+import logo from "../../assets/logo300.png";
+import "../../styles/Login.css";
+
+import axios from "axios";
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
+
+function App() {
+  const [sicilNo, setSicilNo] = React.useState("");
+  const [sifre, setSifre] = React.useState("");
+  const [error, setError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const configuration = {
+    method: "POST",
+    url: "/api/users/login",
+    data: {
+      username: sicilNo,
+      password: sifre,
+    },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const login = () => {
+    console.log(configuration);
+    axios(configuration)
+      .then((result) => {
+        const expDate = new Date(Date.now() + 604800000);
+        console.log(expDate);
+        cookies.set("TOKEN", result.data.token, {
+          path: "/",
+          expires: expDate,
+        });
+        window.location.href = "/";
+      })
+      .catch((error) => {
+        console.log(error);
+        const message =
+          error.response.data.message || "Hata! Daha sonra tekrar deneyiniz";
+        setError(true);
+        setErrorMessage(message);
+      });
+  };
+
   return (
-    <MDBContainer fluid className="p-3 my-5 h-custom">
+    <MDBContainer className="my-5 gradient-form">
       <MDBRow>
-        <MDBCol col="10" md="6">
-          <img
-            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-            class="img-fluid"
-            alt="Sample image"
-          />
+        <MDBCol col="6" className="mb-5">
+          <div className="d-flex flex-column ms-5">
+            <div className="text-center">
+              <img src={logo} style={{ width: "185px" }} alt="logo" />
+              <h4 className="mt-1 mb-5 pb-1">Eskişehir Adliyesi </h4>
+            </div>
+
+            <p>Devam edebilmek için lütfen giriş yapın</p>
+
+            <MDBInput
+              wrapperClass="mb-4"
+              label="Sicil Numarası (abXXXXXX)"
+              id="sicilNo"
+              onChange={(e) => setSicilNo(e.target.value)}
+              value={sicilNo}
+              type="text"
+            />
+            <MDBInput
+              wrapperClass="mb-4"
+              label="Şifre"
+              id="sifre"
+              onChange={(e) => setSifre(e.target.value)}
+              value={sifre}
+              type="password"
+            />
+
+            <div className="text-center pt-1 mb-5 pb-1">
+              <MDBBtn
+                onClick={() => {
+                  login();
+                }}
+                className="mb-4 w-100 gradient-custom-2"
+              >
+                Giriş Yap
+              </MDBBtn>
+              {/* <a className="text-muted" href="#!">
+                Forgot password?
+              </a> */}
+            </div>
+
+            {/* <div className="d-flex flex-row align-items-center justify-content-center pb-4 mb-4">
+              <p className="mb-0">Don't have an account?</p>
+              <MDBBtn outline className="mx-2" color="danger">
+                Danger
+              </MDBBtn>
+            </div> */}
+          </div>
         </MDBCol>
 
-        <MDBCol col="4" md="6">
-          <MDBInput
-            wrapperClass="mb-4"
-            label="Sicil"
-            id="formControlLg"
-            type="email"
-            size="lg"
-          />
-          <MDBInput
-            wrapperClass="mb-4"
-            label="Password"
-            id="formControlLg"
-            type="password"
-            size="lg"
-          />
-
-          <div className="d-flex justify-content-between mb-4">
-            <MDBCheckbox
-              name="flexCheck"
-              value=""
-              id="flexCheckDefault"
-              label="Remember me"
-            />
-            <a href="!#">Forgot password?</a>
-          </div>
-
-          <div className="text-center text-md-start mt-4 pt-2">
-            <MDBBtn className="mb-0 px-5" size="lg">
-              Login
-            </MDBBtn>
-            <p className="small fw-bold mt-2 pt-1 mb-2">
-              Don't have an account?{" "}
-              <a href="#!" className="link-danger">
-                Register
-              </a>
-            </p>
+        <MDBCol col="6" className="mb-5">
+          <div className="d-flex flex-column  justify-content-center gradient-custom-2 h-100 mb-4">
+            <div className="text-white px-3 py-4 p-md-5 mx-md-4">
+              <h4 class="mb-4"> Geliştirici Notu :) </h4>
+              <p class="small mb-0">
+                Eskişehir Adliyesi Komisyon Kalemi için geliştirilmiş bir
+                uygulamadır. Uygulamayı geliştirmekteki temel amaç komisyon
+                kaleminin işlerini daha hızlı ve kolay bir şekilde yapmalarını
+                sağlamaktır.
+              </p>
+            </div>
           </div>
         </MDBCol>
       </MDBRow>
-
-      <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-        <div className="text-white mb-3 mb-md-0">
-          Copyright © 2020. All rights reserved.
-        </div>
-
-        <div>
-          <MDBBtn
-            tag="a"
-            color="none"
-            className="mx-3"
-            style={{ color: "white" }}
-          >
-            <MDBIcon fab icon="facebook-f" size="md" />
-          </MDBBtn>
-
-          <MDBBtn
-            tag="a"
-            color="none"
-            className="mx-3"
-            style={{ color: "white" }}
-          >
-            <MDBIcon fab icon="twitter" size="md" />
-          </MDBBtn>
-
-          <MDBBtn
-            tag="a"
-            color="none"
-            className="mx-3"
-            style={{ color: "white" }}
-          >
-            <MDBIcon fab icon="google" size="md" />
-          </MDBBtn>
-
-          <MDBBtn
-            tag="a"
-            color="none"
-            className="mx-3"
-            style={{ color: "white" }}
-          >
-            <MDBIcon fab icon="linkedin-in" size="md" />
-          </MDBBtn>
-        </div>
-      </div>
     </MDBContainer>
   );
 }
+
+export default App;
