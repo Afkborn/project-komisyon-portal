@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Modal,
@@ -12,10 +12,77 @@ import {
 } from "reactstrap";
 import axios from "axios";
 
-function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
+function BirimEkleModal({ modal, toggle, kurum }) {
+  const [birim, setBirim] = useState({});
+
   const [altKurum, setAltKurum] = useState(null);
   const [birimler, setBirimler] = useState([]);
+  const [tekilMahkeme, setTekilMahkeme] = useState(false);
   const [seciliBirim, setSeciliBirim] = useState(null);
+  const [mahkemeSayi, setMahkemeSayi] = useState(1);
+  const [heyetSayi, setHeyetSayi] = useState("1");
+  const [birimName, setBirimName] = useState("");
+  const [mahkemeDurum, setMahkemeDurum] = useState(true);
+  const [minKatipSayisi, setMinKatipSayisi] = useState(1);
+
+  const handleHeyetRadioChange = (event) => {
+    setHeyetSayi(event.target.value);
+    birimAdiHesapla();
+  };
+
+  const handleRadioChange = (e) => {
+    if (e.target.value === "Tek mahkeme") {
+      setTekilMahkeme(true);
+      setMahkemeSayi(0);
+    } else {
+      setTekilMahkeme(false);
+      setMahkemeSayi(1);
+    }
+  };
+
+  const birimAdiHesapla = () => {
+    if (altKurum && altKurum.id === 0) {
+      let birimAdi = "";
+      if (mahkemeSayi > 0) {
+        if (mahkemeSayi > 0) {
+          birimAdi += mahkemeSayi + ". ";
+          if (seciliBirim) {
+            birimAdi += seciliBirim.name + " ";
+          }
+        }
+      } else {
+        if (seciliBirim) {
+          birimAdi += seciliBirim.name + " ";
+        }
+      }
+
+      if (heyetSayi === "1/2") {
+        birimAdi += "(2. Heyet)";
+      } else if (heyetSayi === "1/3") {
+        birimAdi += "(3. Heyet)";
+      } else if (heyetSayi === "1") {
+        birimAdi += "";
+      }
+
+      birimAdi = birimAdi.replace(/\s+/g, " ");
+      setBirimName(birimAdi);
+    }
+    else if (altKurum && altKurum.id === 1) {
+      let birimAdi = "";
+      if (seciliBirim) {
+        birimAdi += seciliBirim.name + " ";
+      }
+      setBirimName(birimAdi);
+    } 
+    else {
+      setBirimName("");
+    }
+  };
+
+  useEffect(() => {
+    console.log("birimAdi güncellendi");
+    birimAdiHesapla();
+  }, [birimName, mahkemeSayi, seciliBirim, heyetSayi, altKurum]);
 
   function handleKurumTypeSelectInputChange(e) {
     if (e.target.value === "Alt Kurum Seçiniz") {
@@ -24,6 +91,7 @@ function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
     }
     let seciliKurum = kurum.types.find((type) => type.name === e.target.value);
     setAltKurum(seciliKurum);
+    setBirimName("");
     const configuration = {
       method: "GET",
       url: "api/unit_types",
@@ -47,6 +115,25 @@ function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
     }
     let seciliBirim = birimler.find((birim) => birim.name === e.target.value);
     setSeciliBirim(seciliBirim);
+  }
+
+  function handleAddBirim() {
+    setBirim({
+      ...birim,
+      kurumID: kurum.id,
+      kurumName: kurum.name,
+      birimTurID: altKurum ? altKurum.id : null,
+      birimTurName: altKurum ? altKurum.name : null,
+      altBirimID: seciliBirim ? seciliBirim.id : null,
+      altBirimName: seciliBirim ? seciliBirim.name : null,
+      name: birimName,
+      mahkemeDurum: mahkemeDurum,
+      heyetDurum: heyetSayi,
+      mahkemeSayi: mahkemeSayi,
+      minKatipSayisi: minKatipSayisi,
+    });
+
+    console.log(birim);
   }
 
   return (
@@ -76,7 +163,9 @@ function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
               <FormGroup>
                 <Label for="kurumTypeSelect">Birim Türü </Label>
                 <Input
-                  onChange={(e) => handleKurumTypeSelectInputChange(e)}
+                  onChange={(e) => {
+                    handleKurumTypeSelectInputChange(e);
+                  }}
                   id="kurumTypeSelect"
                   name="select"
                   type="select"
@@ -88,10 +177,15 @@ function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
                 </Input>
               </FormGroup>
 
-              <FormGroup>
-                <Label for="birimSelect">Birim </Label>
+              <FormGroup
+                hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
+              >
+                <Label for="birimSelect">Alt Birim </Label>
                 <Input
-                  onChange={(e) => handleBirimSelectInputChange(e)}
+                  onChange={(e) => {
+                    handleBirimSelectInputChange(e);
+                    birimAdiHesapla();
+                  }}
                   id="birimSelect"
                   name="select"
                   type="select"
@@ -103,13 +197,119 @@ function BirimEkleModal({ modal, toggle, handleAddBirim, kurum, setBirim }) {
                 </Input>
               </FormGroup>
 
-              <FormGroup check>
-                <Input name="radio2" type="radio" />{" "}
+              <FormGroup check hidden={!(altKurum && altKurum.id === 0)}>
+                <Input
+                  onClick={(e) => {
+                    handleRadioChange(e);
+                  }}
+                  value="Tek mahkeme"
+                  name="radio2"
+                  type="radio"
+                />{" "}
                 <Label check>Tek mahkeme</Label>
               </FormGroup>
-              <FormGroup check>
-                <Input name="radio2" type="radio" />{" "}
+              <FormGroup check hidden={!(altKurum && altKurum.id === 0)}>
+                <Input
+                  onClick={(e) => {
+                    handleRadioChange(e);
+                  }}
+                  value="Çoklu mahkeme"
+                  name="radio2"
+                  type="radio"
+                  defaultChecked
+                />{" "}
                 <Label check>Çoklu mahkeme</Label>
+              </FormGroup>
+
+              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
+                <Label for="mahkemeSayi">Mahkeme Sayı</Label>
+                <Input
+                  type="number"
+                  name="mahkemeSayi"
+                  id="mahkemeSayi"
+                  placeholder="Mahkeme Sayı"
+                  disabled={tekilMahkeme}
+                  value={mahkemeSayi}
+                  min={1}
+                  onChange={(e) => {
+                    setMahkemeSayi(parseInt(e.target.value, 10));
+                    birimAdiHesapla();
+                  }}
+                />
+              </FormGroup>
+
+              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
+                <Label for="mahkemeHeyet">Heyet Sayısı</Label>
+                <div>
+                  <Input
+                    type="radio"
+                    value="1"
+                    name="heyet"
+                    checked={heyetSayi === "1"}
+                    onChange={handleHeyetRadioChange}
+                  />
+                  <Label>1</Label>
+                </div>
+                <div>
+                  <Input
+                    type="radio"
+                    value="1/2"
+                    name="heyet"
+                    checked={heyetSayi === "1/2"}
+                    onChange={handleHeyetRadioChange}
+                  />
+                  <Label>1/2</Label>
+                </div>
+                <div>
+                  <Input
+                    type="radio"
+                    value="1/3"
+                    name="heyet"
+                    checked={heyetSayi === "1/3"}
+                    onChange={handleHeyetRadioChange}
+                  />
+                  <Label>1/3</Label>
+                </div>
+              </FormGroup>
+
+              <FormGroup switch hidden={!(altKurum && altKurum.id === 0)}>
+                <Input
+                  type="switch"
+                  checked={mahkemeDurum}
+                  onClick={() => {
+                    setMahkemeDurum(!mahkemeDurum);
+                  }}
+                />
+                <Label check>
+                  {mahkemeDurum ? "Mahkeme İşletimde" : "Mahkeme Kapalı"}
+                </Label>
+              </FormGroup>
+
+              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
+                <Label for="minKatipSayi">Gerekli Minimum Katip Sayısı</Label>
+                <Input
+                  type="number"
+                  name="minKatipSayi"
+                  id="minKatipSayi"
+                  placeholder="Katip sayısı"
+                  value={minKatipSayisi}
+                  min={1}
+                  onChange={(e) =>
+                    setMinKatipSayisi(parseInt(e.target.value, 10))
+                  }
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label for="birimAdi">Birim Adı</Label>
+                <Input
+                  type="text"
+                  name="birimAdi"
+                  id="birimAdi"
+                  placeholder="Birim Adı"
+                  value={birimName}
+                  onChange={(e) => setBirimName(e.target.value)}
+                />
               </FormGroup>
             </Form>
           )}

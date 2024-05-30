@@ -13,6 +13,7 @@ export default function Birimler({ kurumlar }) {
     createdDate: null,
     mahkemeDurum: null,
   });
+
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
 
@@ -29,9 +30,7 @@ export default function Birimler({ kurumlar }) {
     setModal(true);
   }
 
-  function handleAddBirim() {
-    alert("Birim eklendi");
-  }
+
 
   return (
     <div>
@@ -105,10 +104,7 @@ export default function Birimler({ kurumlar }) {
       <BirimEkleModal
         modal={modal}
         toggle={toggle}
-        handleAddBirim={handleAddBirim}
         kurum={kurum}
-        birim = {birim}
-        setBirim={setBirim}
       />
     </div>
   );
