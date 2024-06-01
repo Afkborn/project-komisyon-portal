@@ -12,13 +12,14 @@ import {
 } from "reactstrap";
 import axios from "axios";
 
-function BirimEkleModal({ modal, toggle, kurum }) {
+function BirimEkleModal({ modal, toggle, kurum, token }) {
   const [birim, setBirim] = useState({});
+  const [seciliAltBirim, setSeciliAltBirim] = useState(null);
 
   const [altKurum, setAltKurum] = useState(null);
   const [birimler, setBirimler] = useState([]);
   const [tekilMahkeme, setTekilMahkeme] = useState(false);
-  const [seciliBirim, setSeciliBirim] = useState(null);
+
   const [mahkemeSayi, setMahkemeSayi] = useState(1);
   const [heyetSayi, setHeyetSayi] = useState("1");
   const [birimName, setBirimName] = useState("");
@@ -46,13 +47,13 @@ function BirimEkleModal({ modal, toggle, kurum }) {
       if (mahkemeSayi > 0) {
         if (mahkemeSayi > 0) {
           birimAdi += mahkemeSayi + ". ";
-          if (seciliBirim) {
-            birimAdi += seciliBirim.name + " ";
+          if (seciliAltBirim) {
+            birimAdi += seciliAltBirim.name + " ";
           }
         }
       } else {
-        if (seciliBirim) {
-          birimAdi += seciliBirim.name + " ";
+        if (seciliAltBirim) {
+          birimAdi += seciliAltBirim.name + " ";
         }
       }
 
@@ -66,15 +67,13 @@ function BirimEkleModal({ modal, toggle, kurum }) {
 
       birimAdi = birimAdi.replace(/\s+/g, " ");
       setBirimName(birimAdi);
-    }
-    else if (altKurum && altKurum.id === 1) {
+    } else if (altKurum && altKurum.id === 1) {
       let birimAdi = "";
-      if (seciliBirim) {
-        birimAdi += seciliBirim.name + " ";
+      if (seciliAltBirim) {
+        birimAdi += seciliAltBirim.name + " ";
       }
       setBirimName(birimAdi);
-    } 
-    else {
+    } else {
       setBirimName("");
     }
   };
@@ -82,7 +81,7 @@ function BirimEkleModal({ modal, toggle, kurum }) {
   useEffect(() => {
     console.log("birimAdi güncellendi");
     birimAdiHesapla();
-  }, [birimName, mahkemeSayi, seciliBirim, heyetSayi, altKurum]);
+  }, [mahkemeSayi, seciliAltBirim, heyetSayi, altKurum]);
 
   function handleKurumTypeSelectInputChange(e) {
     if (e.target.value === "Alt Kurum Seçiniz") {
@@ -96,7 +95,7 @@ function BirimEkleModal({ modal, toggle, kurum }) {
       method: "GET",
       url: "api/unit_types",
       params: {
-        type: seciliKurum.id,
+        institutionTypeId: seciliKurum.id,
       },
     };
     axios(configuration)
@@ -110,11 +109,13 @@ function BirimEkleModal({ modal, toggle, kurum }) {
 
   function handleBirimSelectInputChange(e) {
     if (e.target.value === "Birim Seçiniz") {
-      setSeciliBirim(null);
+      setSeciliAltBirim(null);
       return;
     }
-    let seciliBirim = birimler.find((birim) => birim.name === e.target.value);
-    setSeciliBirim(seciliBirim);
+    let seciliAltBirim = birimler.find(
+      (birim) => birim.name === e.target.value
+    );
+    setSeciliAltBirim(seciliAltBirim);
   }
 
   function handleAddBirim() {
@@ -124,8 +125,8 @@ function BirimEkleModal({ modal, toggle, kurum }) {
       kurumName: kurum.name,
       birimTurID: altKurum ? altKurum.id : null,
       birimTurName: altKurum ? altKurum.name : null,
-      altBirimID: seciliBirim ? seciliBirim.id : null,
-      altBirimName: seciliBirim ? seciliBirim.name : null,
+      altBirimID: seciliAltBirim ? seciliAltBirim.id : null,
+      altBirimName: seciliAltBirim ? seciliAltBirim.name : null,
       name: birimName,
       mahkemeDurum: mahkemeDurum,
       heyetDurum: heyetSayi,
@@ -133,7 +134,32 @@ function BirimEkleModal({ modal, toggle, kurum }) {
       minKatipSayisi: minKatipSayisi,
     });
 
-    console.log(birim);
+    const configuration = {
+      method: "POST",
+      url: "api/units",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        unitTypeID: seciliAltBirim.id,
+        institutionID: kurum.id,
+        delegationType: heyetSayi,
+        status: mahkemeDurum,
+        series: mahkemeSayi,
+        minClertCount: minKatipSayisi,
+        name: birimName,
+      },
+    };
+    console.log(configuration);
+    axios(configuration)
+      .then((result) => {
+        toggle();
+        alert("Birim başarıyla eklendi");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   return (

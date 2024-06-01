@@ -98,7 +98,7 @@ export default function Dashboard() {
       default:
         return <Welcome />;
       case 1:
-        return <Birimler kurumlar={kurumlar} />;
+        return <Birimler kurumlar={kurumlar}  token={token}/>;
       case 2:
         return <Personel />;
       case 3:
