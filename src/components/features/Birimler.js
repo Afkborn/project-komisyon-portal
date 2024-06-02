@@ -12,16 +12,27 @@ import {
   TabPane,
   Row,
   Col,
+  Badge,
 } from "reactstrap";
 import BirimEkleModal from "./BirimEkleModal";
+import BirimSilModal from "./BirimSilModal";
 import axios from "axios";
+import updateSvg from "../../assets/edit.svg";
+import copSepeti from "../../assets/delete.svg";
 
 export default function Birimler({ kurumlar, token }) {
   const [kurum, setKurum] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [birimler, setBirimler] = useState([]);
   const [showBirimEkleModal, setShowBirimEkleModal] = useState(false);
-  const toggle = () => setShowBirimEkleModal(!showBirimEkleModal);
+  const [showBirimSilModal, setShowBirimSilModal] = useState(false);
+  const [deleteSelectedBirim, setDeleteSelectedBirim] = useState(null); // [1
+  const birimEkleToggle = () => setShowBirimEkleModal(!showBirimEkleModal);
+  const birimSilToggle = () => setShowBirimSilModal(!showBirimSilModal);
+
+  const clikableStyle = {
+    cursor: "pointer",
+  };
 
   function handleKurumChange(event) {
     if (event.target.value === "Seçiniz") {
@@ -71,9 +82,58 @@ export default function Birimler({ kurumlar, token }) {
       });
   }
 
+  function handleBirimDelete(birim) {
+    setDeleteSelectedBirim(birim);
+    setShowBirimSilModal(true);
+  }
+
+  function renderMahkemeBirim(birim) {
+    return (
+      <tr key={birim._id}>
+        <td>{birim.unitType.name}</td>
+        <td>{birim.unitType.unitType}</td>
+        <td>{birim.series === 0 ? "-" : birim.series}</td>
+        <td>{birim.name}</td>
+        <td>{birim.status ? <Badge color="success">Aktif</Badge> : <Badge color="danger">Pasif</Badge> }</td>
+        <td>{birim.minClertCount}</td>
+        <td>{birim.clerks.length}</td>
+        <td>{birim.delegationType}</td>
+        <td>
+          <img
+            src={updateSvg}
+            style={clikableStyle}
+            alt="update"
+            onClick={() => {
+              // handleBirimUpdate(birim);
+            }}
+          />
+
+          <img
+            className="ms-2"
+            src={copSepeti}
+            style={clikableStyle}
+            alt="delete"
+            onClick={() => {
+              handleBirimDelete(birim);
+            }}
+          />
+        </td>
+      </tr>
+    );
+  }
+  function renderSavcilikVeDigerBirim(birim) {
+    return (
+      <tr className={birim.status ? "" : "table-danger"} key={birim.id}>
+        <td>{birim.unitType.name}</td>
+        <td>{birim.name}</td>
+        <td>{birim.status ? "Aktif" : "Pasif"}</td>
+        <td>{birim.clerks.length}</td>
+      </tr>
+    );
+  }
+
   function renderTabPane(type) {
-    if (type.id === 0) {
-      // MAHKEME RENDERİ
+    if (selectedTypeId === 0) {
       return (
         <div>
           <div className="mt-2">
@@ -93,49 +153,15 @@ export default function Birimler({ kurumlar, token }) {
                       <th>Gerekli Katip S.</th>
                       <th>Katip S</th>
                       <th>Heyet Drm</th>
-                      <th>#</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {birimler.map((birim) => (
-                      <tr
-                        className={birim.status ? "" : "table-danger"}
-                        key={birim._id}
-                        hidden={
-                          selectedTypeId != birim.unitType.institutionTypeId
-                        }
-                      >
-                        <td>{birim.unitType.name}</td>
-                        <td>{birim.unitType.unitType}</td>
-                        <td>{birim.series === 0 ? "-" : birim.series}</td>
-                        <td>{birim.name}</td>
-                        <td>{birim.status ? "Aktif" : "Pasif"}</td>
-                        <td>{birim.minClertCount}</td>
-                        <td>{birim.clerks.length}</td>
-                        <td>{birim.delegationType}</td>
-                        <td>
-                          <Button
-                            size="sm"
-                            color="info"
-                            onClick={() => {
-                              // handleBirimUpdate(birim);
-                            }}
-                          >
-                            Updt.
-                          </Button>
-                          <Button
-                            className="ms-2"
-                            size="sm"
-                            color="danger"
-                            onClick={() => {
-                              // handleBirimDelete(birim);
-                            }}
-                          >
-                            Del.
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                    {birimler.map((birim) => {
+                      if (birim.unitType.institutionTypeId === 0) {
+                        return renderMahkemeBirim(birim);
+                      }
+                    })}
                   </tbody>
                 </Table>
               </Col>
@@ -159,20 +185,11 @@ export default function Birimler({ kurumlar, token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {birimler.map((birim) => (
-                    <tr
-                      className={birim.status ? "" : "table-danger"}
-                      key={birim.id}
-                      hidden={
-                        selectedTypeId != birim.unitType.institutionTypeId
-                      }
-                    >
-                      <td>{birim.unitType.name}</td>
-                      <td>{birim.name}</td>
-                      <td>{birim.status ? "Aktif" : "Pasif"}</td>
-                      <td>{birim.clerks.length}</td>
-                    </tr>
-                  ))}
+                  {birimler.map((birim) => {
+                    if (birim.unitType.institutionTypeId === selectedTypeId) {
+                      return renderSavcilikVeDigerBirim(birim);
+                    }
+                  })}
                 </tbody>
               </Table>
             </Col>
@@ -249,14 +266,23 @@ export default function Birimler({ kurumlar, token }) {
         <TabContent activeTab={selectedTypeId}>
           {kurum &&
             kurum.types.map((type) => {
-              return renderTabPane(type);
+              if (type.id === selectedTypeId) {
+                console.log("selectedTypeId", selectedTypeId, "type", type.id);
+                return renderTabPane(type);
+              }
             })}
         </TabContent>
       </div>
       <BirimEkleModal
         modal={showBirimEkleModal}
-        toggle={toggle}
+        toggle={birimEkleToggle}
         kurum={kurum}
+        token={token}
+      />
+      <BirimSilModal
+        modal={showBirimSilModal}
+        toggle={birimSilToggle}
+        birim={deleteSelectedBirim}
         token={token}
       />
     </div>

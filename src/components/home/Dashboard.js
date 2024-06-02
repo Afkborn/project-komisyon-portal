@@ -126,7 +126,7 @@ export default function Dashboard() {
             {user && (
               <div>
                 <Alert color="primary">
-                  Hoşgeldin {user.name} !{" "}
+                  Hoşgeldin {user.name} {" "}
                   <Button size="sm" color="danger" onClick={() => logout()}>
                     Çıkış Yap
                   </Button>{" "}
