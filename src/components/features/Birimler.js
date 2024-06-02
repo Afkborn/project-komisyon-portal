@@ -26,7 +26,8 @@ export default function Birimler({ kurumlar, token }) {
   const [birimler, setBirimler] = useState([]);
   const [showBirimEkleModal, setShowBirimEkleModal] = useState(false);
   const [showBirimSilModal, setShowBirimSilModal] = useState(false);
-  const [deleteSelectedBirim, setDeleteSelectedBirim] = useState(null); // [1
+  const [deleteSelectedBirim, setDeleteSelectedBirim] = useState(null);
+
   const birimEkleToggle = () => setShowBirimEkleModal(!showBirimEkleModal);
   const birimSilToggle = () => setShowBirimSilModal(!showBirimSilModal);
 
@@ -94,17 +95,23 @@ export default function Birimler({ kurumlar, token }) {
         <td>{birim.unitType.unitType}</td>
         <td>{birim.series === 0 ? "-" : birim.series}</td>
         <td>{birim.name}</td>
-        <td>{birim.status ? <Badge color="success">Aktif</Badge> : <Badge color="danger">Pasif</Badge> }</td>
+        <td>
+          {birim.status ? (
+            <Badge color="success">Aktif</Badge>
+          ) : (
+            <Badge color="danger">Pasif</Badge>
+          )}
+        </td>
         <td>{birim.minClertCount}</td>
-        <td>{birim.clerks.length}</td>
         <td>{birim.delegationType}</td>
         <td>
           <img
+            hidden={true}
             src={updateSvg}
             style={clikableStyle}
             alt="update"
             onClick={() => {
-              // handleBirimUpdate(birim);
+              //handleBirimUpdate(birim);
             }}
           />
 
@@ -121,13 +128,12 @@ export default function Birimler({ kurumlar, token }) {
       </tr>
     );
   }
-  function renderSavcilikVeDigerBirim(birim) {
+  function renderSavcilikVeDiger(birim) {
     return (
       <tr className={birim.status ? "" : "table-danger"} key={birim.id}>
         <td>{birim.unitType.name}</td>
         <td>{birim.name}</td>
         <td>{birim.status ? "Aktif" : "Pasif"}</td>
-        <td>{birim.clerks.length}</td>
       </tr>
     );
   }
@@ -151,7 +157,6 @@ export default function Birimler({ kurumlar, token }) {
                       <th>Adı</th>
                       <th>Durum</th>
                       <th>Gerekli Katip S.</th>
-                      <th>Katip S</th>
                       <th>Heyet Drm</th>
                       <th></th>
                     </tr>
@@ -181,13 +186,12 @@ export default function Birimler({ kurumlar, token }) {
                     <th>Birim Tipi</th>
                     <th>Adı</th>
                     <th>Durum</th>
-                    <th>Katip Sayısı</th>
                   </tr>
                 </thead>
                 <tbody>
                   {birimler.map((birim) => {
                     if (birim.unitType.institutionTypeId === selectedTypeId) {
-                      return renderSavcilikVeDigerBirim(birim);
+                      return renderSavcilikVeDiger(birim);
                     }
                   })}
                 </tbody>

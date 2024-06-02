@@ -15,7 +15,7 @@ import logo from "../../assets/logo300.png";
 import Welcome from "./Welcome";
 import Birimler from "../features/Birimler";
 import Personel from "../features/Personel";
-import Unvan from "../features/Unvan";
+
 import Kurum from "../features/Kurum";
 
 import Cookies from "universal-cookie";
@@ -103,8 +103,6 @@ export default function Dashboard() {
         return <Personel />;
       case 3:
         return <HesapAyarlari />;
-      case 4:
-        return <Unvan />;
       case 5:
         return <Kurum kurumlar={kurumlar} />;
     }
@@ -172,14 +170,6 @@ export default function Dashboard() {
               Birimler
             </ListGroupItem>
 
-            <ListGroupItem
-              key={4}
-              onClick={() => onClick_listGroupItem(4)}
-              active={selected === 4}
-              disabled
-            >
-              Ünvan
-            </ListGroupItem>
 
             <ListGroupItem
               key={2}

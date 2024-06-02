@@ -79,7 +79,6 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
   };
 
   useEffect(() => {
-    console.log("birimAdi güncellendi");
     birimAdiHesapla();
   }, [mahkemeSayi, seciliAltBirim, heyetSayi, altKurum]);
 
@@ -119,6 +118,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
   }
 
   function handleAddBirim() {
+    // burada yazılan kod şuan çok karışık ve anlaşılmaz durumda vakit kısıtlı olduğu için şimdilik ellemiyorum.
     setBirim({
       ...birim,
       kurumID: kurum.id,
@@ -142,7 +142,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
         "Content-Type": "application/json",
       },
       data: {
-        unitTypeID: seciliAltBirim.id,
+        unitTypeID: seciliAltBirim ? seciliAltBirim.id : null,
         institutionID: kurum.id,
         delegationType: heyetSayi,
         status: mahkemeDurum,
@@ -151,7 +151,6 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
         name: birimName,
       },
     };
-    console.log(configuration);
     axios(configuration)
       .then((result) => {
         toggle();
@@ -171,7 +170,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
         <ModalBody>
           {kurum && (
             <Form>
-              <div>
+              {/* <div>
                 <Label>
                   Kurum ID: {kurum.id} - Kurum Adı: {kurum.name} <br />
                 </Label>
@@ -182,9 +181,9 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
                     Alt Kurum ID: {altKurum.id} - Alt Kurum Adı: {altKurum.name}
                   </Label>
                 )}
-              </div>
+              </div> */}
 
-              <hr />
+              {/* <hr /> */}
 
               <FormGroup>
                 <Label for="kurumTypeSelect">Birim Türü </Label>
@@ -204,7 +203,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
               </FormGroup>
 
               <FormGroup
-                hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
+                // hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
               >
                 <Label for="birimSelect">Alt Birim </Label>
                 <Input
