@@ -179,11 +179,11 @@ export default function Dashboard() {
               Ana Sayfa
             </ListGroupItem>
 
-            <ListGroupItemHeading className="mt-3 mb-3 text-center">
+            <ListGroupItemHeading className="mt-3 text-center">
               Adliye Yönetim Sistemi <br />
             </ListGroupItemHeading>
 
-            <ListGroupItemHeading className=" small mt-3 mb-3 text-center">
+            <ListGroupItemHeading className=" small mb-3 text-center">
               Seçili Kurum: <br />
               {selectedKurum && selectedKurum.name}
             </ListGroupItemHeading>

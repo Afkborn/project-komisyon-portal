@@ -239,11 +239,11 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {birimlerFiltered.map((birim) => {
-                      if (birim.unitType.institutionTypeId === 0) {
-                        return renderMahkemeBirim(birim);
-                      }
-                    })}
+                    {birimlerFiltered.map((birim) =>
+                      birim.unitType.institutionTypeId === 0
+                        ? renderMahkemeBirim(birim)
+                        : null
+                    )}
                   </tbody>
                 </Table>
               </Col>
@@ -266,11 +266,11 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {birimler.map((birim) => {
-                    if (birim.unitType.institutionTypeId === selectedTypeId) {
-                      return renderSavcilikVeDiger(birim);
-                    }
-                  })}
+                  {birimler.map((birim) =>
+                    birim.unitType.institutionTypeId === selectedTypeId
+                      ? renderSavcilikVeDiger(birim)
+                      : null
+                  )}
                 </tbody>
               </Table>
             </Col>
@@ -289,6 +289,7 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
         getBirimler();
       }
     }
+    // eslint-disable-next-line
   }, [kurum, selectedTypeId]);
 
   return (
@@ -349,11 +350,9 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
         </Nav>
         <TabContent activeTab={selectedTypeId}>
           {kurum &&
-            kurum.types.map((type) => {
-              if (type.id === selectedTypeId) {
-                return renderTabPane(type);
-              }
-            })}
+            kurum.types.map((type) =>
+              type.id === selectedTypeId ? renderTabPane(type) : null
+            )}
         </TabContent>
       </div>
       <BirimEkleModal

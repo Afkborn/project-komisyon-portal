@@ -13,6 +13,7 @@ export default function Personel({ kurumlar, token, selectedKurum }) {
       setKurum(selectedKurum);
       getBirimler(selectedKurum.id);
     }
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   // function handleKurumChange(event) {
@@ -27,7 +28,7 @@ export default function Personel({ kurumlar, token, selectedKurum }) {
   //   );
   //   setKurum(selectedKurum);
   //   getBirimler(selectedKurum.id);
-  // }
+  // } 
 
   function handleTypeChange(event) {
     if (event.target.value === "Seçiniz") {

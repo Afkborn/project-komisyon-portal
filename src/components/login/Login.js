@@ -65,11 +65,11 @@ function Login() {
         window.location.href = "/";
       })
       .catch((error) => {
-        console.log("HATA");
         const message =
           error.response.data.message || "Hata! Daha sonra tekrar deneyiniz";
         setError(true);
         setErrorMessage(message);
+        setSifre("");
       });
   };
 
