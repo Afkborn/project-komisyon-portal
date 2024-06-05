@@ -18,10 +18,10 @@ const DELETE_titles = (_id, token) => {
   };
 };
 
-const POST_titles = (_id, newUnvanName, kind, token, deletable = true) => {
+const POST_titles = (newUnvanName, kind, token, deletable = true) => {
   return {
     method: "POST",
-    url: "api/titles/" + _id,
+    url: "api/titles/",
     headers: {
       Authorization: `Bearer ${token}`,
     },

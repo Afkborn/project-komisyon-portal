@@ -4,9 +4,10 @@ import {
   ListGroupItem,
   ListGroupItemHeading,
   Badge,
+  Button,
 } from "reactstrap";
 
-export default function Kurum({ kurumlar }) {
+export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
   return (
     <div>
       <h3>Kurum Listesi</h3>
@@ -26,8 +27,18 @@ export default function Kurum({ kurumlar }) {
                 <Badge color="info" className="me-2">
                   {kurum.id}
                 </Badge>
-
                 {kurum.name}
+
+                <Button
+                  className="float-end"
+                  onClick={() => setSelectedKurum(kurum)}
+                  color="success"
+                  disabled={selectedKurum && selectedKurum.id === kurum.id}
+                >
+                  {selectedKurum && selectedKurum.id === kurum.id
+                    ? "Seçili"
+                    : "Seç"}
+                </Button>
               </ListGroupItemHeading>
             </ListGroupItem>
           ))}

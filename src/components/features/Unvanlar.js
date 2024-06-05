@@ -73,10 +73,8 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       alert("Ünvan adı boş olamaz.");
       return;
     }
-
     axios(
       POST_titles(
-        updateSelectedUnvan._id,
         newUnvanName,
         strToEng(newUnvanName),
         token
@@ -104,7 +102,6 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
     } else {
       kind = strToEng(updateSelectedUnvan.name);
     }
-
     axios(
       PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, token)
     )

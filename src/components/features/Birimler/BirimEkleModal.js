@@ -108,6 +108,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
     let seciliAltBirim = birimler.find(
       (birim) => birim.name === e.target.value
     );
+    setMinKatipSayisi(seciliAltBirim.gerekenKatipSayisi || 1);
     setSeciliAltBirim(seciliAltBirim);
   }
 
@@ -148,6 +149,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
       .then((result) => {
         toggle();
         alert("Birim başarıyla eklendi");
+        getBirimler();
       })
       .catch((error) => {
         console.log(error);
@@ -304,7 +306,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
               </FormGroup>
 
               <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
-                <Label for="minKatipSayi">Gerekli Minimum Katip Sayısı</Label>
+                <Label for="minKatipSayi">Gerekli Katip Sayısı</Label>
                 <Input
                   type="number"
                   name="minKatipSayi"

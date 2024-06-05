@@ -1,25 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FormGroup, Input, Label } from "reactstrap";
 import axios from "axios";
 
-export default function Personel({ kurumlar, token }) {
+export default function Personel({ kurumlar, token, selectedKurum }) {
   const [kurum, setKurum] = useState(null);
-  const [selectedTypeId, setSelectedTypeId] = useState(null);
+  // const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [tumBirimler, setTumBirimler] = useState([]);
   const [birimler, setBirimler] = useState([]);
-  function handleKurumChange(event) {
-    setBirimler([]);
-    if (event.target.value === "Seçiniz") {
-      setKurum(null);
-      return;
+
+  useEffect(() => {
+    if (selectedKurum) {
+      setKurum(selectedKurum);
+      getBirimler(selectedKurum.id);
     }
-    if (event.target.value === kurum?.name) return;
-    let selectedKurum = kurumlar.find(
-      (kurum) => kurum.name === event.target.value
-    );
-    setKurum(selectedKurum);
-    getBirimler(selectedKurum.id);
-  }
+  }, [selectedKurum]);
+
+  // function handleKurumChange(event) {
+  //   setBirimler([]);
+  //   if (event.target.value === "Seçiniz") {
+  //     setKurum(null);
+  //     return;
+  //   }
+  //   if (event.target.value === kurum?.name) return;
+  //   let selectedKurum = kurumlar.find(
+  //     (kurum) => kurum.name === event.target.value
+  //   );
+  //   setKurum(selectedKurum);
+  //   getBirimler(selectedKurum.id);
+  // }
 
   function handleTypeChange(event) {
     if (event.target.value === "Seçiniz") {
@@ -37,7 +45,9 @@ export default function Personel({ kurumlar, token }) {
     if (event.target.value === "Seçiniz") {
       return;
     }
-    let selectedBirim = birimler.find((birim) => birim.name === event.target.value);
+    let selectedBirim = birimler.find(
+      (birim) => birim.name === event.target.value
+    );
     const configuration = {
       method: "GET",
       url: "api/units/" + selectedBirim.id,
@@ -45,8 +55,6 @@ export default function Personel({ kurumlar, token }) {
         Authorization: `Bearer ${token}`,
       },
     };
-    
-    
   }
 
   function getBirimler(typeID) {
@@ -84,7 +92,7 @@ export default function Personel({ kurumlar, token }) {
 
       <hr />
       <div className="mt-5">
-        <FormGroup>
+        {/* <FormGroup>
           <Label for="selectKurum">Kurum</Label>
           <Input
             id="selectKurum"
@@ -97,7 +105,7 @@ export default function Personel({ kurumlar, token }) {
               <option key={kurum.id}>{kurum.name}</option>
             ))}
           </Input>
-        </FormGroup>
+        </FormGroup> */}
 
         <div hidden={!kurum}>
           <FormGroup>

@@ -22,10 +22,45 @@ import updateSvg from "../../../assets/edit.svg";
 import copSepeti from "../../../assets/delete.svg";
 import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
 
-export default function Birimler({ kurumlar, token }) {
+export default function Birimler({ kurumlar, token, selectedKurum }) {
+  const [selectedFilterOption, setSelectedFilterOption] = useState("Ceza");
+
+  const handleRadioFilterChange = (e) => {
+    setSelectedFilterOption(e.target.value);
+    if (e.target.value === "Ceza") {
+      setBirimlerFiltered(
+        birimler.filter((birim) => birim.unitType.unitType === "Ceza")
+      );
+    } else {
+      setBirimlerFiltered(
+        birimler.filter((birim) => birim.unitType.unitType === "Hukuk")
+      );
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const searchValue = e.target.value;
+    if (searchValue === "") {
+      setBirimlerFiltered(
+        birimler.filter(
+          (birim) => birim.unitType.unitType === selectedFilterOption
+        )
+      );
+    } else {
+      setBirimlerFiltered(
+        birimler.filter(
+          (birim) =>
+            birim.unitType.unitType === selectedFilterOption &&
+            birim.name.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      );
+    }
+  };
+
   const [kurum, setKurum] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [birimler, setBirimler] = useState([]);
+  const [birimlerFiltered, setBirimlerFiltered] = useState([]);
 
   const [showBirimEkleModal, setShowBirimEkleModal] = useState(false);
   const birimEkleToggle = () => setShowBirimEkleModal(!showBirimEkleModal);
@@ -43,23 +78,19 @@ export default function Birimler({ kurumlar, token }) {
     cursor: "pointer",
   };
 
-
-
-
-  function handleKurumChange(event) {
-    if (event.target.value === "Seçiniz") {
-      setKurum(null);
-      return;
-    }
-    if (event.target.value === kurum?.name) return;
-    // birimleri temizliyoruz çünkü seçili kurum değişiyor.
-    setBirimler([]);
-    setKurum(kurumlar.find((kurum) => kurum.name === event.target.value));
-  }
+  // function handleKurumChange(event) {
+  //   if (event.target.value === "Seçiniz") {
+  //     setKurum(null);
+  //     return;
+  //   }
+  //   if (event.target.value === kurum?.name) return;
+  //   // birimleri temizliyoruz çünkü seçili kurum değişiyor.
+  //   setBirimler([]);
+  //   setKurum(kurumlar.find((kurum) => kurum.name === event.target.value));
+  // }
 
   function handleNavLinkClick(type) {
     if (selectedTypeId === type.id) return;
-
     setSelectedTypeId(type.id);
   }
 
@@ -80,6 +111,11 @@ export default function Birimler({ kurumlar, token }) {
           return a.series - b.series;
         });
         setBirimler(result.data.unitList);
+        setBirimlerFiltered(
+          result.data.unitList.filter(
+            (birim) => birim.unitType.unitType === "Ceza"
+          )
+        );
       })
       .catch((error) => {
         console.log(error);
@@ -92,7 +128,6 @@ export default function Birimler({ kurumlar, token }) {
   }
 
   function handleBirimUpdate(birim) {
-    // console.log(birim)
     setUpdateSelectedBirim(birim);
     setShowBirimGuncelleModal(true);
   }
@@ -151,8 +186,41 @@ export default function Birimler({ kurumlar, token }) {
     if (selectedTypeId === 0) {
       return (
         <div>
-          <div className="mt-2">
-            Mahkemeye özgü filtrelemeri koyalım buraya{" "}
+          <div className="m-3">
+            <FormGroup>
+              <Label for="radioCeza">Birim Tipi: </Label>{" "}
+              <Input
+                className="ms-2"
+                type="radio"
+                name="radio"
+                id="radioCeza"
+                value="Ceza"
+                checked={selectedFilterOption === "Ceza"}
+                onChange={handleRadioFilterChange}
+              />
+              <Label for="radioCeza">Ceza</Label>{" "}
+              <Input
+                className="ms-2"
+                type="radio"
+                name="radio"
+                id="radioHukuk"
+                value="Hukuk"
+                checked={selectedFilterOption === "Hukuk"}
+                onChange={handleRadioFilterChange}
+              />
+              <Label for="radioHukuk">Hukuk</Label>
+            </FormGroup>
+            <FormGroup>
+              <Label for="search">Arama</Label>
+              <Input
+                type="text"
+                name="search"
+                onChange={(e) => {
+                  handleSearchChange(e);
+                }}
+                id="search"
+              />
+            </FormGroup>
           </div>
           <TabPane tabId={type.id} key={type.id} className="mt-2">
             <Row>
@@ -171,7 +239,7 @@ export default function Birimler({ kurumlar, token }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {birimler.map((birim) => {
+                    {birimlerFiltered.map((birim) => {
                       if (birim.unitType.institutionTypeId === 0) {
                         return renderMahkemeBirim(birim);
                       }
@@ -213,6 +281,9 @@ export default function Birimler({ kurumlar, token }) {
   }
 
   useEffect(() => {
+    if (selectedKurum) {
+      setKurum(selectedKurum);
+    }
     if (kurum) {
       if (birimler.length === 0) {
         getBirimler();
@@ -232,7 +303,7 @@ export default function Birimler({ kurumlar, token }) {
 
       <hr />
       <div className="mt-5">
-        <FormGroup>
+        {/* <FormGroup>
           <Label for="selectKurum">Kurum</Label>
           <Input
             id="selectKurum"
@@ -245,7 +316,7 @@ export default function Birimler({ kurumlar, token }) {
               <option key={kurum.id}>{kurum.name}</option>
             ))}
           </Input>
-        </FormGroup>
+        </FormGroup> */}
         <div>
           <Button
             className="float-end"
@@ -280,7 +351,6 @@ export default function Birimler({ kurumlar, token }) {
           {kurum &&
             kurum.types.map((type) => {
               if (type.id === selectedTypeId) {
-                console.log("selectedTypeId", selectedTypeId, "type", type.id);
                 return renderTabPane(type);
               }
             })}

@@ -24,13 +24,13 @@ import {
 } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
-import HesapAyarlari from "../features/HesapAyarlari";
 
 export default function Dashboard() {
   const [selected, setSelected] = useState(0);
 
   const [user, setUser] = useState(null);
   const [kurumlar, setKurumlar] = useState([]);
+  const [selectedKurum, setSelectedKurum] = useState(null);
   const [unvanlar, setUnvanlar] = useState([]);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -53,6 +53,13 @@ export default function Dashboard() {
     axios(GET_institutions)
       .then((result) => {
         setKurumlar(result.data.InstitutionList);
+        // eğer seçili kurum yoksa liste içerisinde isDefault olanı seç
+        if (!selectedKurum) {
+          const defaultKurum = result.data.InstitutionList.find(
+            (kurum) => kurum.isDefault
+          );
+          setSelectedKurum(defaultKurum);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -104,11 +111,21 @@ export default function Dashboard() {
       default:
         return <Welcome />;
       case 1:
-        return <Birimler kurumlar={kurumlar} token={token} />;
+        return (
+          <Birimler
+            selectedKurum={selectedKurum}
+            kurumlar={kurumlar}
+            token={token}
+          />
+        );
       case 2:
-        return <Personel kurumlar={kurumlar} token={token} />;
-      case 3:
-        return <HesapAyarlari />;
+        return (
+          <Personel
+            selectedKurum={selectedKurum}
+            kurumlar={kurumlar}
+            token={token}
+          />
+        );
       case 4:
         return (
           <Unvanlar
@@ -118,7 +135,13 @@ export default function Dashboard() {
           />
         );
       case 5:
-        return <Kurum kurumlar={kurumlar} />;
+        return (
+          <Kurum
+            kurumlar={kurumlar}
+            selectedKurum={selectedKurum}
+            setSelectedKurum={setSelectedKurum}
+          />
+        );
     }
   }
 
@@ -156,16 +179,13 @@ export default function Dashboard() {
               Ana Sayfa
             </ListGroupItem>
 
-            <ListGroupItem
-              key={3}
-              onClick={() => onClick_listGroupItem(3)}
-              active={selected === 3}
-            >
-              Hesap Ayarları
-            </ListGroupItem>
-
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
-              Adliye Yönetim Sistemi
+              Adliye Yönetim Sistemi <br />
+            </ListGroupItemHeading>
+
+            <ListGroupItemHeading className=" small mt-3 mb-3 text-center">
+              Seçili Kurum: <br />
+              {selectedKurum && selectedKurum.name}
             </ListGroupItemHeading>
 
             <ListGroupItem
