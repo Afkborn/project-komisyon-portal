@@ -1,20 +1,14 @@
 import React from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import axios from "axios";
-
-function BirimSilModal({ modal, toggle, birim, token }) {
+import { DELETE_UNIT } from "../../constants/AxiosConfiguration";
+function BirimSilModal({ modal, toggle, birim, token, getBirimler }) {
   const handleDelete = () => {
-    const configuration = {
-      method: "DELETE",
-      url: "api/units/" + birim._id,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    axios(configuration)
+    axios(DELETE_UNIT(birim._id, token))
       .then(() => {
         alert(`Birim ${birim.name} başarıyla silindi.`);
         toggle();
+        getBirimler();
       })
       .catch((error) => {
         console.error(error);
@@ -29,6 +23,7 @@ function BirimSilModal({ modal, toggle, birim, token }) {
         <ModalBody>
           <p>
             Birimi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+            <br />
           </p>
           <p>Birim Adı: {birim && birim.name}</p>
         </ModalBody>

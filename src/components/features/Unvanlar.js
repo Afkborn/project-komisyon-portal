@@ -9,6 +9,11 @@ import {
   ModalFooter,
   Input,
 } from "reactstrap";
+import {
+  DELETE_titles,
+  POST_titles,
+  PUT_titles,
+} from "../constants/AxiosConfiguration";
 export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   const [newUnvanName, setNewUnvanName] = useState("");
   const [showUnvanEkleModal, setShowUnvanEkleModal] = useState(false);
@@ -51,14 +56,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   }
 
   function handleDelete() {
-    const configuration = {
-      method: "DELETE",
-      url: "api/titles/" + deleteSelectedUnvan._id,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    axios(configuration)
+    axios(DELETE_titles(deleteSelectedUnvan._id, token))
       .then(() => {
         alert(`Ünvan ${deleteSelectedUnvan.name} başarıyla silindi.`);
         unvanSilToggle();
@@ -76,19 +74,14 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       return;
     }
 
-    const configuration = {
-      method: "POST",
-      url: "api/titles/",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        name: newUnvanName,
-        kind: strToEng(newUnvanName),
-        deletable: true,
-      },
-    };
-    axios(configuration)
+    axios(
+      POST_titles(
+        updateSelectedUnvan._id,
+        newUnvanName,
+        strToEng(newUnvanName),
+        token
+      )
+    )
       .then(() => {
         alert(`Ünvan ${newUnvanName} başarıyla eklendi.`);
         unvanEkleToggle();
@@ -112,19 +105,9 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       kind = strToEng(updateSelectedUnvan.name);
     }
 
-    const configuration = {
-      method: "PUT",
-      url: "api/titles/" + updateSelectedUnvan._id,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        name: updateSelectedUnvan.name,
-        kind,
-        deletable: updateSelectedUnvan.deletable,
-      },
-    };
-    axios(configuration)
+    axios(
+      PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, token)
+    )
       .then(() => {
         alert(`Ünvan ${updateSelectedUnvan.name} başarıyla güncellendi.`);
         unvanGuncelleToggle();
@@ -143,7 +126,8 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         Sistemde kayıtlı olan ünvanlar listelenmektedir.
         <br />
         Bu ekranda yeni ünvan ekleyebilir, olanları güncelleyebilir veya
-        silebilirsiniz. Sabit ünvanlar için işlem<b> yapamazsınız.</b> <br />
+        silebilirsiniz. Sabit ünvanlar için <b>silme işlemi yapamazsınız.</b>
+        <br />
         Ünvanlar tüm kurumlar için geçerli olup, kurum bazında ünvan tanımlaması
         yapılamaz.
       </span>

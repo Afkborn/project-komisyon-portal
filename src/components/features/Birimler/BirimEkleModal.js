@@ -11,8 +11,8 @@ import {
   Label,
 } from "reactstrap";
 import axios from "axios";
-
-function BirimEkleModal({ modal, toggle, kurum, token }) {
+import { GET_UNIT_TYPES } from "../../constants/AxiosConfiguration";
+function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
   const [birim, setBirim] = useState({});
   const [seciliAltBirim, setSeciliAltBirim] = useState(null);
 
@@ -56,11 +56,8 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
           birimAdi += seciliAltBirim.name + " ";
         }
       }
-
-      if (heyetSayi === "1/2") {
-        birimAdi += "(2. Heyet)";
-      } else if (heyetSayi === "1/3") {
-        birimAdi += "(3. Heyet)";
+      if (heyetSayi === "1/2" || heyetSayi === "1/3") {
+        birimAdi += "(1. Heyet)";
       } else if (heyetSayi === "1") {
         // delete last char if it is space
         if (birimAdi.charAt(birimAdi.length - 1) === " ") {
@@ -94,14 +91,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
     let seciliKurum = kurum.types.find((type) => type.name === e.target.value);
     setAltKurum(seciliKurum);
     setBirimName("");
-    const configuration = {
-      method: "GET",
-      url: "api/unit_types",
-      params: {
-        institutionTypeId: seciliKurum.id,
-      },
-    };
-    axios(configuration)
+    axios(GET_UNIT_TYPES(seciliKurum.id))
       .then((result) => {
         setBirimler(result.data);
       })
@@ -166,7 +156,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
 
   return (
     <div>
-      <Modal isOpen={modal} toggle={toggle} fullscreen>
+      <Modal isOpen={modal} toggle={toggle}>
         {kurum && (
           <ModalHeader toggle={toggle}>{kurum.name} - Birim Ekleme</ModalHeader>
         )}

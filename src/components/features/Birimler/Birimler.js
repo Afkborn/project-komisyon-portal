@@ -16,24 +16,35 @@ import {
 } from "reactstrap";
 import BirimEkleModal from "./BirimEkleModal";
 import BirimSilModal from "./BirimSilModal";
+import BirimGuncelleModal from "./BirimGuncelleModal";
 import axios from "axios";
-import updateSvg from "../../assets/edit.svg";
-import copSepeti from "../../assets/delete.svg";
+import updateSvg from "../../../assets/edit.svg";
+import copSepeti from "../../../assets/delete.svg";
+import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
 
 export default function Birimler({ kurumlar, token }) {
   const [kurum, setKurum] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [birimler, setBirimler] = useState([]);
+
   const [showBirimEkleModal, setShowBirimEkleModal] = useState(false);
+  const birimEkleToggle = () => setShowBirimEkleModal(!showBirimEkleModal);
+
   const [showBirimSilModal, setShowBirimSilModal] = useState(false);
   const [deleteSelectedBirim, setDeleteSelectedBirim] = useState(null);
-
-  const birimEkleToggle = () => setShowBirimEkleModal(!showBirimEkleModal);
   const birimSilToggle = () => setShowBirimSilModal(!showBirimSilModal);
+
+  const [showBirimGuncelleModal, setShowBirimGuncelleModal] = useState(false);
+  const [updateSelectedBirim, setUpdateSelectedBirim] = useState(null);
+  const birimGuncelleToggle = () =>
+    setShowBirimGuncelleModal(!showBirimGuncelleModal);
 
   const clikableStyle = {
     cursor: "pointer",
   };
+
+
+
 
   function handleKurumChange(event) {
     if (event.target.value === "Seçiniz") {
@@ -58,18 +69,10 @@ export default function Birimler({ kurumlar, token }) {
   }
 
   function getBirimler() {
-    const configuration = {
-      method: "GET",
-      url: "api/units/institution/" + kurum.id,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    axios(configuration)
+    axios(GET_UNITS_BY_INSTITUTİON(kurum.id, token))
       .then((result) => {
         result.data.unitList.sort((a, b) => {
           // sort by unit type priority
-
           if (a.unitType.oncelikSirasi !== b.unitType.oncelikSirasi) {
             return a.unitType.oncelikSirasi - b.unitType.oncelikSirasi;
           }
@@ -86,6 +89,12 @@ export default function Birimler({ kurumlar, token }) {
   function handleBirimDelete(birim) {
     setDeleteSelectedBirim(birim);
     setShowBirimSilModal(true);
+  }
+
+  function handleBirimUpdate(birim) {
+    // console.log(birim)
+    setUpdateSelectedBirim(birim);
+    setShowBirimGuncelleModal(true);
   }
 
   function renderMahkemeBirim(birim) {
@@ -106,12 +115,11 @@ export default function Birimler({ kurumlar, token }) {
         <td>{birim.delegationType}</td>
         <td>
           <img
-            hidden={true}
             src={updateSvg}
             style={clikableStyle}
             alt="update"
             onClick={() => {
-              //handleBirimUpdate(birim);
+              handleBirimUpdate(birim);
             }}
           />
 
@@ -128,6 +136,7 @@ export default function Birimler({ kurumlar, token }) {
       </tr>
     );
   }
+
   function renderSavcilikVeDiger(birim) {
     return (
       <tr className={birim.status ? "" : "table-danger"} key={birim.id}>
@@ -282,12 +291,21 @@ export default function Birimler({ kurumlar, token }) {
         toggle={birimEkleToggle}
         kurum={kurum}
         token={token}
+        getBirimler={getBirimler}
       />
       <BirimSilModal
         modal={showBirimSilModal}
         toggle={birimSilToggle}
         birim={deleteSelectedBirim}
         token={token}
+        getBirimler={getBirimler}
+      />
+      <BirimGuncelleModal
+        modal={showBirimGuncelleModal}
+        toggle={birimGuncelleToggle}
+        birim={updateSelectedBirim}
+        token={token}
+        getBirimler={getBirimler}
       />
     </div>
   );

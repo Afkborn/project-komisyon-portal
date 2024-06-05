@@ -6,16 +6,14 @@ import {
   Badge,
 } from "reactstrap";
 
-export default function Kurum({kurumlar}) {
-
-
+export default function Kurum({ kurumlar }) {
   return (
     <div>
       <h3>Kurum Listesi</h3>
       <span>
-        Sistemde kayıtlı olan kurumlar listelenmektedir. Burada bir değişiklik yapamazsınız !
-        <br/>
-
+        Sistemde kayıtlı olan kurumlar listelenmektedir. Burada bir değişiklik
+        yapamazsınız !
+        <br />
       </span>
 
       <hr />

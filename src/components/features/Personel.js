@@ -8,6 +8,7 @@ export default function Personel({ kurumlar, token }) {
   const [tumBirimler, setTumBirimler] = useState([]);
   const [birimler, setBirimler] = useState([]);
   function handleKurumChange(event) {
+    setBirimler([]);
     if (event.target.value === "Seçiniz") {
       setKurum(null);
       return;
@@ -32,12 +33,20 @@ export default function Personel({ kurumlar, token }) {
     );
   }
 
-  function handldeBirimChange(event) {
+  function handleBirimChange(event) {
     if (event.target.value === "Seçiniz") {
       return;
     }
     let selectedBirim = birimler.find((birim) => birim.name === event.target.value);
-    console.log(selectedBirim)
+    const configuration = {
+      method: "GET",
+      url: "api/units/" + selectedBirim.id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    
+    
   }
 
   function getBirimler(typeID) {
@@ -112,7 +121,7 @@ export default function Personel({ kurumlar, token }) {
             <Label for="selectBirim">Birim</Label>
             <Input
               id="selectBirim"
-              onChange={(e) => handldeBirimChange(e)}
+              onChange={(e) => handleBirimChange(e)}
               name="select"
               type="select"
             >

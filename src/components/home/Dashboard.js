@@ -13,11 +13,15 @@ import {
 import logo from "../../assets/logo300.png";
 
 import Welcome from "./Welcome";
-import Birimler from "../features/Birimler";
+import Birimler from "../features/Birimler/Birimler";
 import Personel from "../features/Personel";
 import Unvanlar from "../features/Unvanlar";
 import Kurum from "../features/Kurum";
-
+import {
+  GET_institutions,
+  GET_titles,
+  GET_USER_DETAILS,
+} from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import HesapAyarlari from "../features/HesapAyarlari";
@@ -46,11 +50,7 @@ export default function Dashboard() {
   }, []);
 
   function getKurum() {
-    const configuration = {
-      method: "GET",
-      url: "api/institutions",
-    };
-    axios(configuration)
+    axios(GET_institutions)
       .then((result) => {
         setKurumlar(result.data.InstitutionList);
       })
@@ -61,11 +61,7 @@ export default function Dashboard() {
 
   function getUnvanlar() {
     setUnvanlar([]);
-    const configuration = {
-      method: "GET",
-      url: "api/titles",
-    };
-    axios(configuration)
+    axios(GET_titles)
       .then((result) => {
         setUnvanlar(result.data.titleList);
         console.log(result.data.titleList);
@@ -76,14 +72,7 @@ export default function Dashboard() {
   }
 
   function getUser() {
-    const configuration = {
-      method: "GET",
-      url: "api/users/details",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    axios(configuration)
+    axios(GET_USER_DETAILS(token))
       .then((result) => {
         setUser(result.data.user);
         setError(false);
