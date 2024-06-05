@@ -62,7 +62,10 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
       } else if (heyetSayi === "1/3") {
         birimAdi += "(3. Heyet)";
       } else if (heyetSayi === "1") {
-        birimAdi += "";
+        // delete last char if it is space
+        if (birimAdi.charAt(birimAdi.length - 1) === " ") {
+          birimAdi = birimAdi.slice(0, -1);
+        }
       }
 
       birimAdi = birimAdi.replace(/\s+/g, " ");
@@ -72,6 +75,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
       if (seciliAltBirim) {
         birimAdi += seciliAltBirim.name + " ";
       }
+      birimAdi = birimAdi.replace(/\s+/g, " ");
       setBirimName(birimAdi);
     } else {
       setBirimName("");
@@ -133,7 +137,6 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
       mahkemeSayi: mahkemeSayi,
       minKatipSayisi: minKatipSayisi,
     });
-
     const configuration = {
       method: "POST",
       url: "api/units",
@@ -203,7 +206,7 @@ function BirimEkleModal({ modal, toggle, kurum, token }) {
               </FormGroup>
 
               <FormGroup
-                // hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
+              // hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
               >
                 <Label for="birimSelect">Alt Birim </Label>
                 <Input

@@ -15,7 +15,7 @@ import logo from "../../assets/logo300.png";
 import Welcome from "./Welcome";
 import Birimler from "../features/Birimler";
 import Personel from "../features/Personel";
-
+import Unvanlar from "../features/Unvanlar";
 import Kurum from "../features/Kurum";
 
 import Cookies from "universal-cookie";
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   const [user, setUser] = useState(null);
   const [kurumlar, setKurumlar] = useState([]);
-  
+  const [unvanlar, setUnvanlar] = useState([]);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const cookies = new Cookies();
@@ -40,8 +40,10 @@ export default function Dashboard() {
     if (kurumlar.length === 0) {
       getKurum();
     }
+    if (unvanlar.length === 0) {
+      getUnvanlar();
+    }
   }, []);
-
 
   function getKurum() {
     const configuration = {
@@ -57,6 +59,21 @@ export default function Dashboard() {
       });
   }
 
+  function getUnvanlar() {
+    setUnvanlar([]);
+    const configuration = {
+      method: "GET",
+      url: "api/titles",
+    };
+    axios(configuration)
+      .then((result) => {
+        setUnvanlar(result.data.titleList);
+        console.log(result.data.titleList);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   function getUser() {
     const configuration = {
@@ -98,11 +115,19 @@ export default function Dashboard() {
       default:
         return <Welcome />;
       case 1:
-        return <Birimler kurumlar={kurumlar}  token={token}/>;
+        return <Birimler kurumlar={kurumlar} token={token} />;
       case 2:
-        return <Personel />;
+        return <Personel kurumlar={kurumlar} token={token} />;
       case 3:
         return <HesapAyarlari />;
+      case 4:
+        return (
+          <Unvanlar
+            unvanlar={unvanlar}
+            updateUnvanlar={getUnvanlar}
+            token={token}
+          />
+        );
       case 5:
         return <Kurum kurumlar={kurumlar} />;
     }
@@ -124,7 +149,7 @@ export default function Dashboard() {
             {user && (
               <div>
                 <Alert color="primary">
-                  Hoşgeldin {user.name} {" "}
+                  Hoşgeldin {user.name}{" "}
                   <Button size="sm" color="danger" onClick={() => logout()}>
                     Çıkış Yap
                   </Button>{" "}
@@ -151,7 +176,7 @@ export default function Dashboard() {
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
-              Adliye Yönetim Sistemi 
+              Adliye Yönetim Sistemi
             </ListGroupItemHeading>
 
             <ListGroupItem
@@ -159,7 +184,15 @@ export default function Dashboard() {
               onClick={() => onClick_listGroupItem(5)}
               active={selected === 5}
             >
-              Kurum 
+              Kurum
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={4}
+              onClick={() => onClick_listGroupItem(4)}
+              active={selected === 4}
+            >
+              Ünvanlar
             </ListGroupItem>
 
             <ListGroupItem
@@ -170,12 +203,10 @@ export default function Dashboard() {
               Birimler
             </ListGroupItem>
 
-
             <ListGroupItem
               key={2}
               onClick={() => onClick_listGroupItem(2)}
               active={selected === 2}
-              disabled
             >
               Personel Listesi
             </ListGroupItem>
