@@ -2,17 +2,18 @@ import React from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import axios from "axios";
 import { DELETE_UNIT } from "../../constants/AxiosConfiguration";
+import alertify from "alertifyjs";
 function BirimSilModal({ modal, toggle, birim, token, getBirimler }) {
   const handleDelete = () => {
     axios(DELETE_UNIT(birim._id, token))
       .then(() => {
-        alert(`Birim ${birim.name} başarıyla silindi.`);
+        alertify.success("Birim başarıyla silindi.");
         toggle();
         getBirimler();
       })
       .catch((error) => {
         console.error(error);
-        alert("Birim silinirken bir hata oluştu.");
+        alertify.error("Birim silinirken bir hata oluştu.");
       });
   };
 

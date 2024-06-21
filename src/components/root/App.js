@@ -7,6 +7,7 @@ import ProtectedRoutes from "../common/ProtectedRoutes";
 import Dashboard from "../home/Dashboard";
 import Login from "../login/Login";
 
+
 function App() {
   // const location = useLocation();
   // const validPaths = ["/"]; // navigation ve footer olacak  yolları tanımlayalım

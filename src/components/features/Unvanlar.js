@@ -14,6 +14,7 @@ import {
   POST_titles,
   PUT_titles,
 } from "../constants/AxiosConfiguration";
+import alertify from "alertifyjs";
 export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   const [newUnvanName, setNewUnvanName] = useState("");
   const [showUnvanEkleModal, setShowUnvanEkleModal] = useState(false);
@@ -58,13 +59,13 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   function handleDelete() {
     axios(DELETE_titles(deleteSelectedUnvan._id, token))
       .then(() => {
-        alert(`Ünvan ${deleteSelectedUnvan.name} başarıyla silindi.`);
+        alertify.success("Ünvan başarıyla silindi.");
         unvanSilToggle();
         updateUnvanlar();
       })
       .catch((error) => {
         console.error(error);
-        alert("Ünvan silinirken bir hata oluştu.");
+        alertify.error("Ünvan silinirken bir hata oluştu.");
       });
   }
 
@@ -73,21 +74,15 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       alert("Ünvan adı boş olamaz.");
       return;
     }
-    axios(
-      POST_titles(
-        newUnvanName,
-        strToEng(newUnvanName),
-        token
-      )
-    )
+    axios(POST_titles(newUnvanName, strToEng(newUnvanName), token))
       .then(() => {
-        alert(`Ünvan ${newUnvanName} başarıyla eklendi.`);
+        alertify.success(`Ünvan ${newUnvanName} başarıyla eklendi.`);
         unvanEkleToggle();
         updateUnvanlar();
       })
       .catch((error) => {
         console.error(error);
-        alert("Ünvan eklenirken bir hata oluştu.");
+        alertify.error("Ünvan eklenerken bir hata oluştu.");
       });
   }
 
@@ -106,13 +101,15 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, token)
     )
       .then(() => {
-        alert(`Ünvan ${updateSelectedUnvan.name} başarıyla güncellendi.`);
+        alertify.success(
+          `Ünvan ${updateSelectedUnvan.name} başarıyla güncellendi.`
+        );
         unvanGuncelleToggle();
         updateUnvanlar();
       })
       .catch((error) => {
         console.error(error);
-        alert("Ünvan güncellenirken bir hata oluştu.");
+        alertify.error("Ünvan güncellenirken bir hata oluştu.");
       });
   }
 
@@ -131,7 +128,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
 
       <hr />
 
-      <div className="mt-5">
+      <div>
         <div>
           <Button
             className="float-end"

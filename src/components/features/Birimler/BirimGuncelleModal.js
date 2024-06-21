@@ -11,6 +11,7 @@ import {
   Input,
 } from "reactstrap";
 import axios from "axios";
+import alertify from "alertifyjs";
 
 function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
   const [updatedBirim, setUpdatedBirim] = useState({ ...birim });
@@ -43,13 +44,13 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
     };
     axios(configuration)
       .then(() => {
-        alert(`Birim başarıyla güncellendi.`);
+        alertify.success("Birim başarıyla güncellendi.");
         getBirimler();
         toggle();
       })
       .catch((error) => {
         console.error(error);
-        alert("Birim güncellenirken bir hata oluştu.");
+        alertify.error("Birim güncellenirken bir hata oluştu.");
       });
   };
 

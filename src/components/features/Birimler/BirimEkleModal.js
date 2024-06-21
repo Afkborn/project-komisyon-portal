@@ -11,7 +11,10 @@ import {
   Label,
 } from "reactstrap";
 import axios from "axios";
+import alertify from "alertifyjs";
 import { GET_UNIT_TYPES } from "../../constants/AxiosConfiguration";
+
+
 function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
   const [birim, setBirim] = useState({});
   const [seciliAltBirim, setSeciliAltBirim] = useState(null);
@@ -81,6 +84,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
 
   useEffect(() => {
     birimAdiHesapla();
+    // eslint-disable-next-line
   }, [mahkemeSayi, seciliAltBirim, heyetSayi, altKurum]);
 
   function handleKurumTypeSelectInputChange(e) {
@@ -148,7 +152,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
     axios(configuration)
       .then((result) => {
         toggle();
-        alert("Birim başarıyla eklendi");
+        alertify.success("Birim başarıyla eklendi");
         getBirimler();
       })
       .catch((error) => {

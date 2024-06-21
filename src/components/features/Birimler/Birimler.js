@@ -22,7 +22,7 @@ import updateSvg from "../../../assets/edit.svg";
 import copSepeti from "../../../assets/delete.svg";
 import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
 
-export default function Birimler({ kurumlar, token, selectedKurum }) {
+export default function Birimler({ token, selectedKurum }) {
   const [selectedFilterOption, setSelectedFilterOption] = useState("Ceza");
 
   const handleRadioFilterChange = (e) => {
@@ -303,7 +303,7 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
       </span>
 
       <hr />
-      <div className="mt-5">
+      <div>
         {/* <FormGroup>
           <Label for="selectKurum">Kurum</Label>
           <Input
@@ -331,7 +331,7 @@ export default function Birimler({ kurumlar, token, selectedKurum }) {
         </div>
       </div>
 
-      <div className="mt-5" hidden={!kurum}>
+      <div hidden={!kurum}>
         {/* hidden={birimler.length === 0} */}
         <Nav tabs>
           {kurum &&

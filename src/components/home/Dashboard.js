@@ -114,7 +114,7 @@ export default function Dashboard() {
         return (
           <Birimler
             selectedKurum={selectedKurum}
-            kurumlar={kurumlar}
+            // kurumlar={kurumlar}
             token={token}
           />
         );
@@ -122,7 +122,8 @@ export default function Dashboard() {
         return (
           <Personel
             selectedKurum={selectedKurum}
-            kurumlar={kurumlar}
+            unvanlar={unvanlar}
+            // kurumlar={kurumlar}
             token={token}
           />
         );
