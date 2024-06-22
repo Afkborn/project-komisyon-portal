@@ -9,6 +9,7 @@ import {
   Spinner,
   Table,
   Badge,
+  FormGroup,
 } from "reactstrap";
 import axios from "axios";
 import {
@@ -23,8 +24,12 @@ import { getIzinType } from "../../actions/IzinActions";
 
 export default function PersonelDetay({ selectedKurum, token }) {
   const [personel, setPersonel] = useState(null);
+  const [personeller, setPersoneller] = useState([]);
   const [updatedPersonel, setUpdatedPersonel] = useState({ ...personel });
   const [sicil, setSicil] = useState(null);
+  const [ad, setAd] = useState(null);
+  const [soyad, setSoyad] = useState(null);
+  const [searchBy, setSearchBy] = useState("adSoyad");
   const [loadSpinner, setLoadSpinner] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -54,6 +59,10 @@ export default function PersonelDetay({ selectedKurum, token }) {
       ...updatedPersonel,
       [name]: value,
     });
+  };
+
+  const handleSearchByChange = (e) => {
+    setSearchBy(e.target.value);
   };
 
   const refreshPersonel = () => {
@@ -122,8 +131,7 @@ export default function PersonelDetay({ selectedKurum, token }) {
       });
   };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
+  const getPersonelBySicil = (sicil) => {
     setLoadSpinner(true);
     const configuration = {
       method: "GET",
@@ -134,12 +142,9 @@ export default function PersonelDetay({ selectedKurum, token }) {
     };
     axios(configuration)
       .then((response) => {
-        setError(false);
-        setErrorMessage("");
         setPersonel(response.data.person);
         setUpdatedPersonel({
-          goreveBaslamaTarihi:
-            response.data.person.goreveBaslamaTarihi.split("T")[0],
+          goreveBaslamaTarihi: response.data.person.goreveBaslamaTarihi,
           ad: response.data.person.ad,
           soyad: response.data.person.soyad,
           durusmaKatibiMi: response.data.person.durusmaKatibiMi,
@@ -147,11 +152,78 @@ export default function PersonelDetay({ selectedKurum, token }) {
         setLoadSpinner(false);
       })
       .catch((error) => {
-        setError(true);
-        setErrorMessage(error.response.data.message);
+        setLoadSpinner(false);
+        alertify.error("Personel bulunamadı.");
+        setPersonel(null);
+        setUpdatedPersonel(null);
+      });
+
+    setError(false);
+  };
+
+  const getPersonelByAdSoyad = (ad, soyad) => {
+    setLoadSpinner(true);
+    const configuration = {
+      method: "GET",
+      url: "api/persons/byAdSoyad/",
+      params: {
+        ad: ad,
+        soyad: soyad,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios(configuration)
+      .then((response) => {
+        setLoadSpinner(false);
+        let personsCount = response.data.persons.length;
+        if (personsCount > 1) {
+          setPersoneller(response.data.persons);
+        } else if (personsCount === 0) {
+          setPersonel(null);
+          setUpdatedPersonel(null);
+          alertify.error("Personel bulunamadı.");
+        } else {
+          let person = response.data.persons[0];
+          setPersonel(person);
+          setUpdatedPersonel({
+            goreveBaslamaTarihi: person.goreveBaslamaTarihi,
+            ad: person.ad,
+            soyad: person.soyad,
+            durusmaKatibiMi: person.durusmaKatibiMi,
+          });
+        }
+      })
+      .catch((error) => {
         setLoadSpinner(false);
         setPersonel(null);
+        setUpdatedPersonel(null);
+        alertify.error("Personel bulunamadı.");
       });
+
+    setError(false);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    setPersonel(null);
+    setPersoneller([]);
+    if (searchBy === "sicil") {
+      if (sicil) {
+        getPersonelBySicil(sicil);
+      } else {
+        setError(true);
+        setErrorMessage("Sicil numarası boş bırakılamaz.");
+      }
+    } else {
+      if (ad || soyad) {
+        getPersonelByAdSoyad(ad, soyad);
+      } else {
+        setError(true);
+        setErrorMessage("Ad ve soyad boş bırakılamaz.");
+      }
+    }
   };
 
   return (
@@ -168,32 +240,147 @@ export default function PersonelDetay({ selectedKurum, token }) {
       <div>
         <div hidden={!selectedKurum}>
           <Form onSubmit={(e) => handleFormSubmit(e)}>
+            {/* aramanın  ad veya soyad kullanılarak yapılacağını seçtiğimiz row */}
             <Row className="row-cols-lg-auto g-3 align-items-center">
               <Col>
-                <Label className="visually-hidden" for="sicil">
-                  Sicil
+                <Label check>
+                  <Input
+                    type="radio"
+                    name="searchBy"
+                    value="sicil"
+                    checked={searchBy === "sicil"}
+                    onChange={handleSearchByChange}
+                  />{" "}
+                  Sicil ile Ara
                 </Label>
-                <Input
-                  id="sicil"
-                  name="sicil"
-                  placeholder="Sicil (123456)"
-                  type="number"
-                  value={sicil}
-                  onChange={(e) => setSicil(e.target.value)}
-                />
               </Col>
               <Col>
-                <Button onClick={(e) => handleFormSubmit(e)}>Getir</Button>
+                <Label check>
+                  <Input
+                    type="radio"
+                    name="searchBy"
+                    value="adSoyad"
+                    checked={searchBy === "adSoyad"}
+                    onChange={handleSearchByChange}
+                  />{" "}
+                  Ad Soyad ile Ara
+                </Label>
               </Col>
             </Row>
+
+            {/* arama eğer adsoyad ile yapılacak ise gösterilecek  form */}
+            {searchBy === "adSoyad" && (
+              <Row className="row-cols-lg-auto g-3 align-items-center mt-2">
+                <Col>
+                  <Label className="visually-hidden" for="ad">
+                    Ad
+                  </Label>
+                  <Input
+                    id="ad"
+                    name="ad"
+                    placeholder="Adı"
+                    type="text"
+                    value={ad}
+                    onChange={(e) => setAd(e.target.value)}
+                  />
+                </Col>
+                <Col>
+                  <Label className="visually-hidden" for="soyad">
+                    Soyad
+                  </Label>
+                  <Input
+                    id="soyad"
+                    name="soyad"
+                    placeholder="Soyadı"
+                    type="text"
+                    value={soyad}
+                    onChange={(e) => setSoyad(e.target.value)}
+                  />
+                </Col>
+                <Col>
+                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>Getir</Button>
+                </Col>
+              </Row>
+            )}
+
+            {/* arama eğer sicil ile yapılacak ise gösterilecek  form */}
+            {searchBy === "sicil" && (
+              <Row className="row-cols-lg-auto g-3 align-items-center mt-2">
+                <Col>
+                  <Label className="visually-hidden" for="sicil">
+                    Sicil
+                  </Label>
+                  <Input
+                    id="sicil"
+                    name="sicil"
+                    placeholder="Sicil (123456)"
+                    type="number"
+                    value={sicil}
+                    onChange={(e) => setSicil(e.target.value)}
+                  />
+                </Col>
+                <Col>
+                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>Getir</Button>
+                </Col>
+              </Row>
+            )}
           </Form>
         </div>
+
         <div className="mt-1" hidden={!loadSpinner}>
           <Spinner type="grow" color="danger" />
         </div>
         <div className="mt-1" hidden={!error}>
           <span className="text-danger">{errorMessage}</span>
         </div>
+
+        {personeller.length > 0 && (
+          <div>
+            <hr />
+            <h4> {personeller.length} adet personel bulundu</h4>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Sicil</th>
+                  <th>Ad</th>
+                  <th>Soyad</th>
+                  <th>Birim</th>
+                  <th>Ünvan</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {personeller.map((person) => (
+                  <tr key={person._id}>
+                    <td>{person.sicil}</td>
+                    <td>{person.ad}</td>
+                    <td>{person.soyad}</td>
+                    <td>{person.birimID.name}</td>
+                    <td>{person.title.name}</td>
+                    <td>
+                      <Button
+                        color="info"
+                        size="sm"
+                        onClick={(e) => {
+                          setPersonel(person);
+                          setUpdatedPersonel({
+                            goreveBaslamaTarihi: person.goreveBaslamaTarihi,
+                            ad: person.ad,
+                            soyad: person.soyad,
+                            durusmaKatibiMi: person.durusmaKatibiMi,
+                          });
+                          setPersoneller([]);
+                        }}
+                      >
+                        Detayları Gör
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
 
         {personel && (
           <div>

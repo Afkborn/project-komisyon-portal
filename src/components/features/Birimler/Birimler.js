@@ -113,7 +113,7 @@ export default function Birimler({ token, selectedKurum }) {
         setBirimler(result.data.unitList);
         setBirimlerFiltered(
           result.data.unitList.filter(
-            (birim) => birim.unitType.unitType === "Ceza"
+            (birim) => birim.unitType.unitType === selectedFilterOption
           )
         );
       })
