@@ -18,6 +18,10 @@ import PersonelListe from "../features/PersonelListe/PersonelListe";
 import PersonelDetay from "../features/PersonelDetay/PersonelDetay";
 import Unvanlar from "../features/Unvanlar";
 import Kurum from "../features/Kurum";
+import PersonelOnLeave from "../features/Reports/PersonelOnLeave";
+import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
+import KullaniciAyarlari from "../features/KullaniciAyarlari";
+
 import {
   GET_institutions,
   GET_titles,
@@ -112,19 +116,12 @@ export default function Dashboard() {
       default:
         return <Welcome />;
       case 1:
-        return (
-          <Birimler
-            selectedKurum={selectedKurum}
-            // kurumlar={kurumlar}
-            token={token}
-          />
-        );
+        return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:
         return (
           <PersonelListe
             selectedKurum={selectedKurum}
             unvanlar={unvanlar}
-            // kurumlar={kurumlar}
             token={token}
           />
         );
@@ -146,6 +143,12 @@ export default function Dashboard() {
             setSelectedKurum={setSelectedKurum}
           />
         );
+      case 6:
+        return <PersonelOnLeave />;
+      case 7:
+        return <UnitMissingClerk />;
+      case 8:
+        return <KullaniciAyarlari user={user} token={token} />;
     }
   }
 
@@ -181,6 +184,14 @@ export default function Dashboard() {
               active={selected === 0}
             >
               Ana Sayfa
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={8}
+              onClick={() => setSelected(8)}
+              active={selected === 8}
+            >
+              Hesap Ayarları
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 text-center">
@@ -240,9 +251,16 @@ export default function Dashboard() {
               key={6}
               onClick={() => onClick_listGroupItem(6)}
               active={selected === 6}
-              disabled
             >
               İzinde Olan Personel
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={7}
+              onClick={() => onClick_listGroupItem(7)}
+              active={selected === 7}
+            >
+              Eksik Katibi Olan Birimler
             </ListGroupItem>
           </ListGroup>
         </Col>

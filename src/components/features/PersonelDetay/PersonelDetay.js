@@ -143,7 +143,8 @@ export default function PersonelDetay({ selectedKurum, token }) {
       .then((response) => {
         setPersonel(response.data.person);
         setUpdatedPersonel({
-          goreveBaslamaTarihi: response.data.person.goreveBaslamaTarihi,
+          goreveBaslamaTarihi:
+            response.data.person.goreveBaslamaTarihi.split("T")[0],
           ad: response.data.person.ad,
           soyad: response.data.person.soyad,
           durusmaKatibiMi: response.data.person.durusmaKatibiMi,
@@ -162,6 +163,10 @@ export default function PersonelDetay({ selectedKurum, token }) {
 
   const getPersonelByAdSoyad = (ad, soyad) => {
     setLoadSpinner(true);
+
+    if (ad) ad = ad.trim();
+    if (soyad) soyad = soyad.trim();
+
     const configuration = {
       method: "GET",
       url: "api/persons/byAdSoyad/",
@@ -297,7 +302,9 @@ export default function PersonelDetay({ selectedKurum, token }) {
                   />
                 </Col>
                 <Col>
-                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>Getir</Button>
+                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>
+                    Getir
+                  </Button>
                 </Col>
               </Row>
             )}
@@ -319,7 +326,9 @@ export default function PersonelDetay({ selectedKurum, token }) {
                   />
                 </Col>
                 <Col>
-                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>Getir</Button>
+                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>
+                    Getir
+                  </Button>
                 </Col>
               </Row>
             )}
@@ -363,7 +372,8 @@ export default function PersonelDetay({ selectedKurum, token }) {
                         onClick={(e) => {
                           setPersonel(person);
                           setUpdatedPersonel({
-                            goreveBaslamaTarihi: person.goreveBaslamaTarihi,
+                            goreveBaslamaTarihi:
+                              person.goreveBaslamaTarihi.split("T")[0],
                             ad: person.ad,
                             soyad: person.soyad,
                             durusmaKatibiMi: person.durusmaKatibiMi,
