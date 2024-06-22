@@ -3,9 +3,14 @@ const GET_institutions = {
   url: "api/institutions",
 };
 
-const GET_titles = {
-  method: "GET",
-  url: "api/titles",
+const GET_titles = (token) => {
+  return {
+    method: "GET",
+    url: "api/titles",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 };
 
 const DELETE_titles = (_id, token) => {

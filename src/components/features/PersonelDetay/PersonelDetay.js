@@ -18,6 +18,8 @@ import {
 import alertify from "alertifyjs";
 import PersonelCalistigiKisiGuncelleModal from "./PersonelCalistigiKisiGuncelleModal";
 import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncelleModal";
+import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
+import { getIzinType } from "../../actions/IzinActions";
 
 export default function PersonelDetay({ selectedKurum, token }) {
   const [personel, setPersonel] = useState(null);
@@ -39,6 +41,12 @@ export default function PersonelDetay({ selectedKurum, token }) {
     setShowCalistigiBirimGuncelleModal(!showCalistigiBirimGuncelleModal);
   };
 
+  const [showIzinEkleModal, setShowIzinEkleModal] = useState(false);
+
+  const izinEkleModalToggle = () => {
+    setShowIzinEkleModal(!showIzinEkleModal);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -48,9 +56,52 @@ export default function PersonelDetay({ selectedKurum, token }) {
     });
   };
 
+  const refreshPersonel = () => {
+    const configuration = {
+      method: "GET",
+      url: "api/persons/bySicil/" + sicil,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios(configuration)
+      .then((response) => {
+        setPersonel(response.data.person);
+        setUpdatedPersonel({
+          goreveBaslamaTarihi:
+            response.data.person.goreveBaslamaTarihi.split("T")[0],
+          ad: response.data.person.ad,
+          soyad: response.data.person.soyad,
+          durusmaKatibiMi: response.data.person.durusmaKatibiMi,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleIzinDelete = (izin) => {
+    console.log(izin);
+    const configuration = {
+      method: "DELETE",
+      url: "api/leaves/" + izin._id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    console.log(configuration);
+    axios(configuration)
+      .then((response) => {
+        alertify.success("İzin silindi.");
+        refreshPersonel();
+      })
+      .catch((error) => {
+        console.log(error);
+        alertify.error("İzin silinemedi.");
+      });
+  };
+
   const handleUpdate = () => {
-    console.log("personel" + personel);
-    console.log(updatedPersonel);
     setLoadSpinner(true);
     const configuration = {
       method: "PUT",
@@ -157,7 +208,11 @@ export default function PersonelDetay({ selectedKurum, token }) {
                 >
                   Güncelle
                 </Button>
-                <Button  onClick={calistigiBirimGuncelleModalToggle}  className="m-1" color="primary">
+                <Button
+                  onClick={calistigiBirimGuncelleModalToggle}
+                  className="m-1"
+                  color="primary"
+                >
                   Birim Değiştir
                 </Button>
               </Col>
@@ -277,7 +332,9 @@ export default function PersonelDetay({ selectedKurum, token }) {
               <hr />
 
               <div className="mt-2">
-                <Button color="success">İzin Ekle</Button>
+                <Button onClick={izinEkleModalToggle} color="success">
+                  İzin Ekle
+                </Button>
               </div>
               <Table>
                 <thead>
@@ -286,15 +343,27 @@ export default function PersonelDetay({ selectedKurum, token }) {
                     <th>İzin Başlangıç</th>
                     <th>İzin Bitiş</th>
                     <th>Yorum</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {personel.izinler.map((izin) => (
                     <tr key={izin._id}>
-                      <td>{izin.reason}</td>
+                      <td>{getIzinType(izin.reason)}</td>
                       <td>{izin.startDate.split("T")[0]}</td>
                       <td>{izin.endDate.split("T")[0]}</td>
                       <td>{izin.comment}</td>
+                      <td>
+                        <Button
+                          size="sm"
+                          color="danger"
+                          onClick={(e) => {
+                            handleIzinDelete(izin);
+                          }}
+                        >
+                          Sil
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -307,6 +376,7 @@ export default function PersonelDetay({ selectedKurum, token }) {
           toggle={calistigiKisiGuncelleModalToggle}
           personel={personel}
           token={token}
+          refreshPersonel={refreshPersonel}
         />
         <PersonelCalistigiBirimGuncelleModal
           modal={showCalistigiBirimGuncelleModal}
@@ -314,8 +384,15 @@ export default function PersonelDetay({ selectedKurum, token }) {
           personel={personel}
           token={token}
           selectedKurum={selectedKurum}
+          refreshPersonel={refreshPersonel}
         />
-
+        <PersonelIzinEkleModal
+          modal={showIzinEkleModal}
+          toggle={izinEkleModalToggle}
+          personel={personel}
+          token={token}
+          refreshPersonel={refreshPersonel}
+        />
       </div>
     </div>
   );

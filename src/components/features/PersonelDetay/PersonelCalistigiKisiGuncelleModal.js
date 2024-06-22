@@ -18,6 +18,7 @@ export default function PersonelCalistigiKisiGuncelleModal({
   toggle,
   personel,
   token,
+  refreshPersonel,
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newCalistigiKisiSicil, setNewCalistigiKisiSicil] = useState(null);
@@ -45,6 +46,7 @@ export default function PersonelCalistigiKisiGuncelleModal({
     axios(configuration)
       .then((response) => {
         alertify.success("Çalıştığı kişi bilgisi güncellendi.");
+        refreshPersonel();
         toggle();
       })
       .catch((error) => {

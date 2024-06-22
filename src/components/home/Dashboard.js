@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   function getUnvanlar() {
     setUnvanlar([]);
-    axios(GET_titles)
+    axios(GET_titles(token))
       .then((result) => {
         setUnvanlar(result.data.titleList);
         console.log(result.data.titleList);
@@ -137,13 +137,7 @@ export default function Dashboard() {
           />
         );
       case 3:
-        return (
-          <PersonelDetay
-            
-            selectedKurum={selectedKurum}
-            token={token}
-          />
-        );
+        return <PersonelDetay selectedKurum={selectedKurum} token={token} />;
       case 5:
         return (
           <Kurum

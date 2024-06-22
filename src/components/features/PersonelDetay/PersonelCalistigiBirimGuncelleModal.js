@@ -19,6 +19,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
   personel,
   token,
   selectedKurum,
+  refreshPersonel
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newCalistigiBirim, setNewCalistigiBirim] = useState(null);
@@ -35,16 +36,14 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
   useEffect(() => {
     if (selectedKurum) {
-      getBirimler(selectedKurum.id);
+      if (tumBirimler.length === 0) {
+        getBirimler(selectedKurum.id);
+      }
     }
   });
 
   function handleTypeChange(event) {
     if (event.target.value === "Seçiniz") {
-      setBirimler([]);
-      setTumBirimler([]);
-      setNewCalistigiBirim(null);
-      setUpdateButtonDisabled(true);
       return;
     }
     let typeId = selectedKurum.types.find(
@@ -108,6 +107,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
     axios(configuration)
       .then((result) => {
         alertify.success("Çalıştığı birim bilgisi güncellendi.");
+        refreshPersonel();
         toggle();
       })
       .catch((error) => {
