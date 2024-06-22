@@ -23,7 +23,7 @@ const DELETE_titles = (_id, token) => {
   };
 };
 
-const POST_titles = (newUnvanName, kind, token, deletable = true) => {
+const POST_titles = (newUnvanName, kind, token, newUnvanOncelikSira,  deletable = true) => {
   return {
     method: "POST",
     url: "api/titles/",
@@ -33,6 +33,7 @@ const POST_titles = (newUnvanName, kind, token, deletable = true) => {
     data: {
       name: newUnvanName,
       kind: kind,
+      oncelikSirasi: newUnvanOncelikSira,
       deletable,
     },
   };

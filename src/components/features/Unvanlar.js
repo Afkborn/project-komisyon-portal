@@ -17,6 +17,7 @@ import {
 import alertify from "alertifyjs";
 export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   const [newUnvanName, setNewUnvanName] = useState("");
+  const [newUnvanOncelikSira, setNewUnvanOncelikSira] = useState("");
   const [showUnvanEkleModal, setShowUnvanEkleModal] = useState(false);
   const [showUnvanSilModal, setShowUnvanSilModal] = useState(false);
   const [showUnvanGuncelleModal, setShowUnvanGuncelleModal] = useState(false);
@@ -74,7 +75,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       alert("Ünvan adı boş olamaz.");
       return;
     }
-    axios(POST_titles(newUnvanName, strToEng(newUnvanName), token))
+    axios(POST_titles(newUnvanName, strToEng(newUnvanName), token , newUnvanOncelikSira))
       .then(() => {
         alertify.success(`Ünvan ${newUnvanName} başarıyla eklendi.`);
         unvanEkleToggle();
@@ -203,6 +204,14 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
               setNewUnvanName(e.target.value);
             }}
           />
+
+          <p className="mt-1">Ünvan Öncelik Sırası: </p>
+          <Input
+            type="text"
+            onChange={(e) => {
+              setNewUnvanOncelikSira(e.target.value);
+            }}
+          />
         </ModalBody>
         <ModalFooter>
           <Button
@@ -233,6 +242,24 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
               });
             }}
           />
+
+          <p className="mt-1">Ünvan Öncelik Sırası: </p>
+          <Input
+            type="text"
+            defaultValue={
+              updateSelectedUnvan && updateSelectedUnvan.oncelikSirasi
+            }
+            onChange={(e) => {
+              setUpdateSelectedUnvan({
+                ...updateSelectedUnvan,
+                oncelikSirasi: e.target.value,
+              });
+            }}
+          />
+          <small>
+            Personel Listesi ekranında sıralama yaparken ünvanın öncelik
+            sıralamasındaki değere göre sıralama yapar.
+          </small>
         </ModalBody>
         <ModalFooter>
           <Button

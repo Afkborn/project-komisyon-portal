@@ -85,6 +85,15 @@ export default function PersonelListe({ unvanlar, token, selectedKurum }) {
     };
     axios(configuration)
       .then((result) => {
+
+        result.data.persons.sort((a, b) => {
+          if (a.title.oncelikSirasi !== b.title.oncelikSirasi) {
+            return a.title.oncelikSirasi - b.title.oncelikSirasi;
+          }
+          return a.sicil - b.sicil;
+        });
+
+
         setPersonel(result.data.persons);
         setShowSpinner(false);
       })
