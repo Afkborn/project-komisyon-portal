@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FormGroup, Input, Label, Badge, Spinner, Button } from "reactstrap";
 import axios from "axios";
-import PersonelEkleModal from "./PersonelModals/PersonelEkleModal";
-
-export default function Personel({ unvanlar, token, selectedKurum }) {
+import PersonelEkleModal from "./PersonelEkleModal";
+import {
+  renderDate_GGAAYYYY,
+  calculateGorevSuresi,
+} from "../../actions/TimeActions";
+export default function PersonelListe({ unvanlar, token, selectedKurum }) {
   const [kurum, setKurum] = useState(null);
   // const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [tumBirimler, setTumBirimler] = useState([]);
@@ -61,24 +64,6 @@ export default function Personel({ unvanlar, token, selectedKurum }) {
     setBirimler(
       tumBirimler.filter((birim) => birim.unitType.institutionTypeId === typeId)
     );
-  }
-
-  function renderDate_GGAAYYYY(date) {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
-  }
-
-  function calculateGorevSuresi(date) {
-    //  0 Yıl 2 Ay 3 Gün
-    if (!date) return "";
-    const d = new Date(date);
-    const now = new Date();
-    const diff = now - d;
-    const yil = Math.floor(diff / 31536000000);
-    const ay = Math.floor((diff % 31536000000) / 2628000000);
-    const gun = Math.floor(((diff % 31536000000) % 2628000000) / 86400000);
-    return `${yil} Yıl ${ay} Ay ${gun} Gün`;
   }
 
   function handleBirimChange(event) {
@@ -210,7 +195,7 @@ export default function Personel({ unvanlar, token, selectedKurum }) {
           <div>
             {showSpinner ? (
               <div className="mt-5 center">
-                <Spinner type="grow" color="primary" />
+                <Spinner type="grow" color="danger" />
               </div>
             ) : (
               <div>
@@ -284,6 +269,7 @@ export default function Personel({ unvanlar, token, selectedKurum }) {
         unvanlar={unvanlar}
         birim={selectedBirim}
         handleBirimChange={handleBirimChange}
+        personel={personel}
       />
     </div>
   );

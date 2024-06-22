@@ -12,7 +12,15 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
-function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimChange }) {
+function PersonelEkleModal({
+  modal,
+  toggle,
+  unvanlar,
+  birim,
+  token,
+  handleBirimChange,
+  personel,
+}) {
   const [formData, setFormData] = useState({
     birimID: "",
     kind: "",
@@ -44,7 +52,6 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
   };
 
   const handleCancel = () => {
-
     setFormData({
       birimID: "",
       kind: "",
@@ -101,7 +108,7 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
         <ModalHeader toggle={toggle}>Personel Ekle</ModalHeader>
         <ModalBody>
           <Form>
-            <FormGroup>
+            <FormGroup hidden>
               <Label for="name">BirimID</Label>
               <Input
                 type="text"
@@ -111,7 +118,6 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
                 disabled
               />
             </FormGroup>
-
             <FormGroup>
               <Label for="unvan">Ünvan</Label>
               <Input
@@ -144,6 +150,26 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
               </FormGroup>
             )}
 
+            {formData.kind === "zabitkatibi" && (
+              <FormGroup>
+                <Label for="calistigiKisi">Çalıştığı Kişi (Opsiyonel)</Label>
+                <Input
+                  type="select"
+                  name="calistigiKisi"
+                  id="calistigiKisi"
+                  value={formData.calistigiKisi}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Seçiniz</option>
+                  {personel.map((person) => (
+                    <option key={person._id} value={person._id}>
+                      {person.title.name} | {person.ad} {person.soyad} -{" "}
+                      {person.sicil}
+                    </option>
+                  ))}
+                </Input>
+              </FormGroup>
+            )}
             <FormGroup>
               <Label for="sicil">Sicil</Label>
               <Input
@@ -171,7 +197,6 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
                 onChange={handleInputChange}
               />
             </FormGroup>
-
             <FormGroup>
               <Label for="goreveBaslamaTarihi">Göreve Başlama Tarihi</Label>
               <Input
@@ -179,6 +204,17 @@ function PersonelEkleModal({ modal, toggle, unvanlar, birim, token, handleBirimC
                 name="goreveBaslamaTarihi"
                 id="goreveBaslamaTarihi"
                 onChange={handleInputChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="birimeBaslamaTarihi">Birime Başlama Tarihi</Label>
+              <Input
+                type="date"
+                name="birimeBaslamaTarihi"
+                id="birimeBaslamaTarihi"
+                onChange={handleInputChange}
+                defaultValue={new Date().toISOString().substr(0, 10)}
               />
             </FormGroup>
           </Form>

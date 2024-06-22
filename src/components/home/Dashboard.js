@@ -14,7 +14,8 @@ import logo from "../../assets/logo300.png";
 
 import Welcome from "./Welcome";
 import Birimler from "../features/Birimler/Birimler";
-import Personel from "../features/Personel";
+import PersonelListe from "../features/PersonelListe/PersonelListe";
+import PersonelDetay from "../features/PersonelDetay/PersonelDetay";
 import Unvanlar from "../features/Unvanlar";
 import Kurum from "../features/Kurum";
 import {
@@ -120,7 +121,7 @@ export default function Dashboard() {
         );
       case 2:
         return (
-          <Personel
+          <PersonelListe
             selectedKurum={selectedKurum}
             unvanlar={unvanlar}
             // kurumlar={kurumlar}
@@ -132,6 +133,14 @@ export default function Dashboard() {
           <Unvanlar
             unvanlar={unvanlar}
             updateUnvanlar={getUnvanlar}
+            token={token}
+          />
+        );
+      case 3:
+        return (
+          <PersonelDetay
+            
+            selectedKurum={selectedKurum}
             token={token}
           />
         );
@@ -218,7 +227,15 @@ export default function Dashboard() {
               onClick={() => onClick_listGroupItem(2)}
               active={selected === 2}
             >
-              Personel Listesi
+              Personel Listesi (Birim Bazlı)
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={3}
+              onClick={() => onClick_listGroupItem(3)}
+              active={selected === 3}
+            >
+              Personel Detay
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
