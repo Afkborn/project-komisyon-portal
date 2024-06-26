@@ -24,11 +24,13 @@ import PersonelSilModal from "./PersonelSilModal";
 import { getIzinType } from "../../actions/IzinActions";
 
 export default function PersonelDetay({
+  kurumlar,
   selectedKurum,
   token,
   selectedPersonelID,
 }) {
   const [personel, setPersonel] = useState(null);
+  const [personelKurum, setPersonelKurum] = useState(null);
   const [personeller, setPersoneller] = useState([]);
   const [updatedPersonel, setUpdatedPersonel] = useState({ ...personel });
   const [sicil, setSicil] = useState(null);
@@ -97,6 +99,13 @@ export default function PersonelDetay({
       axios(configuration)
         .then((response) => {
           setPersonel(response.data.person);
+
+          // response.data.person.birimID.institutionID değerini kurumlar içinde ara ve bul
+          let kurum = kurumlar.find(
+            (kurum) => kurum.id === response.data.person.birimID.institutionID
+          );
+          setPersonelKurum(kurum);
+
           setUpdatedPersonel({
             goreveBaslamaTarihi:
               response.data.person.goreveBaslamaTarihi.split("T")[0],
@@ -165,6 +174,11 @@ export default function PersonelDetay({
     axios(configuration)
       .then((response) => {
         setPersonel(response.data.person);
+        let kurum = kurumlar.find(
+          (kurum) => kurum.id === response.data.person.birimID.institutionID
+        );
+        setPersonelKurum(kurum);
+
         setUpdatedPersonel({
           goreveBaslamaTarihi:
             response.data.person.goreveBaslamaTarihi.split("T")[0],
@@ -214,6 +228,11 @@ export default function PersonelDetay({
         } else {
           let person = response.data.persons[0];
           setPersonel(person);
+          let kurum = kurumlar.find(
+            (kurum) => kurum.id === person.birimID.institutionID
+          );
+
+          setPersonelKurum(kurum);
           setUpdatedPersonel({
             goreveBaslamaTarihi: person.goreveBaslamaTarihi,
             ad: person.ad,
@@ -258,6 +277,9 @@ export default function PersonelDetay({
       <h3>Personel Detay</h3>
       <span>
         Sicil ile birlikte personel hakkında detaylı bilgi alabilirsiniz.
+        <br />
+        Kurum seçimi yapmanıza gerek yok, sismtede{" "}
+        <b> kayıtlı tüm personelleri</b> arayabilirsiniz.
         <br />
         Personelin birimini değiştirebilir, izin bilgisi ekleyebilir veya
         güncelleyebilirsiniz.
@@ -396,6 +418,10 @@ export default function PersonelDetay({
                         size="sm"
                         onClick={(e) => {
                           setPersonel(person);
+                          let kurum = kurumlar.find(
+                            (kurum) => kurum.id === person.birimID.institutionID
+                          );
+                          setPersonelKurum(kurum);
                           setUpdatedPersonel({
                             goreveBaslamaTarihi:
                               person.goreveBaslamaTarihi.split("T")[0],
@@ -478,9 +504,18 @@ export default function PersonelDetay({
             </Row>
             <Row className="mt-2">
               <Col>
+                <Label>Çalıştığı Kurum </Label>
+                <Input
+                  type="text"
+                  value={personelKurum ? personelKurum.name : "-"}
+                  disabled
+                />
+              </Col>
+              <Col>
                 <Label>Çalıştığı Birim </Label>
                 <Input type="text" value={personel.birimID.name} disabled />
               </Col>
+
               <Col>
                 <Label>Ünvan</Label>
                 <Input

@@ -64,11 +64,29 @@ function PersonelEkleModal({
     toggle();
   };
 
+  const checkFormDatas = () => {
+    if (
+      formData.kind === "" ||
+      formData.sicil === "" ||
+      formData.ad === "" ||
+      formData.soyad === "" ||
+      formData.goreveBaslamaTarihi === ""
+    ) {
+      alertify.error("Lütfen tüm alanları doldurunuz.");
+      return false;
+    }
+    return true;
+  };
+
   const handleAdd = () => {
     setFormData({
       ...formData,
       birimID: birim._id,
     });
+
+    if (!checkFormDatas()) {
+      return;
+    }
 
     const configuration = {
       method: "POST",

@@ -15,6 +15,7 @@ import logo from "../../assets/logo300.png";
 import Welcome from "./Welcome";
 import Birimler from "../features/Birimler/Birimler";
 import PersonelListe from "../features/PersonelListe/PersonelListe";
+import PersonelListeByBirim from "../features/PersonelListeByBirim/PersonelListeByBirim";
 import PersonelDetay from "../features/PersonelDetay/PersonelDetay";
 import Unvanlar from "../features/Unvanlar";
 import Kurum from "../features/Kurum";
@@ -130,7 +131,7 @@ export default function Dashboard() {
         return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:
         return (
-          <PersonelListe
+          <PersonelListeByBirim
             selectedKurum={selectedKurum}
             unvanlar={unvanlar}
             token={token}
@@ -148,6 +149,7 @@ export default function Dashboard() {
       case 3:
         return (
           <PersonelDetay
+            kurumlar={kurumlar}
             selectedPersonelID={selectedPersonelID}
             selectedKurum={selectedKurum}
             token={token}
@@ -167,6 +169,8 @@ export default function Dashboard() {
         return <UnitMissingClerk />;
       case 8:
         return <KullaniciAyarlari user={user} token={token} />;
+      case 9:
+        return <PersonelListe />;
     }
   }
 
@@ -198,7 +202,7 @@ export default function Dashboard() {
           <ListGroup className="mt-2" style={listGroupStyle}>
             <ListGroupItem
               key={0}
-              onClick={() => changePage(0)}
+              onClick={() => onClick_listGroupItem(0)}
               active={selected === 0}
             >
               Ana Sayfa
@@ -206,7 +210,7 @@ export default function Dashboard() {
 
             <ListGroupItem
               key={8}
-              onClick={() => changePage(8)}
+              onClick={() => onClick_listGroupItem(8)}
               active={selected === 8}
             >
               Hesap Ayarları
@@ -244,13 +248,21 @@ export default function Dashboard() {
             >
               Birimler
             </ListGroupItem>
+            <ListGroupItem
+              key={9}
+              onClick={() => onClick_listGroupItem(9)}
+              active={selected === 9}
+            >
+              Tüm Personel Listesi
+            </ListGroupItem>
+
 
             <ListGroupItem
               key={2}
               onClick={() => onClick_listGroupItem(2)}
               active={selected === 2}
             >
-              Personel Listesi (Birim Bazlı)
+              Personel Listele (Birim Seçerek)
             </ListGroupItem>
 
             <ListGroupItem
