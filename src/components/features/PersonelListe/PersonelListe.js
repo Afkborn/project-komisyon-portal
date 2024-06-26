@@ -6,7 +6,7 @@ import {
   renderDate_GGAAYYYY,
   calculateGorevSuresi,
 } from "../../actions/TimeActions";
-export default function PersonelListe({ unvanlar, token, selectedKurum }) {
+export default function PersonelListe({ unvanlar, token, selectedKurum, showPersonelDetay }) {
   const [kurum, setKurum] = useState(null);
   // const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [tumBirimler, setTumBirimler] = useState([]);
@@ -66,6 +66,10 @@ export default function PersonelListe({ unvanlar, token, selectedKurum }) {
     );
   }
 
+  function handlePersonDetailButton_Click(person) {
+    showPersonelDetay(person);
+  }
+
   function handleBirimChange(event) {
     if (event.target.value === "Seçiniz") {
       return;
@@ -85,14 +89,15 @@ export default function PersonelListe({ unvanlar, token, selectedKurum }) {
     };
     axios(configuration)
       .then((result) => {
-
         result.data.persons.sort((a, b) => {
+          if (a.title === null) {
+            return 1;
+          }
           if (a.title.oncelikSirasi !== b.title.oncelikSirasi) {
             return a.title.oncelikSirasi - b.title.oncelikSirasi;
           }
           return a.sicil - b.sicil;
         });
-
 
         setPersonel(result.data.persons);
         setShowSpinner(false);
@@ -232,13 +237,14 @@ export default function PersonelListe({ unvanlar, token, selectedKurum }) {
                         <th>Göreve Başlama Tarihi</th>
                         <th>Duruşma Ktp.</th>
                         <th>İzin?</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       {personel.map((person) => (
                         <tr key={person._id}>
                           <td>{person.sicil}</td>
-                          <td>{person.title.name}</td>
+                          <td>{person.title ? person.title.name : "BELİRTİLMEMİŞ"}</td>
                           <td>{person.ad}</td>
                           <td>{person.soyad}</td>
                           <td>
@@ -260,6 +266,18 @@ export default function PersonelListe({ unvanlar, token, selectedKurum }) {
                             ) : (
                               <div></div>
                             )}
+                          </td>
+
+                          <td>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                handlePersonDetailButton_Click(person);
+                              }}
+                              color="primary"
+                            >
+                              Detay
+                            </Button>
                           </td>
                         </tr>
                       ))}

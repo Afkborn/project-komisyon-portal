@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Input,
   Label,
@@ -19,9 +19,15 @@ import alertify from "alertifyjs";
 import PersonelCalistigiKisiGuncelleModal from "./PersonelCalistigiKisiGuncelleModal";
 import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncelleModal";
 import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
+import PersonelSilModal from "./PersonelSilModal";
+
 import { getIzinType } from "../../actions/IzinActions";
 
-export default function PersonelDetay({ selectedKurum, token }) {
+export default function PersonelDetay({
+  selectedKurum,
+  token,
+  selectedPersonelID,
+}) {
   const [personel, setPersonel] = useState(null);
   const [personeller, setPersoneller] = useState([]);
   const [updatedPersonel, setUpdatedPersonel] = useState({ ...personel });
@@ -33,6 +39,13 @@ export default function PersonelDetay({ selectedKurum, token }) {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    if (selectedPersonelID) {
+      getPersonelBySicil(selectedPersonelID);
+    }
+    // eslint-disable-next-line
+  }, [selectedPersonelID]);
+
   const [showCalistigiKisiGuncelleModal, setShowCalistigiKisiGuncelleModal] =
     useState(false);
   const calistigiKisiGuncelleModalToggle = () => {
@@ -43,6 +56,11 @@ export default function PersonelDetay({ selectedKurum, token }) {
     useState(false);
   const calistigiBirimGuncelleModalToggle = () => {
     setShowCalistigiBirimGuncelleModal(!showCalistigiBirimGuncelleModal);
+  };
+
+  const [showDeletePersonelModal, setShowDeletePersonelModal] = useState(false);
+  const deletePersonelModalToggle = () => {
+    setShowDeletePersonelModal(!showDeletePersonelModal);
   };
 
   const [showIzinEkleModal, setShowIzinEkleModal] = useState(false);
@@ -64,28 +82,33 @@ export default function PersonelDetay({ selectedKurum, token }) {
     setSearchBy(e.target.value);
   };
 
-  const refreshPersonel = () => {
-    const configuration = {
-      method: "GET",
-      url: "api/persons/bySicil/" + sicil,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    axios(configuration)
-      .then((response) => {
-        setPersonel(response.data.person);
-        setUpdatedPersonel({
-          goreveBaslamaTarihi:
-            response.data.person.goreveBaslamaTarihi.split("T")[0],
-          ad: response.data.person.ad,
-          soyad: response.data.person.soyad,
-          durusmaKatibiMi: response.data.person.durusmaKatibiMi,
+  const refreshPersonel = (afterDelete = false) => {
+    if (afterDelete) {
+      setPersonel(null);
+      setUpdatedPersonel(null);
+    } else {
+      const configuration = {
+        method: "GET",
+        url: "api/persons/bySicil/" + sicil,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      axios(configuration)
+        .then((response) => {
+          setPersonel(response.data.person);
+          setUpdatedPersonel({
+            goreveBaslamaTarihi:
+              response.data.person.goreveBaslamaTarihi.split("T")[0],
+            ad: response.data.person.ad,
+            soyad: response.data.person.soyad,
+            durusmaKatibiMi: response.data.person.durusmaKatibiMi,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
         });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    }
   };
 
   const handleIzinDelete = (izin) => {
@@ -364,7 +387,9 @@ export default function PersonelDetay({ selectedKurum, token }) {
                     <td>{person.ad}</td>
                     <td>{person.soyad}</td>
                     <td>{person.birimID.name}</td>
-                    <td>{person.title.name}</td>
+                    <td>
+                      {person.title ? person.title.name : "BELİRTİLMEMİŞ"}
+                    </td>
                     <td>
                       <Button
                         color="info"
@@ -411,6 +436,13 @@ export default function PersonelDetay({ selectedKurum, token }) {
                 >
                   Birim Değiştir
                 </Button>
+                <Button
+                  onClick={deletePersonelModalToggle}
+                  className="m-1"
+                  color="danger"
+                >
+                  Sil
+                </Button>
               </Col>
             </Row>
             <Row className="mt-2">
@@ -451,7 +483,11 @@ export default function PersonelDetay({ selectedKurum, token }) {
               </Col>
               <Col>
                 <Label>Ünvan</Label>
-                <Input type="text" value={personel.title.name} disabled />
+                <Input
+                  type="text"
+                  value={personel.title ? personel.title.name : "BELİRTİLMEMİŞ"}
+                  disabled
+                />
               </Col>
             </Row>
 
@@ -476,7 +512,7 @@ export default function PersonelDetay({ selectedKurum, token }) {
               </Col>
             </Row>
 
-            {personel.title.kind === "zabitkatibi" && (
+            {personel.title && personel.title.kind === "zabitkatibi" && (
               <Row className="mt-2">
                 <Col>
                   <Label>Duruşma Katibi</Label>
@@ -585,6 +621,14 @@ export default function PersonelDetay({ selectedKurum, token }) {
         <PersonelIzinEkleModal
           modal={showIzinEkleModal}
           toggle={izinEkleModalToggle}
+          personel={personel}
+          token={token}
+          refreshPersonel={refreshPersonel}
+        />
+
+        <PersonelSilModal
+          modal={showDeletePersonelModal}
+          toggle={deletePersonelModalToggle}
           personel={personel}
           token={token}
           refreshPersonel={refreshPersonel}

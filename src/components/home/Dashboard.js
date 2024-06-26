@@ -31,8 +31,9 @@ import Cookies from "universal-cookie";
 import axios from "axios";
 
 export default function Dashboard() {
-  const [selected, setSelected] = useState(0);
+  const [selectedPersonelID, setSelectedPersonelID] = useState(null);
 
+  const [selected, setSelected] = useState(0);
   const [user, setUser] = useState(null);
   const [kurumlar, setKurumlar] = useState([]);
   const [selectedKurum, setSelectedKurum] = useState(null);
@@ -41,6 +42,11 @@ export default function Dashboard() {
   const [errorMessage, setErrorMessage] = useState("");
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+
+  function changePage(rank) {
+    setSelectedPersonelID(null);
+    setSelected(rank);
+  }
 
   useState(() => {
     if (user === null) {
@@ -107,8 +113,13 @@ export default function Dashboard() {
     justifyContent: "center",
   };
 
+  const showPersonelDetay = (person) => {
+    changePage(3);
+    setSelectedPersonelID(person.sicil);
+  };
+
   function onClick_listGroupItem(rank) {
-    setSelected(rank);
+    changePage(rank);
   }
 
   function renderScreen() {
@@ -123,6 +134,7 @@ export default function Dashboard() {
             selectedKurum={selectedKurum}
             unvanlar={unvanlar}
             token={token}
+            showPersonelDetay={showPersonelDetay}
           />
         );
       case 4:
@@ -134,7 +146,13 @@ export default function Dashboard() {
           />
         );
       case 3:
-        return <PersonelDetay selectedKurum={selectedKurum} token={token} />;
+        return (
+          <PersonelDetay
+            selectedPersonelID={selectedPersonelID}
+            selectedKurum={selectedKurum}
+            token={token}
+          />
+        );
       case 5:
         return (
           <Kurum
@@ -180,7 +198,7 @@ export default function Dashboard() {
           <ListGroup className="mt-2" style={listGroupStyle}>
             <ListGroupItem
               key={0}
-              onClick={() => setSelected(0)}
+              onClick={() => changePage(0)}
               active={selected === 0}
             >
               Ana Sayfa
@@ -188,7 +206,7 @@ export default function Dashboard() {
 
             <ListGroupItem
               key={8}
-              onClick={() => setSelected(8)}
+              onClick={() => changePage(8)}
               active={selected === 8}
             >
               Hesap Ayarları

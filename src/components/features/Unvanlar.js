@@ -180,7 +180,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         <ModalHeader toggle={unvanSilToggle}>Ünvan Sil</ModalHeader>
         <ModalBody>
           <p>
-            Ünvanı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+            Ünvanı silmek istediğinize emin misiniz? 
           </p>
           <p>Ünvan Adı: {deleteSelectedUnvan && deleteSelectedUnvan.name}</p>
         </ModalBody>
