@@ -166,6 +166,7 @@ export default function Dashboard() {
       case 6:
         return (
           <PersonelOnLeave
+            selectedKurum={selectedKurum}
             token={token}
             showPersonelDetay={showPersonelDetay}
           />
@@ -175,7 +176,14 @@ export default function Dashboard() {
       case 8:
         return <KullaniciAyarlari user={user} token={token} />;
       case 9:
-        return <PersonelListe />;
+        return (
+          <PersonelListe
+            selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+            unvanlar={unvanlar}
+          />
+        );
     }
   }
 

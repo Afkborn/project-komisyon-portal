@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Input, Label, Button, Form, Row, Col } from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
-export default function PersonelOnLeave({ token, showPersonelDetay }) {
+export default function PersonelOnLeave({
+  selectedKurum,
+  token,
+  showPersonelDetay,
+}) {
   const [searchBy, setSearchBy] = useState("current");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -26,7 +30,8 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
 
     setPersonelList([]);
 
-    let url = "api/reports/izinliPersoneller";
+    let url = "api/reports/izinliPersoneller?institutionId=" + selectedKurum.id;
+
     if (searchBy === "byDate") {
       url += `?startDate=${startDate}&endDate=${endDate}`;
     }
@@ -54,7 +59,7 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
     <div>
       <h3>Rapor - İzinde Olan Personel</h3>
       <span>
-        Bu rapor sayesinde tarih bazlı veya güncel olarak izinde olan
+        Bu rapor sayesinde seçili olan kurumda tarih bazlı veya güncel olarak izinde olan
         personelleri listeyebilir, excel veya pdf formatında dışa
         aktarabilirsiniz.
       </span>

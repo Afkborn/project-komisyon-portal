@@ -278,7 +278,7 @@ export default function PersonelDetay({
       <span>
         Sicil ile birlikte personel hakkında detaylı bilgi alabilirsiniz.
         <br />
-        Kurum seçimi yapmanıza gerek yok, sismtede{" "}
+        Kurum seçimi yapmanıza gerek yok, sistemde{" "}
         <b> kayıtlı tüm personelleri</b> arayabilirsiniz.
         <br />
         Personelin birimini değiştirebilir, izin bilgisi ekleyebilir veya
