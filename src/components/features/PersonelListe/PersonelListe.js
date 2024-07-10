@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FormGroup, Input, Label, Badge, Spinner, Button } from "reactstrap";
+import { FormGroup, Input, Label, Badge, Spinner } from "reactstrap";
 import axios from "axios";
 
 export default function PersonelListe({
@@ -11,7 +11,6 @@ export default function PersonelListe({
   const [personeller, setPersoneller] = useState([]);
   const [filteredPersoneller, setFilteredPersoneller] = useState([]);
   const [loadSpinner, setLoadSpinner] = useState(false);
-  const [selectedUnvan, setSelectedUnvan] = useState(0);
 
   useEffect(() => {
     if (selectedKurum)
@@ -48,8 +47,6 @@ export default function PersonelListe({
   };
 
   const handleUnvanChange = (e) => {
-    setSelectedUnvan(e.target.value);
-
     if (e.target.value === "0") {
       setFilteredPersoneller(personeller);
     } else {
