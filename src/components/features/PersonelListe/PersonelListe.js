@@ -11,6 +11,7 @@ export default function PersonelListe({
   const [personeller, setPersoneller] = useState([]);
   const [filteredPersoneller, setFilteredPersoneller] = useState([]);
   const [loadSpinner, setLoadSpinner] = useState(false);
+  const [selectedUnvan, setSelectedUnvan] = useState("0");
 
   useEffect(() => {
     if (selectedKurum)
@@ -47,6 +48,7 @@ export default function PersonelListe({
   };
 
   const handleUnvanChange = (e) => {
+    setSelectedUnvan(e.target.value);
     if (e.target.value === "0") {
       setFilteredPersoneller(personeller);
     } else {
@@ -54,6 +56,17 @@ export default function PersonelListe({
         (personel) => personel.title.kind === e.target.value
       );
       setFilteredPersoneller(tempPersoneller);
+    }
+  };
+
+  const handleDurusmaKatibiChange = (e) => {
+    if (e.target.checked) {
+      let tempPersoneller = personeller.filter(
+        (personel) => personel.durusmaKatibiMi === true
+      );
+      setFilteredPersoneller(tempPersoneller);
+    } else {
+      setFilteredPersoneller(personeller);
     }
   };
 
@@ -84,6 +97,14 @@ export default function PersonelListe({
             ))}
           </Input>
         </FormGroup>
+        {selectedUnvan === "zabitkatibi" && (
+          <FormGroup>
+            <Label check>
+              <Input onClick={handleDurusmaKatibiChange} type="checkbox" />
+              Duruşma Katibi
+            </Label>
+          </FormGroup>
+        )}
       </div>
       <hr />
       <div>
@@ -108,7 +129,15 @@ export default function PersonelListe({
                 <tr key={personel._id}>
                   <td>{personel.sicil}</td>
                   <td>{personel.ad + " " + personel.soyad}</td>
-                  <td>{personel.title.name}</td>
+                  <td>
+                    <Badge color="danger">{personel.title.name}</Badge>
+                   {" "}
+                    {personel.durusmaKatibiMi && (
+                      <Badge color="warning" className="ml-1">
+                        Duruşma
+                      </Badge>
+                    )}
+                  </td>
                   <td>{personel.birimID.name}</td>
                   <td>
                     <Badge
