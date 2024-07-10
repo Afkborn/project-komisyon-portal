@@ -164,7 +164,12 @@ export default function Dashboard() {
           />
         );
       case 6:
-        return <PersonelOnLeave />;
+        return (
+          <PersonelOnLeave
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
       case 7:
         return <UnitMissingClerk />;
       case 8:
@@ -255,7 +260,6 @@ export default function Dashboard() {
             >
               Tüm Personel Listesi
             </ListGroupItem>
-
 
             <ListGroupItem
               key={2}
