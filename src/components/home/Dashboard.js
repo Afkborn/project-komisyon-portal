@@ -82,7 +82,9 @@ export default function Dashboard() {
     setUnvanlar([]);
     axios(GET_titles(token))
       .then((result) => {
-        setUnvanlar(result.data.titleList);
+        let unvanlar = result.data.titleList;
+        unvanlar.sort((a, b) => a.oncelikSirasi - b.oncelikSirasi);
+        setUnvanlar(unvanlar);
         console.log(result.data.titleList);
       })
       .catch((error) => {

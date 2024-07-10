@@ -125,6 +125,10 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         <br />
         Ünvanlar tüm kurumlar için geçerli olup, kurum bazında ünvan tanımlaması
         yapılamaz.
+        <br/>
+        Ünvanlarda bulunan ünvan sırası, personel listesi ekranında sıralama yaparken
+        kullanılır. Öncelik sırası küçük olan ünvanlar, personel listesinde daha üst
+        sırada gösterilir. En küçük öncelik sırası 1'dir.
       </span>
 
       <hr />
@@ -146,7 +150,9 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
           <thead>
             <tr>
               <th>Ünvan Adı</th>
+              <th>Ünvan Sırası</th>
               <th>İşlemler</th>
+
             </tr>
           </thead>
           <tbody>
@@ -154,6 +160,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
               return (
                 <tr key={unvan._id}>
                   <td>{unvan.name}</td>
+                  <td>{unvan.oncelikSirasi}</td>
                   <td>
                     <Button
                       onClick={() => handleButtonEditUnvan(unvan)}
