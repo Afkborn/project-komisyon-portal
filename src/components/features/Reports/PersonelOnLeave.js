@@ -46,7 +46,14 @@ export default function PersonelOnLeave({
 
     axios(configuration)
       .then((response) => {
-        setPersonelList(response.data.izinliPersonelList);
+        let izinliPersonelList = response.data.izinliPersonelList;
+
+        // sort unvan.oncelikSirasi
+        izinliPersonelList.sort((a, b) => {
+          return a.unvan.oncelikSirasi - b.unvan.oncelikSirasi;
+        });
+
+        setPersonelList(izinliPersonelList);
         setAramaYapildiMi(true);
       })
       .catch((error) => {
@@ -154,7 +161,7 @@ export default function PersonelOnLeave({
                   personelList.map((personel) => (
                     <tr key={personel._id}>
                       <td>{personel.sicil}</td>
-                      <td>{personel.unvan}</td>
+                      <td>{personel.unvan.name}</td>
                       <td>
                         {personel.ad} {personel.soyad}{" "}
                       </td>
