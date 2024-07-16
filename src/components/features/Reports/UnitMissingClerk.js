@@ -27,6 +27,7 @@ export default function UnitMissingClerk({ token }) {
           console.log(error);
         });
     }
+    // eslint-disable-next-line
   }, [token]);
 
   const handleGetRapor = (e) => {
