@@ -27,17 +27,21 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
                 <Badge color="info" className="me-2">
                   {kurum.id}
                 </Badge>
-                {kurum.name}
+                {kurum.name} {kurum.status === false && "(Pasif)"}
 
                 <Button
                   className="float-end"
                   onClick={() => setSelectedKurum(kurum)}
                   color="success"
-                  disabled={selectedKurum && selectedKurum.id === kurum.id}
+                  disabled={
+                    (selectedKurum && selectedKurum.id === kurum.id) ||
+                    kurum.status === false
+                  }
                 >
                   {selectedKurum && selectedKurum.id === kurum.id
                     ? "Seçili"
                     : "Seç"}
+                    
                 </Button>
               </ListGroupItemHeading>
             </ListGroupItem>

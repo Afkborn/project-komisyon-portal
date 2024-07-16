@@ -113,6 +113,7 @@ export default function PersonelDetay({
             soyad: response.data.person.soyad,
             durusmaKatibiMi: response.data.person.durusmaKatibiMi,
           });
+          alertify.success("Personel bilgileri güncellendi.");
         })
         .catch((error) => {
           console.log(error);

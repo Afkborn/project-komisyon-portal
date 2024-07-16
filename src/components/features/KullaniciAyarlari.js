@@ -4,7 +4,7 @@ import axios from "axios";
 import Cookies from "universal-cookie";
 import alertify from "alertifyjs";
 
-export default function KullaniciAyarlari({ user, token }) {
+export default function KullaniciAyarlari({ user, token, getUser }) {
   const cookies = new Cookies();
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -87,11 +87,11 @@ export default function KullaniciAyarlari({ user, token }) {
         phoneNumber: updateUser.phoneNumber,
       },
     };
-
     axios(configuration)
       .then((response) => {
-        console.log(response.data);
         alertify.success("Bilgiler başarıyla güncellendi");
+        getUser();
+
       })
       .catch((error) => {
         alertify.error("Bilgiler güncellenemedi");

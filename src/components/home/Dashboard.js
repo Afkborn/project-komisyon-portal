@@ -174,9 +174,9 @@ export default function Dashboard() {
           />
         );
       case 7:
-        return <UnitMissingClerk />;
+        return <UnitMissingClerk token={token} />;
       case 8:
-        return <KullaniciAyarlari user={user} token={token} />;
+        return <KullaniciAyarlari user={user} token={token} getUser={getUser} />;
       case 9:
         return (
           <PersonelListe

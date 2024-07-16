@@ -59,8 +59,8 @@ export default function PersonelOnLeave({
     <div>
       <h3>Rapor - İzinde Olan Personel</h3>
       <span>
-        Bu rapor sayesinde seçili olan kurumda tarih bazlı veya güncel olarak izinde olan
-        personelleri listeyebilir, excel veya pdf formatında dışa
+        Bu rapor sayesinde seçili olan kurumda tarih bazlı veya güncel olarak
+        izinde olan personelleri listeyebilir, excel veya pdf formatında dışa
         aktarabilirsiniz.
       </span>
 
@@ -176,6 +176,24 @@ export default function PersonelOnLeave({
                   ))}
               </tbody>
             </table>
+            <Button
+              disabled
+              className="m-3"
+              size="lg"
+              id="exportExcel"
+              type="submit"
+            >
+              Excel'e Aktar
+            </Button>
+            <Button
+              disabled
+              className="m-3"
+              size="lg"
+              id="exportPdf"
+              type="submit"
+            >
+              Pdf'e Aktar
+            </Button>
           </div>
         )}
       </div>
