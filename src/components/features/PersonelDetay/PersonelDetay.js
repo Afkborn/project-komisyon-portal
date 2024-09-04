@@ -84,6 +84,17 @@ export default function PersonelDetay({
     setSearchBy(e.target.value);
   };
 
+  const updatedPersonelAttributes = (updatedPersonel) => {
+    return {
+      ad: updatedPersonel.ad,
+      soyad: updatedPersonel.soyad,
+      goreveBaslamaTarihi: updatedPersonel.goreveBaslamaTarihi.split("T")[0],
+      durusmaKatibiMi: updatedPersonel.durusmaKatibiMi,
+      description: updatedPersonel.description,
+      level: updatedPersonel.level,
+    };
+  };
+
   const refreshPersonel = (afterDelete = false) => {
     if (afterDelete) {
       setPersonel(null);
@@ -106,13 +117,7 @@ export default function PersonelDetay({
           );
           setPersonelKurum(kurum);
 
-          setUpdatedPersonel({
-            goreveBaslamaTarihi:
-              response.data.person.goreveBaslamaTarihi.split("T")[0],
-            ad: response.data.person.ad,
-            soyad: response.data.person.soyad,
-            durusmaKatibiMi: response.data.person.durusmaKatibiMi,
-          });
+          setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
           alertify.success("Personel bilgileri güncellendi.");
         })
         .catch((error) => {
@@ -180,13 +185,7 @@ export default function PersonelDetay({
         );
         setPersonelKurum(kurum);
 
-        setUpdatedPersonel({
-          goreveBaslamaTarihi:
-            response.data.person.goreveBaslamaTarihi.split("T")[0],
-          ad: response.data.person.ad,
-          soyad: response.data.person.soyad,
-          durusmaKatibiMi: response.data.person.durusmaKatibiMi,
-        });
+        setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         setLoadSpinner(false);
       })
       .catch((error) => {
@@ -234,12 +233,8 @@ export default function PersonelDetay({
           );
 
           setPersonelKurum(kurum);
-          setUpdatedPersonel({
-            goreveBaslamaTarihi: person.goreveBaslamaTarihi,
-            ad: person.ad,
-            soyad: person.soyad,
-            durusmaKatibiMi: person.durusmaKatibiMi,
-          });
+          console.log("oh yeh");
+          setUpdatedPersonel(updatedPersonelAttributes(person));
         }
       })
       .catch((error) => {
@@ -423,13 +418,7 @@ export default function PersonelDetay({
                             (kurum) => kurum.id === person.birimID.institutionID
                           );
                           setPersonelKurum(kurum);
-                          setUpdatedPersonel({
-                            goreveBaslamaTarihi:
-                              person.goreveBaslamaTarihi.split("T")[0],
-                            ad: person.ad,
-                            soyad: person.soyad,
-                            durusmaKatibiMi: person.durusmaKatibiMi,
-                          });
+                          setUpdatedPersonel(updatedPersonelAttributes(person));
                           setPersoneller([]);
                         }}
                       >
@@ -590,6 +579,30 @@ export default function PersonelDetay({
                 </Col>
               </Row>
             )}
+
+            <Row className="mt-2">
+              <Col>
+                <Label>Açıklama</Label>
+                <Input
+                  type="text"
+                  id="description"
+                  name="description"
+                  value={updatedPersonel.description}
+                  onChange={handleInputChange}
+                />
+              </Col>
+              <Col>
+                <Label>Seviye</Label>
+                <Input
+                  type="text"
+                  id="level"
+                  name="level"
+                  value={updatedPersonel.level}
+                  onChange={handleInputChange}
+                />
+              </Col>
+            </Row>
+
             <div className="mt-3">
               <h4>
                 İzinler{" "}

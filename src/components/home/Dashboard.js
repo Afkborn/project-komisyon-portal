@@ -22,6 +22,7 @@ import Kurum from "../features/Kurum";
 import PersonelOnLeave from "../features/Reports/PersonelOnLeave";
 import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
 import KullaniciAyarlari from "../features/KullaniciAyarlari";
+import PersonelSayi from "../features/PersonelSayi/PersonelSayi";
 
 import {
   GET_institutions,
@@ -176,7 +177,9 @@ export default function Dashboard() {
       case 7:
         return <UnitMissingClerk token={token} />;
       case 8:
-        return <KullaniciAyarlari user={user} token={token} getUser={getUser} />;
+        return (
+          <KullaniciAyarlari user={user} token={token} getUser={getUser} />
+        );
       case 9:
         return (
           <PersonelListe
@@ -184,6 +187,14 @@ export default function Dashboard() {
             token={token}
             showPersonelDetay={showPersonelDetay}
             unvanlar={unvanlar}
+          />
+        );
+      case 10:
+        return (
+          <PersonelSayi
+            selectedKurum={selectedKurum}
+            unvanlar={unvanlar}
+            token={token}
           />
         );
     }
@@ -285,6 +296,14 @@ export default function Dashboard() {
               active={selected === 3}
             >
               Personel Detay
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={10}
+              onClick={() => onClick_listGroupItem(10)}
+              active={selected === 10}
+            >
+              Personel Sayısı
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">

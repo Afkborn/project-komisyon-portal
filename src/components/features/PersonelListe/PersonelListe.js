@@ -120,6 +120,7 @@ export default function PersonelListe({
                 <th>Sicil No</th>
                 <th>Ad Soyad</th>
                 <th>Ünvan</th>
+                <th>Açıklama</th>
                 <th>Birim</th>
                 <th>İşlem</th>
               </tr>
@@ -138,6 +139,7 @@ export default function PersonelListe({
                       </Badge>
                     )}
                   </td>
+                  <td>{personel.description} {personel.level ? <Badge color="success">Lvl. {personel.level}</Badge> : ""}</td>
                   <td>{personel.birimID.name}</td>
                   <td>
                     <Badge

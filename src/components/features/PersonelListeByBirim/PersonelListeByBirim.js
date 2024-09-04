@@ -240,6 +240,7 @@ export default function PersonelListeByBirim({
                         <th>Adı</th>
                         <th>Soyadı</th>
                         <th>Göreve Başlama Tarihi</th>
+                        <th>Açıklama</th>
                         <th>Duruşma Ktp.</th>
                         <th>İzin?</th>
                         <th></th>
@@ -258,7 +259,7 @@ export default function PersonelListeByBirim({
                             {renderDate_GGAAYYYY(person.goreveBaslamaTarihi)} (
                             {calculateGorevSuresi(person.goreveBaslamaTarihi)})
                           </td>
-
+                          <td>{person.description} {person.level ? <Badge color="success">Lvl. {person.level}</Badge> : ""}</td>
                           <td>
                             {person.durusmaKatibiMi ? (
                               <Badge color="success">Evet</Badge>
