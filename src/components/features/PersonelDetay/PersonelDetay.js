@@ -493,14 +493,15 @@ export default function PersonelDetay({
               </Col>
             </Row>
             <Row className="mt-2">
-              {/* <Col>
-                <Label>Çalıştığı Kurum </Label>
+              <Col hidden>
+                <Label hidden>Çalıştığı Kurum </Label>
                 <Input
                   type="text"
                   value={personelKurum ? personelKurum.name : "-"}
                   disabled
+                  hidden
                 />
-              </Col> */}
+              </Col>
               <Col>
                 <Label>Çalıştığı Birim </Label>
                 <Input type="text" value={personel.birimID.name} disabled />
