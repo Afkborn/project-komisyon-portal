@@ -53,7 +53,8 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
       console.log("Personel sayısı getiriliyor");
       getPersonelSayisi();
     }
-  }, [selectedKurum]);
+    // eslint-disable-next-line
+  }, [selectedKurum, personelSayisi]);
 
   return (
     <div>
