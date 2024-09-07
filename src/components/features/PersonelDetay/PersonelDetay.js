@@ -493,17 +493,26 @@ export default function PersonelDetay({
               </Col>
             </Row>
             <Row className="mt-2">
-              <Col>
+              {/* <Col>
                 <Label>Çalıştığı Kurum </Label>
                 <Input
                   type="text"
                   value={personelKurum ? personelKurum.name : "-"}
                   disabled
                 />
-              </Col>
+              </Col> */}
               <Col>
                 <Label>Çalıştığı Birim </Label>
                 <Input type="text" value={personel.birimID.name} disabled />
+              </Col>
+
+              <Col>
+                <Label>Birimde Çalıştığı Süre</Label>
+                <Input
+                  type="text"
+                  value={calculateGorevSuresi(personel.birimeBaslamaTarihi)}
+                  disabled
+                />
               </Col>
 
               <Col>
