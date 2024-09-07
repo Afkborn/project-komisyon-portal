@@ -19,10 +19,16 @@ export default function PersonelCalistigiBirimGuncelleModal({
   personel,
   token,
   selectedKurum,
-  refreshPersonel
+  refreshPersonel,
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newCalistigiBirim, setNewCalistigiBirim] = useState(null);
+
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [detail, setDetail] = useState(null);
+
   const [birimler, setBirimler] = useState([]);
   const [tumBirimler, setTumBirimler] = useState([]);
 
@@ -95,15 +101,20 @@ export default function PersonelCalistigiBirimGuncelleModal({
     }
 
     const configuration = {
-      method: "PUT",
-      url: "api/persons/" + personel._id,
+      method: "POST",
+      url: "api/personunits/changeUnit",
       headers: {
         Authorization: `Bearer ${token}`,
       },
       data: {
-        birimID: newCalistigiBirim._id,
+        personID: personel._id,
+        unitID: personel.birimID._id,
+        endDate: endDate,
+        detail: detail,
+        newUnitID: newCalistigiBirim._id,
       },
     };
+
     axios(configuration)
       .then((result) => {
         alertify.success("Çalıştığı birim bilgisi güncellendi.");
@@ -117,19 +128,35 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
   return (
     <Modal isOpen={modal} toggle={toggle}>
+      {console.log(personel)}
       <ModalHeader toggle={toggle}>Çalıştığı Birimi Güncelle</ModalHeader>
       <ModalBody>
         <Form>
           {personel && (
-            <FormGroup>
-              <Label for="calistigiBirim">Çalıştığı Birim</Label>
-              <Input
-                id="calistigiBirim"
-                type="text"
-                value={personel.birimID.name}
-                disabled
-              />
-            </FormGroup>
+            <div>
+              <FormGroup>
+                <Label for="calistigiBirim">Şuan Çalıştığı Birim</Label>
+                <Input
+                  id="calistigiBirim"
+                  type="text"
+                  value={personel.birimID.name}
+                  disabled
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="calistigiBirimBaslangicTarihi">
+                  Birim Başlangıç Tarihi
+                </Label>
+                <Input
+                  id="calistigiBirimBaslangicTarihi"
+                  type="text"
+                  value={new Date(
+                    personel.birimeBaslamaTarihi
+                  ).toLocaleDateString()}
+                  disabled
+                />
+              </FormGroup>
+            </div>
           )}
 
           <FormGroup>
@@ -164,7 +191,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
             </Input>
           </FormGroup>
           <FormGroup>
-            <Label for="selectedBirim">Seçili Birim</Label>
+            <Label for="selectedBirim">Yeni Çalışacağı Birim*</Label>
             <Input
               id="selectedBirim"
               type="text"
@@ -172,6 +199,28 @@ export default function PersonelCalistigiBirimGuncelleModal({
               disabled
             />
           </FormGroup>
+
+          <FormGroup>
+            <Label for="endDate">Değişiklik Tarihi*</Label>
+            <Input
+              id="endDate"
+              name="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label for="detail">Gerekçe</Label>
+            <Input
+              id="detail"
+              type="text"
+              onChange={(e) => setDetail(e.target.value)}
+            />
+          </FormGroup>
+
+          <p>* Zorunlu alanlar</p>
         </Form>
       </ModalBody>
       <ModalFooter>

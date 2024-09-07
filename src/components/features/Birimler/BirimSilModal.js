@@ -12,8 +12,8 @@ function BirimSilModal({ modal, toggle, birim, token, getBirimler }) {
         getBirimler();
       })
       .catch((error) => {
-        console.error(error);
-        alertify.error("Birim silinirken bir hata oluştu.");
+        let errorMessage = error.response.data.message || "Birim silinirken bir hata oluştu.";
+        alertify.error(errorMessage);
       });
   };
 

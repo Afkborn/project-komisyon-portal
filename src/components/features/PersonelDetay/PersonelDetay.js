@@ -592,17 +592,20 @@ export default function PersonelDetay({
                 />
               </Col>
               <Col>
-                <Label>Seviye</Label>
+                <Label>Seviye (1 Çok İyi - 5 Çok Kötü)</Label>
                 <Input
-                  type="text"
+                  type="number"
                   id="level"
                   name="level"
                   value={updatedPersonel.level}
                   onChange={handleInputChange}
+                  min={1}
+                  max={5}
                 />
               </Col>
             </Row>
 
+            {/* İZİNLER */}
             <div className="mt-3">
               <h4>
                 İzinler{" "}
@@ -640,6 +643,46 @@ export default function PersonelDetay({
                           color="danger"
                           onClick={(e) => {
                             handleIzinDelete(izin);
+                          }}
+                        >
+                          Sil
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+
+            {/* ÇALIŞTIĞI BİRİMLER */}
+            <div className="mt-3">
+              <h4>Çalıştığı Birimler </h4>
+              <hr />
+              <Table>
+                <thead>
+                  <tr>
+                    <th>Birim Adı</th>
+                    <th>Birime Başlangıç Tarihi </th>
+                    <th>Birimden Ayrılış Tarihi </th>
+                    <th>Süre </th>
+                    <th>Gerekçe</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {personel.gecmisBirimler.map((birim) => (
+                    <tr key={birim._id}>
+                      <td>{birim.unitID.name}</td>
+                      <td>{birim.startDate.split("T")[0]}</td>
+                      <td>{birim.endDate.split("T")[0]}</td>
+                      <td>{calculateGorevSuresi(birim.startDate)}</td>
+                      <td>{birim.detail}</td>
+                      <td>
+                        <Button
+                          size="sm"
+                          color="danger"
+                          onClick={(e) => {
+                            // handleIzinDelete(izin);
                           }}
                         >
                           Sil

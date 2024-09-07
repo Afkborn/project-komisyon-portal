@@ -23,7 +23,7 @@ import PersonelOnLeave from "../features/Reports/PersonelOnLeave";
 import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
 import KullaniciAyarlari from "../features/KullaniciAyarlari";
 import PersonelSayi from "../features/PersonelSayi/PersonelSayi";
-
+import TumPersonelTablo from "../features/TumPersonelTablo/TumPersonelTablo";
 import {
   GET_institutions,
   GET_titles,
@@ -197,6 +197,8 @@ export default function Dashboard() {
             token={token}
           />
         );
+      case 11:
+        return <TumPersonelTablo selectedKurum={selectedKurum} token={token} />;
     }
   }
 
@@ -279,7 +281,15 @@ export default function Dashboard() {
               onClick={() => onClick_listGroupItem(9)}
               active={selected === 9}
             >
-              Tüm Personel Listesi
+              Tüm Personel (Liste)
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={11}
+              onClick={() => onClick_listGroupItem(11)}
+              active={selected === 11}
+            >
+              Tüm Personel (Tablo)
             </ListGroupItem>
 
             <ListGroupItem
