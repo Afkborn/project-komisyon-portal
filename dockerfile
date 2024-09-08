@@ -1,23 +1,13 @@
-# Base image
-FROM node:16
-
-# Working directory inside the container
+# Build aşaması
+FROM node:18 AS build
 WORKDIR /app
-
-# Dependencies kopyalama
-COPY package*.json ./
-
-# Dependencies yükleme
+COPY package.json package-lock.json ./
 RUN npm install
-
-# Tüm projeyi kopyalama
 COPY . .
-
-# Build işlemi
 RUN npm run build
 
-# Kullanılacak portu tanımlama
-EXPOSE 3000
-
-# React uygulamasını başlatma
-CMD ["npm", "start"]
+# Production aşaması
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
