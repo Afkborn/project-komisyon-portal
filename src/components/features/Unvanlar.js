@@ -75,7 +75,23 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       alert("Ünvan adı boş olamaz.");
       return;
     }
-    axios(POST_titles(newUnvanName, strToEng(newUnvanName), token , newUnvanOncelikSira))
+    if (
+      newUnvanOncelikSira === "" ||
+      newUnvanOncelikSira < 1 ||
+      newUnvanOncelikSira > 150
+    ) {
+      alert("Ünvan öncelik sırası 1-150 arasında olmalıdır.");
+      return;
+    }
+
+    axios(
+      POST_titles(
+        newUnvanName,
+        strToEng(newUnvanName),
+        token,
+        newUnvanOncelikSira
+      )
+    )
       .then(() => {
         alertify.success(`Ünvan ${newUnvanName} başarıyla eklendi.`);
         unvanEkleToggle();
@@ -88,7 +104,15 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   }
 
   function handleUpdate() {
-    console.log(updateSelectedUnvan)
+    if (
+      updateSelectedUnvan.oncelikSirasi === "" ||
+      updateSelectedUnvan.oncelikSirasi < 1 ||
+      updateSelectedUnvan.oncelikSirasi > 150
+    ) {
+      alert("Ünvan öncelik sırası 1-150 arasında olmalıdır.");
+      return;
+    }
+
     if (updateSelectedUnvan.name === "") {
       alert("Ünvan adı boş olamaz.");
       return;
@@ -100,7 +124,13 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       kind = strToEng(updateSelectedUnvan.name);
     }
     axios(
-      PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, updateSelectedUnvan.oncelikSirasi, token)
+      PUT_titles(
+        updateSelectedUnvan._id,
+        updateSelectedUnvan.name,
+        kind,
+        updateSelectedUnvan.oncelikSirasi,
+        token
+      )
     )
       .then(() => {
         alertify.success(
@@ -126,10 +156,11 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         <br />
         Ünvanlar tüm kurumlar için geçerli olup, kurum bazında ünvan tanımlaması
         yapılamaz.
-        <br/>
-        Ünvanlarda bulunan ünvan sırası, personel listesi ekranında sıralama yaparken
-        kullanılır. Öncelik sırası küçük olan ünvanlar, personel listesinde daha üst
-        sırada gösterilir. En küçük öncelik sırası 1'dir.
+        <br />
+        Ünvanlarda bulunan ünvan sırası, personel listesi ekranında sıralama
+        yaparken kullanılır. Öncelik sırası küçük olan ünvanlar, personel
+        listesinde daha üst sırada gösterilir. En küçük öncelik sırası 1'dir, en
+        büyük öncelik sırası 150'dir.
       </span>
 
       <hr />
@@ -153,7 +184,6 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
               <th>Ünvan Adı</th>
               <th>Ünvan Sırası</th>
               <th>İşlemler</th>
-
             </tr>
           </thead>
           <tbody>
@@ -187,9 +217,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       <Modal isOpen={showUnvanSilModal} toggle={unvanSilToggle}>
         <ModalHeader toggle={unvanSilToggle}>Ünvan Sil</ModalHeader>
         <ModalBody>
-          <p>
-            Ünvanı silmek istediğinize emin misiniz? 
-          </p>
+          <p>Ünvanı silmek istediğinize emin misiniz?</p>
           <p>Ünvan Adı: {deleteSelectedUnvan && deleteSelectedUnvan.name}</p>
         </ModalBody>
         <ModalFooter>
@@ -215,7 +243,9 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
 
           <p className="mt-1">Ünvan Öncelik Sırası: </p>
           <Input
-            type="text"
+            type="number"
+            min={1}
+            max={150}
             onChange={(e) => {
               setNewUnvanOncelikSira(e.target.value);
             }}
@@ -257,6 +287,8 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
             defaultValue={
               updateSelectedUnvan && updateSelectedUnvan.oncelikSirasi
             }
+            min={1}
+            max={150}
             onChange={(e) => {
               setUpdateSelectedUnvan({
                 ...updateSelectedUnvan,
