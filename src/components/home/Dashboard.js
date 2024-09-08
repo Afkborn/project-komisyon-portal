@@ -24,6 +24,8 @@ import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
 import KullaniciAyarlari from "../features/KullaniciAyarlari";
 import PersonelSayi from "../features/PersonelSayi/PersonelSayi";
 import TumPersonelTablo from "../features/TumPersonelTablo/TumPersonelTablo";
+import PersonelAktar from "../features/Aktarim/PersonelAktar";
+
 import {
   GET_institutions,
   GET_titles,
@@ -199,6 +201,14 @@ export default function Dashboard() {
         );
       case 11:
         return <TumPersonelTablo selectedKurum={selectedKurum} token={token} />;
+      case 12:
+        return (
+          <PersonelAktar
+            selectedKurum={selectedKurum}
+            token={token}
+            unvanlar={unvanlar}
+          />
+        );
     }
   }
 
@@ -334,6 +344,18 @@ export default function Dashboard() {
               active={selected === 7}
             >
               Eksik Katibi Olan Birimler
+            </ListGroupItem>
+
+            <ListGroupItemHeading className="mt-3 mb-3 text-center">
+              Aktarım
+            </ListGroupItemHeading>
+
+            <ListGroupItem
+              key={12}
+              onClick={() => onClick_listGroupItem(12)}
+              active={selected === 12}
+            >
+              Personel Aktar
             </ListGroupItem>
           </ListGroup>
         </Col>
