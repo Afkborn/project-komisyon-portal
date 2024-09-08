@@ -88,6 +88,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
   }
 
   function handleUpdate() {
+    console.log(updateSelectedUnvan)
     if (updateSelectedUnvan.name === "") {
       alert("Ünvan adı boş olamaz.");
       return;
@@ -99,7 +100,7 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
       kind = strToEng(updateSelectedUnvan.name);
     }
     axios(
-      PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, token)
+      PUT_titles(updateSelectedUnvan._id, updateSelectedUnvan.name, kind, updateSelectedUnvan.oncelikSirasi, token)
     )
       .then(() => {
         alertify.success(

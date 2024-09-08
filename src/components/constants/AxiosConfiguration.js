@@ -39,7 +39,7 @@ const POST_titles = (newUnvanName, kind, token, newUnvanOncelikSira,  deletable 
   };
 };
 
-const PUT_titles = (_id, newUnvanName, kind, token, deletable = true) => {
+const PUT_titles = (_id, newUnvanName, kind, newOncelikSirasi, token,  deletable = true) => {
   return {
     method: "PUT",
     url: "api/titles/" + _id,
@@ -48,6 +48,7 @@ const PUT_titles = (_id, newUnvanName, kind, token, deletable = true) => {
     },
     data: {
       name: newUnvanName,
+      oncelikSirasi : newOncelikSirasi,
       kind: kind,
       deletable,
     },
