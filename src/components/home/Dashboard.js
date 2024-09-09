@@ -131,7 +131,7 @@ export default function Dashboard() {
   function renderScreen() {
     switch (selected) {
       default:
-        return <Welcome />;
+        return <Welcome user={user} token={token}  />;
       case 1:
         return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:

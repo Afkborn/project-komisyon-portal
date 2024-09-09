@@ -74,6 +74,32 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
       });
   };
 
+  const deleteUser = () => {
+    const configuration = {
+      method: "DELETE",
+      url: "api/users",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        password: password,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        alert("Kullanıcı başarıyla silindi, lütfen tekrar giriş yapınız");
+        cookies.remove("TOKEN");
+        window.location.reload();
+      })
+      .catch((error) => {
+        let errorMessage =
+          error.response.data.message ||
+          "Kullanıcı silinirken bir hata oluştu.";
+        alert(errorMessage);
+      });
+  };
+
   const updateUserDetail = (e) => {
     e.preventDefault();
     const configuration = {
@@ -91,7 +117,6 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
       .then((response) => {
         alertify.success("Bilgiler başarıyla güncellendi");
         getUser();
-
       })
       .catch((error) => {
         alertify.error("Bilgiler güncellenemedi");
@@ -153,7 +178,8 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
             Bilgileri Güncelle
           </Button>
         </Form>
-        <Form className="mt-2">
+        <hr></hr>
+        <Form className="mt-5">
           <h3>Şifre Değiştir</h3>
           <FormGroup>
             <Label for="password">Mevcut Şifre</Label>
@@ -185,6 +211,23 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
           </FormGroup>
           <Button onClick={changeUserPassword} color="success">
             Şifre Değiştir
+          </Button>
+        </Form>
+        <hr></hr>
+        <Form className="mt-5">
+          <h3>Kullanıcı Sil</h3>
+          <FormGroup>
+            <Label for="password">Mevcut Şifre</Label>
+            <Input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Şifre"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </FormGroup>
+          <Button onClick={deleteUser} color="danger">
+            Kullanıcı SİL
           </Button>
         </Form>
       </div>
