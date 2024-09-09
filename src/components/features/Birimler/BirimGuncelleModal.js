@@ -58,6 +58,7 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
     <div>
       <Modal isOpen={modal} toggle={toggle}>
         <ModalHeader toggle={toggle}>Birim Güncelle</ModalHeader>
+
         <ModalBody>
           {birim && (
             <Form>
@@ -66,13 +67,13 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
                   Birim Tipi : {birim.unitType.name}
                 </Label>
                 <br />
-                <Label for="unitTypeType">
+                <Label for="unitTypeType"  hidden={!birim.isMahkeme}>
                   Birim Tipi : {birim.unitType.unitType}
                 </Label>
               </FormGroup>
 
               {/* sıra */}
-              <FormGroup>
+              <FormGroup hidden={!birim.isMahkeme}>
                 <Label for="sira">Sıra</Label>
                 <Input
                   type="number"
@@ -99,7 +100,7 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
               </FormGroup>
 
               {/*  minumum katip sayısı */}
-              <FormGroup>
+              <FormGroup  hidden={!birim.isMahkeme}>
                 <Label for="minKatipSayi">Gerekli Minimum Katip Sayısı</Label>
                 <Input
                   type="number"
@@ -122,13 +123,13 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
                   value={updatedBirim.status}
                   onChange={handleInputChange}
                 >
-                  <option value={true}>Mahkeme İşletimde</option>
-                  <option value={false}>Mahkeme Kapalı</option>
+                  <option value={true}>Aktif</option>
+                  <option value={false}>Pasif</option>
                 </Input>
               </FormGroup>
 
               {/* heyet sayısı */}
-              <FormGroup>
+              <FormGroup  hidden={!birim.isMahkeme}>
                 <Label for="heyetSayi">Heyet Sayısı</Label>
                 <Input
                   type="select"

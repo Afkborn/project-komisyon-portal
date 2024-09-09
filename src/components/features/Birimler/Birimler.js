@@ -127,8 +127,14 @@ export default function Birimler({ token, selectedKurum }) {
     setShowBirimSilModal(true);
   }
 
-  function handleBirimUpdate(birim) {
-    setUpdateSelectedBirim(birim);
+  function handleBirimUpdate(birim, isMahkeme = true) {
+    // birim içinde isMahkeme adında bir property oluştur
+    // ve bu property true ise mahkeme birimi false ise savcilik ve genel birim olacak
+    // bu propertyi kullanarak birim güncelleme işlemlerini
+    // ayırmamız gerekiyor
+    const updatedBirim = { ...birim, isMahkeme };
+
+    setUpdateSelectedBirim(updatedBirim); // güncellenmiş birimi set ediyoruz
     setShowBirimGuncelleModal(true);
   }
 
@@ -172,12 +178,38 @@ export default function Birimler({ token, selectedKurum }) {
     );
   }
 
-  function renderSavcilikVeDiger(birim) {
+  function renderSavcilikVeGenel(birim) {
     return (
       <tr className={birim.status ? "" : "table-danger"} key={birim.id}>
         <td>{birim.unitType.name}</td>
         <td>{birim.name}</td>
-        <td>{birim.status ? "Aktif" : "Pasif"}</td>
+        <td>
+          {birim.status ? (
+            <Badge color="success">Aktif</Badge>
+          ) : (
+            <Badge color="danger">Pasif</Badge>
+          )}
+        </td>
+        <td>
+          <img
+            src={updateSvg}
+            style={clikableStyle}
+            alt="update"
+            onClick={() => {
+              handleBirimUpdate(birim, false);
+            }}
+          />
+
+          <img
+            className="ms-2"
+            src={copSepeti}
+            style={clikableStyle}
+            alt="delete"
+            onClick={() => {
+              handleBirimDelete(birim);
+            }}
+          />
+        </td>
       </tr>
     );
   }
@@ -188,7 +220,7 @@ export default function Birimler({ token, selectedKurum }) {
         <div>
           <div className="m-3">
             <FormGroup>
-              <Label for="radioCeza">Birim Tipi: </Label>{" "}
+              <Label for="radioCeza">Birim Alan: </Label>{" "}
               <Input
                 className="ms-2"
                 type="radio"
@@ -251,8 +283,35 @@ export default function Birimler({ token, selectedKurum }) {
           </TabPane>
         </div>
       );
+    } else if (selectedTypeId === 1) {
+      // SAVCILIK RENDER
+      return (
+        <TabPane tabId={type.id} key={type.id}>
+          <Row>
+            <Col sm="12">
+              <Table hover>
+                <thead>
+                  <tr>
+                    <th>Birim Tipi</th>
+                    <th>Adı</th>
+                    <th>Durum</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {birimler.map((birim) =>
+                    birim.unitType.institutionTypeId === selectedTypeId
+                      ? renderSavcilikVeGenel(birim)
+                      : null
+                  )}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </TabPane>
+      );
     } else {
-      // SAVCILIK VE DİĞER RENDDERİ
+      //  GENEL RENDER
       return (
         <TabPane tabId={type.id} key={type.id}>
           <Row>
@@ -268,7 +327,7 @@ export default function Birimler({ token, selectedKurum }) {
                 <tbody>
                   {birimler.map((birim) =>
                     birim.unitType.institutionTypeId === selectedTypeId
-                      ? renderSavcilikVeDiger(birim)
+                      ? renderSavcilikVeGenel(birim)
                       : null
                   )}
                 </tbody>

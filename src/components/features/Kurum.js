@@ -28,7 +28,6 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
                   {kurum.id}
                 </Badge>
                 {kurum.name} {kurum.status === false && "(Pasif)"}
-
                 <Button
                   className="float-end"
                   onClick={() => setSelectedKurum(kurum)}
@@ -41,9 +40,16 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
                   {selectedKurum && selectedKurum.id === kurum.id
                     ? "Seçili"
                     : "Seç"}
-                    
                 </Button>
               </ListGroupItemHeading>
+
+              <ListGroup flush>
+                {kurum.types.map((altBirim) => (
+                  <ListGroupItem key={altBirim.id}>
+                    {altBirim.name}
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
             </ListGroupItem>
           ))}
         </ListGroup>
