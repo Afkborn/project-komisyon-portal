@@ -29,6 +29,7 @@ function PersonelEkleModal({
     soyad: "",
     goreveBaslamaTarihi: "",
     durusmaKatibiMi: "",
+    birimeBaslamaTarihi: new Date().toISOString().substr(0, 10),
   });
 
   const handleInputChange = (e) => {

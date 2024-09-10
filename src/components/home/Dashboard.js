@@ -103,7 +103,9 @@ export default function Dashboard() {
         setErrorMessage("");
       })
       .catch((error) => {
-        console.log(error);
+        // delete cookie if user not found
+        cookies.remove("TOKEN");
+        window.location.href = "/login";
         const message = error.response.data.message || "Hata!";
         setError(true);
         setErrorMessage(message);
@@ -318,13 +320,7 @@ export default function Dashboard() {
               Personel Detay
             </ListGroupItem>
 
-            <ListGroupItem
-              key={10}
-              onClick={() => onClick_listGroupItem(10)}
-              active={selected === 10}
-            >
-              Personel Sayısı
-            </ListGroupItem>
+
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
               Raporlar
@@ -344,6 +340,14 @@ export default function Dashboard() {
               active={selected === 7}
             >
               Eksik Katibi Olan Birimler
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={10}
+              onClick={() => onClick_listGroupItem(10)}
+              active={selected === 10}
+            >
+              Personel Sayısı
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">

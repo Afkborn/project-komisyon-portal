@@ -123,13 +123,15 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
     } else {
       kind = strToEng(updateSelectedUnvan.name);
     }
+    console.log(updateSelectedUnvan);
     axios(
       PUT_titles(
         updateSelectedUnvan._id,
         updateSelectedUnvan.name,
         kind,
         updateSelectedUnvan.oncelikSirasi,
-        token
+        token,
+        updateSelectedUnvan.deletable
       )
     )
       .then(() => {
