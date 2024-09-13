@@ -38,7 +38,8 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
     setEksikKatibiOlanBirimler([]);
     let configuration = {
       method: "GET",
-      url: "api/reports/eksikKatibiOlanBirimler",
+      url:
+        "api/reports/eksikKatibiOlanBirimler?institutionId=" + selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
       },
