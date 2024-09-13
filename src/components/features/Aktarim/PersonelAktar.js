@@ -71,6 +71,8 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
     if (ad === "" || soyad === "") {
       throw new Error("ADSOYAD boş olamaz.");
     }
+    
+    // bu hepsinin başındaki ESKİŞEHİR yazdığı için.
     // bölüm'ü boşluğa böl, ilkinden sonrasını al
     let bolum = (personel.S_BRM_BOLUMAD = personel.S_BRM_BOLUMAD.split(" ")
       .slice(1)

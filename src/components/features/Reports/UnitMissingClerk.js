@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Badge, Spinner, Label, FormGroup, Input } from "reactstrap";
 import axios from "axios";
 
-export default function UnitMissingClerk({ token }) {
+export default function UnitMissingClerk({ token, selectedKurum }) {
   const [aramaYapilacakBirimler, setAramaYapilacakBirimler] = useState([]);
   const [eksikKatibiOlanBirimler, setEksikKatibiOlanBirimler] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +11,9 @@ export default function UnitMissingClerk({ token }) {
     if (aramaYapilacakBirimler.length === 0) {
       const configuration = {
         method: "GET",
-        url: "api/reports/eksikKatipAramasiYapilacakBirimler",
+        url:
+          "api/reports/eksikKatipAramasiYapilacakBirimler?institutionId=" +
+          selectedKurum.id,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,7 +102,7 @@ export default function UnitMissingClerk({ token }) {
 
         {isLoading && (
           <div>
-            <Spinner color="primary" /> {" "}
+            <Spinner color="primary" />{" "}
             <span>Rapor yükleniyor, bu işlem biraz zaman alabilir.</span>
           </div>
         )}
