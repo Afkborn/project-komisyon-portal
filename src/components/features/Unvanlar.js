@@ -65,8 +65,9 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         updateUnvanlar();
       })
       .catch((error) => {
-        console.error(error);
-        alertify.error("Ünvan silinirken bir hata oluştu.");
+        let errorMessage = error.response.data.message || "Bir hata oluştu.";
+        console.error(errorMessage);
+        alertify.error(errorMessage);
       });
   }
 
@@ -98,8 +99,9 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         updateUnvanlar();
       })
       .catch((error) => {
-        console.error(error);
-        alertify.error("Ünvan eklenerken bir hata oluştu.");
+        let errorMessage = error.response.data.message || "Bir hata oluştu.";
+        console.error(errorMessage);
+        alertify.error(errorMessage);
       });
   }
 
@@ -142,8 +144,11 @@ export default function Unvanlar({ unvanlar, token, updateUnvanlar }) {
         updateUnvanlar();
       })
       .catch((error) => {
-        console.error(error);
-        alertify.error("Ünvan güncellenirken bir hata oluştu.");
+        let errorMessage =
+          error.response.data.message ||
+          "Ünvan güncellenirken bir hata oluştu.";
+        console.error(errorMessage);
+        alertify.error(errorMessage);
       });
   }
 

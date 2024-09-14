@@ -5,6 +5,7 @@ import {
   MDBRow,
   MDBCol,
   MDBInput,
+  MDBCheckbox,
 } from "mdb-react-ui-kit";
 import { useHistory } from "react-router-dom";
 import { useEffect } from "react";
@@ -20,6 +21,7 @@ function Login() {
   const [sifre, setSifre] = useState("");
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useHistory();
 
@@ -50,18 +52,33 @@ function Login() {
     }
     return true;
   };
-
   const login = () => {
     if (!validateForm()) {
       return;
     }
+
     axios(configuration)
       .then((result) => {
-        const expDate = new Date(Date.now() + 604800000);
-        cookies.set("TOKEN", result.data.token, {
-          path: "/",
-          expires: expDate,
-        });
+        // status code 200 ise başarılı giriş
+        if (result.status !== 200) {
+          setError(true);
+          setErrorMessage("Hata! Daha sonra tekrar deneyiniz");
+          return;
+        }
+        if (rememberMe) {
+          // Beni hatırla seçiliyse token 7 gün
+          const expDate = new Date(Date.now() + 604800000);
+          cookies.set("TOKEN", result.data.token, {
+            path: "/",
+            expires: expDate,
+          });
+        } else {
+          // Beni hatırla seçili değilse, token oturum süresince geçerli olacak
+          cookies.set("TOKEN", result.data.token, {
+            path: "/",
+          });
+        }
+        // Başarılı giriş sonrası yönlendirme
         window.location.href = "/";
       })
       .catch((error) => {
@@ -69,7 +86,7 @@ function Login() {
           error.response.data.message || "Hata! Daha sonra tekrar deneyiniz";
         setError(true);
         setErrorMessage(message);
-        setSifre("");
+        setSifre(""); // Şifreyi temizle
       });
   };
 
@@ -114,6 +131,14 @@ function Login() {
                 }}
                 value={sifre}
                 type="password"
+              />
+
+              {/* oturum açık kalsın mı  */}
+              <MDBCheckbox
+                id="rememberMe"
+                label="Beni Hatırla"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
               />
 
               <div className="text-center pt-1 mb-5 pb-1">

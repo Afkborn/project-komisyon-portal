@@ -1,36 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { Button, Badge, Spinner, Label, FormGroup, Input } from "reactstrap";
 import axios from "axios";
+import alertify from "alertifyjs";
 
 export default function UnitMissingClerk({ token, selectedKurum }) {
   const [aramaYapilacakBirimler, setAramaYapilacakBirimler] = useState([]);
   const [eksikKatibiOlanBirimler, setEksikKatibiOlanBirimler] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const getEksikKatipAramasiYapilacakBirimler = () => {
+    const configuration = {
+      method: "GET",
+      url:
+        "api/reports/eksikKatipAramasiYapilacakBirimler?institutionId=" +
+        selectedKurum.id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        setAramaYapilacakBirimler(
+          response.data.eksikKatipKontrolEdilecekBirimler
+        );
+      })
+      .catch((error) => {
+        let errorMessage = error.response.data.message || "Bir hata oluştu.";
+        console.log(errorMessage);
+        alertify.error(errorMessage);
+      });
+  };
+
   useEffect(() => {
     if (!token) return;
     if (aramaYapilacakBirimler.length === 0) {
-      const configuration = {
-        method: "GET",
-        url:
-          "api/reports/eksikKatipAramasiYapilacakBirimler?institutionId=" +
-          selectedKurum.id,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      axios(configuration)
-        .then((response) => {
-          setAramaYapilacakBirimler(
-            response.data.eksikKatipKontrolEdilecekBirimler
-          );
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      getEksikKatipAramasiYapilacakBirimler();
     }
-    // eslint-disable-next-line
-  }, [token]);
+  }, [token, aramaYapilacakBirimler]);
 
   const handleGetRapor = (e) => {
     setIsLoading(true);

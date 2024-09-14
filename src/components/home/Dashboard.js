@@ -22,8 +22,8 @@ import Kurum from "../features/Kurum";
 import PersonelOnLeave from "../features/Reports/PersonelOnLeave";
 import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
 import KullaniciAyarlari from "../features/KullaniciAyarlari";
-import PersonelSayi from "../features/PersonelSayi/PersonelSayi";
-import TumPersonelTablo from "../features/TumPersonelTablo/TumPersonelTablo";
+import PersonelSayi from "../features/Reports/PersonelSayi";
+import TumPersonelTablo from "../features/Reports/TumPersonelTablo";
 import PersonelAktar from "../features/Aktarim/PersonelAktar";
 
 import {
@@ -88,7 +88,6 @@ export default function Dashboard() {
         let unvanlar = result.data.titleList;
         unvanlar.sort((a, b) => a.oncelikSirasi - b.oncelikSirasi);
         setUnvanlar(unvanlar);
-        console.log(result.data.titleList);
       })
       .catch((error) => {
         console.log(error);
@@ -133,7 +132,7 @@ export default function Dashboard() {
   function renderScreen() {
     switch (selected) {
       default:
-        return <Welcome user={user} token={token}  />;
+        return <Welcome user={user} token={token} />;
       case 1:
         return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:
@@ -179,7 +178,7 @@ export default function Dashboard() {
           />
         );
       case 7:
-        return <UnitMissingClerk token={token} selectedKurum={selectedKurum}  />;
+        return <UnitMissingClerk token={token} selectedKurum={selectedKurum} />;
       case 8:
         return (
           <KullaniciAyarlari user={user} token={token} getUser={getUser} />
@@ -293,15 +292,7 @@ export default function Dashboard() {
               onClick={() => onClick_listGroupItem(9)}
               active={selected === 9}
             >
-              Tüm Personel (Liste)
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={11}
-              onClick={() => onClick_listGroupItem(11)}
-              active={selected === 11}
-            >
-              Tüm Personel (Tablo)
+              Tüm Personel Listesi
             </ListGroupItem>
 
             <ListGroupItem
@@ -309,7 +300,7 @@ export default function Dashboard() {
               onClick={() => onClick_listGroupItem(2)}
               active={selected === 2}
             >
-              Personel Listele (Birim Seçerek)
+              Birim Personel Listele
             </ListGroupItem>
 
             <ListGroupItem
@@ -319,8 +310,6 @@ export default function Dashboard() {
             >
               Personel Detay
             </ListGroupItem>
-
-
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
               Raporlar
@@ -348,6 +337,14 @@ export default function Dashboard() {
               active={selected === 10}
             >
               Personel Sayısı
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={11}
+              onClick={() => onClick_listGroupItem(11)}
+              active={selected === 11}
+            >
+              Personel Tablosu
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
