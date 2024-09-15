@@ -1,21 +1,46 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FormGroup, Label, Input, Button, Spinner, Row, Col } from "reactstrap";
+import { FormGroup, Label, Input, Button, Spinner, Row, Col, Badge } from "reactstrap";
 import alertify from "alertifyjs";
 
-export default function TumPersonelTablo({ selectedKurum, token }) {
+export default function TumPersonelTablo({
+  selectedKurum,
+  token,
+  showPersonelDetay,
+}) {
   const [kontrolEdilecekBirimTipi, setKontrolEdilecekBirimTipi] = useState([]);
   const [kontrolEdilecekBirimler, setKontrolEdilecekBirimler] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
-
+  const [selectedUnitType, setSelectedUnitType] = useState("Ceza");
   const [mahkemeTablo, setMahkemeTablo] = useState([]);
 
-  const getKontrolEdilecekBirimler = async () => {
+  useEffect(() => {
+    if (selectedKurum) {
+      getKontrolEdilecekBirimler(selectedUnitType);
+    }
+     // eslint-disable-next-line 
+  }, [selectedKurum]);
+
+  const handleRadioFilterChange = (e) => {
+    const newFilterOption = e.target.value === "Ceza" ? "Ceza" : "Hukuk";
+    setSelectedUnitType(newFilterOption);
+
+    getKontrolEdilecekBirimler(newFilterOption);
+  };
+
+  const getKontrolEdilecekBirimler = async (queryUnitType) => {
+    setKontrolEdilecekBirimTipi([]);
+    setKontrolEdilecekBirimler([]);
+    setMahkemeTablo([]);
+
     const configuration = {
       method: "GET",
       url:
         "/api/reports/personelTabloKontrolEdilecekBirimler?institutionId=" +
-        selectedKurum.id,
+        selectedKurum.id +
+        "&queryUnitType=" +
+        queryUnitType,
+
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -37,7 +62,11 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
     setRaporGetiriliyorMu(true);
     const configuration = {
       method: "GET",
-      url: "/api/reports/personelTablo?institutionId=" + selectedKurum.id,
+      url:
+        "/api/reports/personelTablo?institutionId=" +
+        selectedKurum.id +
+        "&queryUnitType=" +
+        selectedUnitType,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -55,12 +84,6 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
       });
   };
 
-  useEffect(() => {
-    if (selectedKurum) {
-      getKontrolEdilecekBirimler();
-    }
-  }, [selectedKurum]);
-
   const birimTipStyle = {
     fontWeight: "bold",
 
@@ -73,6 +96,8 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
     alignItems: "center",
   };
 
+  const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
+
   function renderPersonelWithKind(personelTablo, kind) {
     const filteredPersonel = personelTablo.filter(
       (personel) => personel.title && personel.title.kind === kind
@@ -82,11 +107,27 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
       return <p>Tanımlı kişi bulunamadı</p>;
     }
 
-    return filteredPersonel.map((personel) => (
-      <h6 key={personel._id || personel.id}>
-        {personel.ad} {personel.soyad}
-      </h6>
-    ));
+    return filteredPersonel.map((personel) => {
+      const isHovered = hoveredPersonelId === (personel._id || personel.id);
+
+      const personelStyle = {
+        fontWeight: "normal",
+        cursor: "pointer",
+        textDecoration: isHovered ? "underline" : "none", // sadece mouse üzerinde ise altını çiz
+      };
+
+      return (
+        <h6
+          style={personelStyle}
+          key={personel._id || personel.id}
+          onClick={() => showPersonelDetay(personel)}
+          onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
+          onMouseLeave={() => setHoveredPersonelId(null)}
+        >
+          {personel.ad} {personel.soyad} <Badge color="secondary">{personel.level}</Badge>
+        </h6>
+      );
+    });
   }
 
   return (
@@ -99,6 +140,29 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
         <b> biraz zaman alabilir.</b>
       </span>
       <div>
+        <FormGroup>
+          <Label for="radioCeza">Birim Alan: </Label>{" "}
+          <Input
+            className="ms-2"
+            type="radio"
+            name="radio"
+            id="radioCeza"
+            value="Ceza"
+            checked={selectedUnitType === "Ceza"}
+            onChange={handleRadioFilterChange}
+          />
+          <Label for="radioCeza">Ceza</Label>{" "}
+          <Input
+            className="ms-2"
+            type="radio"
+            name="radio"
+            id="radioHukuk"
+            value="Hukuk"
+            checked={selectedUnitType === "Hukuk"}
+            onChange={handleRadioFilterChange}
+          />
+          <Label for="radioHukuk">Hukuk</Label>
+        </FormGroup>
         <FormGroup>
           <Label for="kontrolEdilecekBirimTip">
             Kontrol Edilecek Birim Tipleri
@@ -158,7 +222,7 @@ export default function TumPersonelTablo({ selectedKurum, token }) {
           )}
         </div>
 
-        <div hidden={raporGetiriliyorMu || mahkemeTablo.length==0}>
+        <div hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
           {kontrolEdilecekBirimTipi.length > 0 &&
             kontrolEdilecekBirimTipi.map((birimTip) => (
               <div key={birimTip.unitTypeID} className="mt-5 border ">

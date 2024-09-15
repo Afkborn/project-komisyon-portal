@@ -201,7 +201,7 @@ export default function Dashboard() {
           />
         );
       case 11:
-        return <TumPersonelTablo selectedKurum={selectedKurum} token={token} />;
+        return <TumPersonelTablo selectedKurum={selectedKurum} token={token} showPersonelDetay={showPersonelDetay} />;
       case 12:
         return (
           <PersonelAktar
