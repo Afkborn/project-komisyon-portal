@@ -15,9 +15,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
   const [excelData, setExcelData] = useState([]);
   const [headers, setHeaders] = useState([]);
   const [unitsNames, setUnitsNames] = useState([]);
-  const [yuklenecekPersonelListesi, setYuklenecekPersonelListesi] = useState(
-    []
-  );
+
   const [hataliListe, setHataliListe] = useState([]);
   const [aktarimBasladiMi, setAktarimBasladiMi] = useState(false);
   const izinVerilenHeaderler = [
@@ -33,6 +31,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
     if (unitsNames.length === 0 && selectedKurum) {
       fetchUnitsNames();
     }
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   const fetchUnitsNames = async () => {
@@ -71,7 +70,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
     if (ad === "" || soyad === "") {
       throw new Error("ADSOYAD boş olamaz.");
     }
-    
+
     // bu hepsinin başındaki ESKİŞEHİR yazdığı için.
     // bölüm'ü boşluğa böl, ilkinden sonrasını al
     let bolum = (personel.S_BRM_BOLUMAD = personel.S_BRM_BOLUMAD.split(" ")
@@ -283,7 +282,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
           </Button>
         </div>
 
-        <div hidden={hataliListe == 0} className="mt-2">
+        <div hidden={hataliListe === 0} className="mt-2">
           <h5>Aktarımı başarısız olan {hataliListe.length} kişi</h5>
           <Table striped size="sm">
             <thead>

@@ -140,6 +140,18 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
             />
           </FormGroup>
           <FormGroup>
+            <Label for="name">Yetki</Label>
+            <Input
+              type="text"
+              name="role"
+              id="role"
+              placeholder="Rol"
+              value={user.role}
+              disabled
+            />
+          </FormGroup>
+
+          <FormGroup>
             <Label for="username">Username</Label>
             <Input
               type="text"

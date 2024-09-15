@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FormGroup, Input, Label, Badge, Spinner } from "reactstrap";
 import axios from "axios";
-
-export default function PersonelListe({
+import alertify from "alertifyjs";
+export default function TumPersonelListe({
   selectedKurum,
   token,
   showPersonelDetay,
@@ -44,6 +44,7 @@ export default function PersonelListe({
       .catch((error) => {
         setLoadSpinner(false);
         console.log(error);
+        alertify.error("Bir hata oluştu");
       });
   };
 
@@ -72,7 +73,7 @@ export default function PersonelListe({
 
   return (
     <div>
-      <h3>Tüm Personel Listesi (Kurum Bazlı)</h3>
+      <h3>Tüm Personel Listesi</h3>
       <span>
         Seçili olan kuruma kayıtlı olan tüm personeller listelenmektedir.
         Personeller ünvan seçilerek filtreleme yapılabilir.
@@ -131,15 +132,21 @@ export default function PersonelListe({
                   <td>{personel.sicil}</td>
                   <td>{personel.ad + " " + personel.soyad}</td>
                   <td>
-                    <Badge color="danger">{personel.title.name}</Badge>
-                   {" "}
+                    <Badge color="danger">{personel.title.name}</Badge>{" "}
                     {personel.durusmaKatibiMi && (
                       <Badge color="warning" className="ml-1">
                         Duruşma
                       </Badge>
                     )}
                   </td>
-                  <td>{personel.description} {personel.level ? <Badge color="success">Lvl. {personel.level}</Badge> : ""}</td>
+                  <td>
+                    {personel.description}{" "}
+                    {personel.level ? (
+                      <Badge color="success">Lvl. {personel.level}</Badge>
+                    ) : (
+                      ""
+                    )}
+                  </td>
                   <td>{personel.birimID.name}</td>
                   <td>
                     <Badge

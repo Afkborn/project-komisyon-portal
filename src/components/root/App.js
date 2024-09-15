@@ -1,12 +1,16 @@
 import { MDBContainer } from "mdb-react-ui-kit";
 import { Switch, Route } from "react-router-dom"; // useLocation
 import NotFound from "../common/NotFound";
-// import Navigation from "../navi/Navigation";
-// import Footer from "../footer/Footer";
-import ProtectedRoutes from "../common/ProtectedRoutes";
-import Dashboard from "../home/Dashboard";
+import Unauthorized from "../common/Unauthorized";
+
+import KomisyonRoutes from "../common/KomisyonRoutes";
+import SantralRoutes from "../common/SantralRoutes";
+
+import Home from "./Home";
 import Login from "../login/Login";
 
+import KomisyonPortalDashboard from "../dashboards/KomisyonPortalDashboard";
+import SantralPortalDashboard from "../dashboards/SantralPortalDashboard";
 
 function App() {
   // const location = useLocation();
@@ -18,8 +22,19 @@ function App() {
       {/* {isPathValid && <Navigation />} */}
       <MDBContainer fluid>
         <Switch>
-          <ProtectedRoutes path="/" exact component={Dashboard} />
+          <Route path="/" exact component={Home} />
+          <KomisyonRoutes
+            path="/komisyon-portal"
+            exact
+            component={KomisyonPortalDashboard}
+          />
+          <SantralRoutes
+            path="/santral-portal"
+            exact
+            component={SantralPortalDashboard}
+          />
           <Route path="/login" component={Login} />
+          <Route path="/unauthorized" component={Unauthorized} />
           <Route component={NotFound} />
         </Switch>
       </MDBContainer>

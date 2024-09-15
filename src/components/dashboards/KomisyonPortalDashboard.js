@@ -12,19 +12,21 @@ import {
 
 import logo from "../../assets/logo300.png";
 
-import Welcome from "./Welcome";
-import Birimler from "../features/Birimler/Birimler";
-import PersonelListe from "../features/PersonelListe/PersonelListe";
-import PersonelListeByBirim from "../features/PersonelListeByBirim/PersonelListeByBirim";
-import PersonelDetay from "../features/PersonelDetay/PersonelDetay";
-import Unvanlar from "../features/Unvanlar";
-import Kurum from "../features/Kurum";
-import PersonelOnLeave from "../features/Reports/PersonelOnLeave";
-import UnitMissingClerk from "../features/Reports/UnitMissingClerk";
-import KullaniciAyarlari from "../features/KullaniciAyarlari";
-import PersonelSayi from "../features/Reports/PersonelSayi";
-import TumPersonelTablo from "../features/Reports/TumPersonelTablo";
-import PersonelAktar from "../features/Aktarim/PersonelAktar";
+import KomisyonPortalWelcome from "../komisyon-portal-features/KomisyonPortalWelcome";
+import Birimler from "../komisyon-portal-features/Birimler/Birimler";
+
+import TumPersonelListe from "../komisyon-portal-features/TumPersonelListe/TumPersonelListe";
+import PersonelListeByBirim from "../komisyon-portal-features/PersonelListeByBirim/PersonelListeByBirim";
+import PersonelDetay from "../komisyon-portal-features/PersonelDetay/PersonelDetay";
+import Unvanlar from "../komisyon-portal-features/Unvanlar";
+import Kurum from "../komisyon-portal-features/Kurum";
+import PersonelOnLeave from "../komisyon-portal-features/Reports/PersonelOnLeave";
+import UnitMissingClerk from "../komisyon-portal-features/Reports/UnitMissingClerk";
+import KullaniciAyarlari from "../komisyon-portal-features/KullaniciAyarlari";
+import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
+import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
+import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
+import KullaniciEkle from "../komisyon-portal-features/KullaniciEkle";
 
 import {
   GET_institutions,
@@ -34,7 +36,7 @@ import {
 import Cookies from "universal-cookie";
 import axios from "axios";
 
-export default function Dashboard() {
+export default function KomisyonPortalDashboard() {
   const [selectedPersonelID, setSelectedPersonelID] = useState(null);
 
   const [selected, setSelected] = useState(0);
@@ -132,7 +134,7 @@ export default function Dashboard() {
   function renderScreen() {
     switch (selected) {
       default:
-        return <Welcome user={user} token={token} />;
+        return <KomisyonPortalWelcome user={user} token={token} />;
       case 1:
         return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:
@@ -185,7 +187,7 @@ export default function Dashboard() {
         );
       case 9:
         return (
-          <PersonelListe
+          <TumPersonelListe
             selectedKurum={selectedKurum}
             token={token}
             showPersonelDetay={showPersonelDetay}
@@ -201,7 +203,13 @@ export default function Dashboard() {
           />
         );
       case 11:
-        return <TumPersonelTablo selectedKurum={selectedKurum} token={token} showPersonelDetay={showPersonelDetay} />;
+        return (
+          <TumPersonelTablo
+            selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
       case 12:
         return (
           <PersonelAktar
@@ -210,6 +218,9 @@ export default function Dashboard() {
             unvanlar={unvanlar}
           />
         );
+
+      case 13:
+        return <KullaniciEkle user={user} token={token} />;
     }
   }
 
@@ -253,6 +264,15 @@ export default function Dashboard() {
               active={selected === 8}
             >
               Hesap Ayarları
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={13}
+              onClick={() => onClick_listGroupItem(13)}
+              active={selected === 13}
+              hidden={user && user.role !== "admin"}
+            >
+              Kullanıcı Ekle
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 text-center">

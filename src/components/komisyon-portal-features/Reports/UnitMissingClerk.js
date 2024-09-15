@@ -37,6 +37,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
     if (aramaYapilacakBirimler.length === 0) {
       getEksikKatipAramasiYapilacakBirimler();
     }
+    // eslint-disable-next-line
   }, [token, aramaYapilacakBirimler]);
 
   const handleGetRapor = (e) => {
