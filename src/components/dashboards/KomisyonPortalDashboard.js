@@ -26,7 +26,7 @@ import KullaniciAyarlari from "../komisyon-portal-features/KullaniciAyarlari";
 import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
-import KullaniciEkle from "../komisyon-portal-features/KullaniciEkle";
+import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
 
 import {
   GET_institutions,
@@ -120,6 +120,9 @@ export default function KomisyonPortalDashboard() {
   const centerImage = {
     display: "flex",
     justifyContent: "center",
+
+    //clickable cursor
+    cursor: "pointer",
   };
 
   const showPersonelDetay = (person) => {
@@ -220,7 +223,7 @@ export default function KomisyonPortalDashboard() {
         );
 
       case 13:
-        return <KullaniciEkle user={user} token={token} />;
+        return <KomisyonPortalKullaniciYonetim user={user} token={token} />;
     }
   }
 
@@ -229,11 +232,15 @@ export default function KomisyonPortalDashboard() {
     window.location.href = "/login";
   }
 
+  function handleHome() {
+    window.location.href = "/";
+  }
+
   return (
     <Container className="mt-5" fluid>
       <Row>
         <Col xs="12" lg="2">
-          <div style={centerImage}>
+          <div style={centerImage} onClick={(e)=> handleHome()} >
             <img src={logo} style={{ width: "150px" }} alt="logo" />
           </div>
           <div className="mt-2">
@@ -272,7 +279,7 @@ export default function KomisyonPortalDashboard() {
               active={selected === 13}
               hidden={user && user.role !== "admin"}
             >
-              Kullanıcı Ekle
+              Portal Kullanıcı Yönetim
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 text-center">

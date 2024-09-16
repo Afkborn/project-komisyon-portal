@@ -25,8 +25,10 @@ export default function Home() {
   const token = cookies.get("TOKEN");
 
   function getUser() {
+    console.log("token", token);
     axios(GET_USER_DETAILS(token))
       .then((result) => {
+        console.log("result", result);
         setUser(result.data.user);
       })
       .catch((error) => {});
@@ -83,7 +85,6 @@ export default function Home() {
     display: "block",
     marginLeft: "auto",
     marginRight: "auto",
-    width: "50%",
   };
 
   const cardStyle = {
@@ -110,7 +111,9 @@ export default function Home() {
         </Navbar>
       </>
       <Container>
+        
         <div className="mt-5">
+          <h5 className="text-center">Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş yapmanız gerekmektektedir.</h5>
           <CardGroup>
             <Card
               className="m-5"

@@ -101,12 +101,22 @@ function Login() {
         <MDBCol col="6" className="mb-5">
           <form onSubmit={handleSubmit}>
             <div className="d-flex flex-column ms-5">
-              <div className="text-center">
+              <div
+                onClick={(e) => {
+                  navigate.push("/");
+                }}
+                className="text-center mt-5"
+                style={{
+                  cursor: "pointer",
+                }}
+              >
                 <img src={logo} style={{ width: "185px" }} alt="logo" />
-                <h4 className="mt-1 mb-5 pb-1">Eskişehir Adliyesi </h4>
+                <h4 hidden className="mt-1 mb-5 pb-1">
+                  Eskişehir Adliyesi{" "}
+                </h4>
               </div>
 
-              <p>Devam edebilmek için lütfen giriş yapın</p>
+              <p className="mt-5">Devam edebilmek için lütfen giriş yapın</p>
 
               <MDBInput
                 wrapperClass="mb-4"
@@ -163,12 +173,11 @@ function Login() {
         <MDBCol col="6" className="mb-5">
           <div className="d-flex flex-column  justify-content-center gradient-custom-2 h-100 mb-4">
             <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-              <h4 class="mb-4"> Geliştirici Notu :) </h4>
+              <h4 class="mb-4"> Eskişehir Adliyesi Yönetim Sistemi </h4>
               <p class="small mb-0">
-                Eskişehir Adliyesi Komisyon Kalemi için geliştirilmiş bir
-                uygulamadır. Uygulamayı geliştirmekteki temel amaç komisyon
-                kaleminin işlerini daha hızlı ve kolay bir şekilde yapmalarını
-                sağlamaktır - Bilgehan Kalay
+                Eskişehir Adliyesi Yönetim Sistemi, Eskişehir Adliyesi
+                personelinin işlemlerini kolaylaştırmak ve hızlandırmak amacıyla
+                geliştirilmiştir.
               </p>
             </div>
           </div>
