@@ -49,12 +49,13 @@ export default function TumPersonelListe({
   };
 
   const handleUnvanChange = (e) => {
-    setSelectedUnvan(e.target.value);
+    let selectedUnvan = unvanlar.find((unvan) => unvan.name === e.target.value);
+    setSelectedUnvan(selectedUnvan);
     if (e.target.value === "0") {
       setFilteredPersoneller(personeller);
     } else {
       let tempPersoneller = personeller.filter(
-        (personel) => personel.title.kind === e.target.value
+        (personel) => personel.title.name === e.target.value
       );
       setFilteredPersoneller(tempPersoneller);
     }
@@ -92,13 +93,13 @@ export default function TumPersonelListe({
           >
             <option value="0">Tümü</option>
             {unvanlar.map((unvan) => (
-              <option key={unvan.kind} value={unvan.kind}>
+              <option key={unvan.name} value={unvan.name}>
                 {unvan.name}
               </option>
             ))}
           </Input>
         </FormGroup>
-        {selectedUnvan === "zabitkatibi" && (
+        {selectedUnvan.kind === "zabitkatibi" && (
           <FormGroup>
             <Label check>
               <Input onClick={handleDurusmaKatibiChange} type="checkbox" />

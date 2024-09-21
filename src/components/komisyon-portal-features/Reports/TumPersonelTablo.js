@@ -156,6 +156,11 @@ export default function TumPersonelTablo({
               <PopoverBody>{personel.description}</PopoverBody>
             </Popover>
           )}
+          {personel.durusmaKatibiMi && (
+            <Badge color="warning" className="ms-2">
+              Duruşma
+            </Badge>
+          )}
         </h6>
       );
     });
