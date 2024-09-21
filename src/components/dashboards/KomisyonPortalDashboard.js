@@ -27,6 +27,7 @@ import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
 import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
+import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 
 import {
   GET_institutions,
@@ -224,6 +225,15 @@ export default function KomisyonPortalDashboard() {
 
       case 13:
         return <KomisyonPortalKullaniciYonetim user={user} token={token} />;
+
+      case 14:
+        return (
+          <PasifPersonel
+            selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
     }
   }
 
@@ -373,6 +383,15 @@ export default function KomisyonPortalDashboard() {
             >
               Personel Tablosu
             </ListGroupItem>
+
+            <ListGroupItem
+              key={14}
+              onClick={() => onClick_listGroupItem(14)}
+              active={selected === 14}
+            >
+              Pasif Personel
+            </ListGroupItem>
+            
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
               Aktarım

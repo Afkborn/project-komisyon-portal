@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FormGroup, Label, Input, Button, Spinner, Row, Col, Badge } from "reactstrap";
+import {
+  FormGroup,
+  Label,
+  Input,
+  Button,
+  Spinner,
+  Row,
+  Col,
+  Badge,
+  Popover,
+  PopoverHeader,
+  PopoverBody,
+} from "reactstrap";
 import alertify from "alertifyjs";
 
 export default function TumPersonelTablo({
@@ -18,7 +30,7 @@ export default function TumPersonelTablo({
     if (selectedKurum) {
       getKontrolEdilecekBirimler(selectedUnitType);
     }
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   const handleRadioFilterChange = (e) => {
@@ -124,7 +136,26 @@ export default function TumPersonelTablo({
           onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
           onMouseLeave={() => setHoveredPersonelId(null)}
         >
-          {personel.ad} {personel.soyad} <Badge color="secondary">{personel.level}</Badge>
+          {personel.ad} {personel.soyad}{" "}
+          {personel.level && (
+            <Badge color="secondary">Svy. {personel.level}</Badge>
+          )}
+          {personel.description && (
+            <Badge id="descriptionPopover" color="info" className="ms-2">
+              Açklm.
+            </Badge>
+          )}
+          {personel.description && (
+            <Popover
+              placement="right"
+              isOpen={isHovered}
+              target="descriptionPopover"
+              hidden={!personel.description}
+            >
+              <PopoverHeader>Personel Açıklaması</PopoverHeader>
+              <PopoverBody>{personel.description}</PopoverBody>
+            </Popover>
+          )}
         </h6>
       );
     });

@@ -16,6 +16,7 @@ import {
   calculateGorevSuresi,
 } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
+import PersonelDurumGuncelleModal from "./PersonelDurumGuncelleModal";
 import PersonelCalistigiKisiGuncelleModal from "./PersonelCalistigiKisiGuncelleModal";
 import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncelleModal";
 import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
@@ -63,6 +64,11 @@ export default function PersonelDetay({
   const [showDeletePersonelModal, setShowDeletePersonelModal] = useState(false);
   const deletePersonelModalToggle = () => {
     setShowDeletePersonelModal(!showDeletePersonelModal);
+  };
+
+  const [showDurumDegistirModal, setShowDurumDegistirModal] = useState(false);
+  const durumDegistirModalToggle = () => {
+    setShowDurumDegistirModal(!showDurumDegistirModal);
   };
 
   const [showIzinEkleModal, setShowIzinEkleModal] = useState(false);
@@ -433,34 +439,33 @@ export default function PersonelDetay({
         )}
 
         {personel && (
-          <div>
+          <div className="mt-5">
+            <h4>Özlük</h4>
             <hr />
-            <h4>Personel Bilgileri</h4>
+
             <Row className="mt-2">
               <Col>
-                <Button
-                  className="m-1"
-                  onClick={(e) => handleUpdate(e)}
-                  color="primary"
-                >
-                  Güncelle
-                </Button>
-                <Button
-                  onClick={calistigiBirimGuncelleModalToggle}
-                  className="m-1"
-                  color="primary"
-                >
-                  Birim Değiştir
-                </Button>
-                <Button
-                  onClick={deletePersonelModalToggle}
-                  className="m-1"
-                  color="danger"
-                >
-                  Sil
-                </Button>
+                <Label>Personel Durum</Label>
+                <Input
+                  type="text"
+                  value={personel.status ? "Aktif" : "Pasif"}
+                  disabled
+                />
+              </Col>
+              <Col hidden={personel.status}>
+                <Label>Ayrılış Nedeni</Label>
+                <Input
+                  type="text"
+                  value={
+                    personel.deactivationReason
+                      ? personel.deactivationReason
+                      : ""
+                  }
+                  disabled
+                />
               </Col>
             </Row>
+
             <Row className="mt-2">
               <Col>
                 <Label>Sicil</Label>
@@ -615,8 +620,41 @@ export default function PersonelDetay({
               </Col>
             </Row>
 
+            <Row className="mt-2">
+              <Col>
+                <Button
+                  className="m-1"
+                  onClick={(e) => handleUpdate(e)}
+                  color="success"
+                >
+                  Değişiklikleri Kaydet
+                </Button>
+                <Button
+                  onClick={calistigiBirimGuncelleModalToggle}
+                  className="m-1"
+                  color="primary"
+                >
+                  Birim Değiştir
+                </Button>
+                <Button
+                  className="m-1"
+                  color="warning"
+                  onClick={durumDegistirModalToggle}
+                >
+                  Durum Değiştir
+                </Button>
+                <Button
+                  onClick={deletePersonelModalToggle}
+                  className="m-1"
+                  color="danger"
+                >
+                  Sil
+                </Button>
+              </Col>
+            </Row>
+
             {/* İZİNLER */}
-            <div className="mt-3">
+            <div className="mt-5">
               <h4>
                 İzinler{" "}
                 <Badge color={personel.izindeMi ? "danger" : "success"}>
@@ -665,7 +703,7 @@ export default function PersonelDetay({
             </div>
 
             {/* ÇALIŞTIĞI BİRİMLER */}
-            <div className="mt-3">
+            <div className="mt-5">
               <h4>Çalıştığı Birimler </h4>
               <hr />
               <Table>
@@ -723,6 +761,13 @@ export default function PersonelDetay({
         <PersonelIzinEkleModal
           modal={showIzinEkleModal}
           toggle={izinEkleModalToggle}
+          personel={personel}
+          token={token}
+          refreshPersonel={refreshPersonel}
+        />
+        <PersonelDurumGuncelleModal
+          modal={showDurumDegistirModal}
+          toggle={durumDegistirModalToggle}
           personel={personel}
           token={token}
           refreshPersonel={refreshPersonel}

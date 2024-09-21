@@ -128,7 +128,6 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
   return (
     <Modal isOpen={modal} toggle={toggle}>
-      {console.log(personel)}
       <ModalHeader toggle={toggle}>Çalıştığı Birimi Güncelle</ModalHeader>
       <ModalBody>
         <Form>
