@@ -18,7 +18,6 @@ export default function PersonelDurumGuncelleModal({
   toggle,
   personel,
   token,
-  selectedKurum,
   refreshPersonel,
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);

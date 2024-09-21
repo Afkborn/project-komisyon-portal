@@ -165,6 +165,7 @@ export default function KomisyonPortalDashboard() {
             selectedPersonelID={selectedPersonelID}
             selectedKurum={selectedKurum}
             token={token}
+            unvanlar={unvanlar}
           />
         );
       case 5:
@@ -250,7 +251,7 @@ export default function KomisyonPortalDashboard() {
     <Container className="mt-5" fluid>
       <Row>
         <Col xs="12" lg="2">
-          <div style={centerImage} onClick={(e)=> handleHome()} >
+          <div style={centerImage} onClick={(e) => handleHome()}>
             <img src={logo} style={{ width: "150px" }} alt="logo" />
           </div>
           <div className="mt-2">
@@ -391,7 +392,6 @@ export default function KomisyonPortalDashboard() {
             >
               Pasif Personel
             </ListGroupItem>
-            
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">
               Aktarım

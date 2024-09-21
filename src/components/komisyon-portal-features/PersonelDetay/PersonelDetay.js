@@ -16,6 +16,7 @@ import {
   calculateGorevSuresi,
 } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
+import PersonelUnvanGuncelleModal from "./PersonelUnvanGuncelleModal";
 import PersonelDurumGuncelleModal from "./PersonelDurumGuncelleModal";
 import PersonelCalistigiKisiGuncelleModal from "./PersonelCalistigiKisiGuncelleModal";
 import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncelleModal";
@@ -29,6 +30,7 @@ export default function PersonelDetay({
   selectedKurum,
   token,
   selectedPersonelID,
+  unvanlar,
 }) {
   const [personel, setPersonel] = useState(null);
   const [personelKurum, setPersonelKurum] = useState(null);
@@ -53,6 +55,11 @@ export default function PersonelDetay({
     useState(false);
   const calistigiKisiGuncelleModalToggle = () => {
     setShowCalistigiKisiGuncelleModal(!showCalistigiKisiGuncelleModal);
+  };
+
+  const [showUnvanGuncelleModal, setShowUnvanGuncelleModal] = useState(false);
+  const unvanGuncelleModalToggle = () => {
+    setShowUnvanGuncelleModal(!showUnvanGuncelleModal);
   };
 
   const [showCalistigiBirimGuncelleModal, setShowCalistigiBirimGuncelleModal] =
@@ -286,7 +293,6 @@ export default function PersonelDetay({
         Personelin birimini değiştirebilir, izin bilgisi ekleyebilir veya
         güncelleyebilirsiniz.
       </span>
-
       <hr />
       <div>
         <div hidden={!selectedKurum}>
@@ -643,6 +649,15 @@ export default function PersonelDetay({
                 >
                   Durum Değiştir
                 </Button>
+
+                <Button
+                  className="m-1"
+                  color="info"
+                  onClick={unvanGuncelleModalToggle}
+                >
+                  Ünvan Değiştir
+                </Button>
+
                 <Button
                   onClick={deletePersonelModalToggle}
                   className="m-1"
@@ -771,6 +786,14 @@ export default function PersonelDetay({
           personel={personel}
           token={token}
           refreshPersonel={refreshPersonel}
+        />
+        <PersonelUnvanGuncelleModal
+          modal={showUnvanGuncelleModal}
+          toggle={unvanGuncelleModalToggle}
+          personel={personel}
+          token={token}
+          refreshPersonel={refreshPersonel}
+          unvanlar={unvanlar}
         />
 
         <PersonelSilModal

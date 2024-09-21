@@ -5,6 +5,7 @@ import PersonelEkleModal from "./PersonelEkleModal";
 import {
   renderDate_GGAAYYYY,
   calculateGorevSuresi,
+  calculateBirimGorevSuresi,
 } from "../../actions/TimeActions";
 export default function PersonelListeByBirim({
   unvanlar,
@@ -240,6 +241,7 @@ export default function PersonelListeByBirim({
                         <th>Adı</th>
                         <th>Soyadı</th>
                         <th>Göreve Başlama Tarihi</th>
+                        <th>Birimde Geçen Gün</th>
                         <th>Açıklama</th>
                         <th>Duruşma Ktp.</th>
                         <th>İzin?</th>
@@ -258,6 +260,9 @@ export default function PersonelListeByBirim({
                           <td>
                             {renderDate_GGAAYYYY(person.goreveBaslamaTarihi)} (
                             {calculateGorevSuresi(person.goreveBaslamaTarihi)})
+                          </td>
+                          <td>
+                            {calculateBirimGorevSuresi(person.birimeBaslamaTarihi)}
                           </td>
                           <td>{person.description} {person.level ? <Badge color="success">Lvl. {person.level}</Badge> : ""}</td>
                           <td>

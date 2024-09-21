@@ -16,6 +16,8 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
   const [headers, setHeaders] = useState([]);
   const [unitsNames, setUnitsNames] = useState([]);
 
+  const [basariliSayisi, setBasariliSayisi] = useState(0);
+  const [basariliListe, setBasariliListe] = useState([]);
   const [hataliListe, setHataliListe] = useState([]);
   const [aktarimBasladiMi, setAktarimBasladiMi] = useState(false);
   const izinVerilenHeaderler = [
@@ -146,6 +148,8 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
         let personel = personelObjesiOlustur(row);
 
         let unvan = unvanlar.find((u) => u.name === personel.unvan);
+        console.log("personel unvan data", personel.unvan);
+        console.log("unvan", unvan.name);
         if (!unvan) {
           throw new Error("Hatalı Unvan");
         }
@@ -166,6 +170,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
             ad: personel.ad,
             soyad: personel.soyad,
             kind: unvan.kind,
+            titleID: unvan._id,
             goreveBaslamaTarihi: personel.kurumaBaslamaTarihi,
             birimID: birim._id,
             birimeBaslamaTarihi: bugunYYYYMMDD,
@@ -175,6 +180,8 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
         axios(config)
           .then(() => {
             console.log("Personel başarıyla eklendi.");
+            setBasariliSayisi((prev) => prev + 1);
+            setBasariliListe((prev) => [...prev, row]);
           })
           .catch((error) => {
             let errorCode = error.response.data.code;
@@ -284,6 +291,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
 
         <div hidden={hataliListe === 0} className="mt-2">
           <h5>Aktarımı başarısız olan {hataliListe.length} kişi</h5>
+
           <Table striped size="sm">
             <thead>
               <tr>
@@ -296,6 +304,30 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
             <tbody>
               {hataliListe.length > 0 &&
                 hataliListe.map((row, index) => (
+                  <tr key={index}>
+                    {Object.values(row).map((value, index) => (
+                      <td key={index}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+
+        <div hidden={basariliListe.length === 0} className="mt-2">
+          <h5>Aktarımı başarılı olan {basariliSayisi} kişi</h5>
+          <Table striped size="sm">
+            <thead>
+              <tr>
+                {basariliListe.length > 0 &&
+                  Object.keys(basariliListe[0]).map((key) => (
+                    <th key={key}>{key}</th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody>
+              {basariliListe.length > 0 &&
+                basariliListe.map((row, index) => (
                   <tr key={index}>
                     {Object.values(row).map((value, index) => (
                       <td key={index}>{value}</td>

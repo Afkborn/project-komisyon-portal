@@ -16,7 +16,19 @@ function calculateGorevSuresi(date) {
   return `${yil} Yıl ${ay} Ay ${gun} Gün`;
 }
 
+
+function calculateBirimGorevSuresi(date){
+  // 380 GÜN
+  if (!date) return "";
+  const d = new Date(date);
+  const now = new Date();
+  const diff = now - d;
+  const gun = Math.floor(diff / 86400000);
+  return `${gun} Gün`;
+}
+
 module.exports = {
   renderDate_GGAAYYYY,
   calculateGorevSuresi,
+  calculateBirimGorevSuresi
 };

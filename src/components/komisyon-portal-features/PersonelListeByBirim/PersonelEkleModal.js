@@ -21,9 +21,11 @@ function PersonelEkleModal({
   handleBirimChange,
   personel,
 }) {
+  let [selectedUnvan, setSelectedUnvan] = useState("");
+
   const [formData, setFormData] = useState({
     birimID: "",
-    kind: "",
+    titleID: "",
     sicil: "",
     ad: "",
     soyad: "",
@@ -35,15 +37,9 @@ function PersonelEkleModal({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "kind") {
-      if (value === "zabitkatibi") {
-        setFormData({
-          ...formData,
-          [name]: value,
-          durusmaKatibiMi: false,
-        });
-        return;
-      }
+    if (name === "titleID") {
+      const selectedUnvan = unvanlar.find((unvan) => unvan._id === value);
+      setSelectedUnvan(selectedUnvan);
     }
 
     setFormData({
@@ -55,7 +51,7 @@ function PersonelEkleModal({
   const handleCancel = () => {
     setFormData({
       birimID: "",
-      kind: "",
+      titleID: "",
       sicil: "",
       ad: "",
       soyad: "",
@@ -98,6 +94,8 @@ function PersonelEkleModal({
       data: formData,
     };
 
+    console.log(formData);
+
     axios(configuration)
       .then(() => {
         alertify.success("Personel başarıyla eklendi.");
@@ -105,6 +103,7 @@ function PersonelEkleModal({
         handleBirimChange({ target: { value: birim.name } });
       })
       .catch((error) => {
+        console.log(error);
         if (error.response.data.code === 11000) {
           alertify.error("Bu sicil numarası zaten kullanılmakta.");
         } else {
@@ -141,19 +140,19 @@ function PersonelEkleModal({
               <Label for="unvan">Ünvan</Label>
               <Input
                 type="select"
-                name="kind"
-                id="kind"
+                name="titleID"
+                id="titleID"
                 onChange={handleInputChange}
               >
                 <option value="">Seçiniz</option>
                 {unvanlar.map((unvan) => (
-                  <option key={unvan.id} value={unvan.kind}>
+                  <option key={unvan._id} value={unvan._id}>
                     {unvan.name}
                   </option>
                 ))}
               </Input>
             </FormGroup>
-            {formData.kind === "zabitkatibi" && (
+            {selectedUnvan.kind === "zabitkatibi" && (
               <FormGroup>
                 <Label for="durusmaKatibiMi">Duruşma Katibi Mi?</Label>
                 <Input
@@ -169,7 +168,7 @@ function PersonelEkleModal({
               </FormGroup>
             )}
 
-            {formData.kind === "zabitkatibi" && (
+            {selectedUnvan.kind === "zabitkatibi" && (
               <FormGroup>
                 <Label for="calistigiKisi">Çalıştığı Kişi (Opsiyonel)</Label>
                 <Input
