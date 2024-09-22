@@ -34,7 +34,7 @@ export default function TumPersonelTablo({
   }, [selectedKurum]);
 
   const handleRadioFilterChange = (e) => {
-    const newFilterOption = e.target.value === "Ceza" ? "Ceza" : "Hukuk";
+    const newFilterOption = e.target.value;
     setSelectedUnitType(newFilterOption);
 
     getKontrolEdilecekBirimler(newFilterOption);
@@ -245,6 +245,16 @@ export default function TumPersonelTablo({
             onChange={handleRadioFilterChange}
           />
           <Label for="radioHukuk">Hukuk</Label>
+          <Input
+            className="ms-2"
+            type="radio"
+            name="radio"
+            id="radioDiger"
+            value="Diger"
+            checked={selectedUnitType === "Diger"}
+            onChange={handleRadioFilterChange}
+          />
+          <Label for="radioDiger">Diğer</Label>
         </FormGroup>
         <FormGroup>
           <Label for="kontrolEdilecekBirimTip">
