@@ -121,11 +121,48 @@ export default function TumPersonelTablo({
 
     return filteredPersonel.map((personel) => {
       const isHovered = hoveredPersonelId === (personel._id || personel.id);
+      let badges = [];
+
+      if (personel.durusmaKatibiMi) {
+        badges.push(
+          <Badge color="warning" className="ms-2" key="durusma">
+            Duruşma
+          </Badge>
+        );
+      }
+      if (personel.isTemporary) {
+        badges.push(
+          <Badge color="danger" className="ms-2" key="gecici">
+            Geçici
+          </Badge>
+        );
+      }
+      if (personel.level) {
+        badges.push(
+          <Badge color="secondary" className="ms-2" key="seviye">
+            Svy. {personel.level}
+          </Badge>
+        );
+      }
+      if (personel.description) {
+        badges.push(
+          <>
+            <Badge
+              id={`descriptionPopover-${personel._id || personel.id}`}
+              color="info"
+              className="ms-2"
+              key="aciklama"
+            >
+              {personel.description}
+            </Badge>
+          </>
+        );
+      }
 
       const personelStyle = {
         fontWeight: "normal",
         cursor: "pointer",
-        textDecoration: isHovered ? "underline" : "none", // sadece mouse üzerinde ise altını çiz
+        textDecoration: isHovered ? "underline" : "none",
       };
 
       return (
@@ -137,29 +174,31 @@ export default function TumPersonelTablo({
           onMouseLeave={() => setHoveredPersonelId(null)}
         >
           {personel.ad} {personel.soyad}{" "}
-          {personel.level && (
-            <Badge color="secondary">Svy. {personel.level}</Badge>
-          )}
-          {personel.description && (
-            <Badge id="descriptionPopover" color="info" className="ms-2">
-              Açklm.
-            </Badge>
-          )}
-          {personel.description && (
-            <Popover
-              placement="right"
-              isOpen={isHovered}
-              target="descriptionPopover"
-              hidden={!personel.description}
-            >
-              <PopoverHeader>Personel Açıklaması</PopoverHeader>
-              <PopoverBody>{personel.description}</PopoverBody>
-            </Popover>
-          )}
-          {personel.durusmaKatibiMi && (
-            <Badge color="warning" className="ms-2">
-              Duruşma
-            </Badge>
+          {badges.length < 3 ? (
+            // 2 veya daha az rozet varsa yan yana göster
+            badges
+          ) : (
+            // 3 veya daha fazla rozet varsa popover içine yerleştir
+            <>
+              <Badge
+                id={`badgePopover-${personel._id || personel.id}`}
+                color="primary"
+                className="ms-2"
+              >
+                {badges.length} Rozet
+              </Badge>
+              {/* Badge yüklendikten sonra popoveru aç */}
+              {isHovered && (
+                <Popover
+                  placement="right"
+                  isOpen={isHovered} // Benzersiz hover kontrolü
+                  target={`badgePopover-${personel._id || personel.id}`} // Benzersiz ID
+                >
+                  <PopoverHeader>Rozetler</PopoverHeader>
+                  <PopoverBody>{badges}</PopoverBody>
+                </Popover>
+              )}
+            </>
           )}
         </h6>
       );

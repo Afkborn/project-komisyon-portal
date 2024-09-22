@@ -264,7 +264,10 @@ export default function PersonelListeByBirim({
                           <td>
                             {calculateBirimGorevSuresi(person.birimeBaslamaTarihi)}
                           </td>
-                          <td>{person.description} {person.level ? <Badge color="success">Lvl. {person.level}</Badge> : ""}</td>
+                          <td>{person.description}
+                            {person.level ? <Badge color="success">Lvl. {person.level}</Badge> : ""}
+                            {person.isTemporary ? <Badge color="danger">Geçici Personel</Badge> : ""}
+                          </td>
                           <td>
                             {person.durusmaKatibiMi ? (
                               <Badge color="success">Evet</Badge>

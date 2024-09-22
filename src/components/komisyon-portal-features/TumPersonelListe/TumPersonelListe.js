@@ -10,14 +10,61 @@ export default function TumPersonelListe({
 }) {
   const [personeller, setPersoneller] = useState([]);
   const [filteredPersoneller, setFilteredPersoneller] = useState([]);
+  const [isTemporaryChecked, setIsTemporaryChecked] = useState(false);
+  const [hasDescriptionChecked, setHasDescriptionChecked] = useState(false);
+  const [isDurusmaKatibiChecked, setIsDurusmaKatibiChecked] = useState(false);
+  const [selectedUnvan, setSelectedUnvan] = useState(undefined);
+
   const [loadSpinner, setLoadSpinner] = useState(false);
-  const [selectedUnvan, setSelectedUnvan] = useState("0");
 
   useEffect(() => {
     if (selectedKurum)
       if (personeller.length === 0) getPersoneller(selectedKurum.id);
+
+    let tempPersoneller = personeller;
+
+    if (selectedUnvan === undefined) {
+      tempPersoneller = personeller;
+    }
+
+    if (isTemporaryChecked) {
+      tempPersoneller = tempPersoneller.filter(
+        (personel) => personel.isTemporary === true
+      );
+    }
+
+    if (hasDescriptionChecked) {
+      tempPersoneller = tempPersoneller.filter(
+        (personel) =>
+          personel.description !== "" &&
+          personel.description !== null &&
+          personel.description !== undefined
+      );
+    }
+
+    // duruşma katibi filtresi
+    if (isDurusmaKatibiChecked) {
+      tempPersoneller = tempPersoneller.filter(
+        (personel) => personel.durusmaKatibiMi === true
+      );
+    }
+
+    if (selectedUnvan && selectedUnvan.name !== "0") {
+      tempPersoneller = tempPersoneller.filter(
+        (personel) => personel.title.name === selectedUnvan.name
+      );
+    }
+
+    setFilteredPersoneller(tempPersoneller);
     // eslint-disable-next-line
-  }, [selectedKurum]);
+  }, [
+    selectedKurum,
+    isTemporaryChecked,
+    hasDescriptionChecked,
+    personeller,
+    isDurusmaKatibiChecked,
+    selectedUnvan,
+  ]);
 
   const getPersoneller = () => {
     console.log("getPersoneller");
@@ -34,10 +81,26 @@ export default function TumPersonelListe({
       .then((response) => {
         setLoadSpinner(false);
         let personList = response.data.personList;
-        // sort personList by unvan oncelikSirasi
-        personList.sort(
-          (a, b) => a.title.oncelikSirasi - b.title.oncelikSirasi
-        );
+
+        // CHATGPT abim sort işini çok güzel yapıyor, o olmasa bunları yazmaya üşenirim :D
+        // Sort by title.oncelikSirasi, then birimID.oncelikSirasi, and finally birimID.series
+        personList.sort((a, b) => {
+          // İlk olarak title.oncelikSirasi'na göre sıralama
+          const titleComparison = a.title.oncelikSirasi - b.title.oncelikSirasi;
+          if (titleComparison !== 0) {
+            return titleComparison; // Eğer fark varsa bu değeri döner
+          }
+
+          // Eğer title.oncelikSirasi eşitse, birimID.oncelikSirasi'na göre sıralama
+          const birimOncelikComparison =
+            a.birimID.oncelikSirasi - b.birimID.oncelikSirasi;
+          if (birimOncelikComparison !== 0) {
+            return birimOncelikComparison; // Eğer fark varsa bu değeri döner
+          }
+
+          // Eğer hem title.oncelikSirasi hem de birimID.oncelikSirasi eşitse, birimID.series'e göre sıralama
+          return a.birimID.series - b.birimID.series;
+        });
         setPersoneller(personList);
         setFilteredPersoneller(personList);
       })
@@ -51,25 +114,18 @@ export default function TumPersonelListe({
   const handleUnvanChange = (e) => {
     let selectedUnvan = unvanlar.find((unvan) => unvan.name === e.target.value);
     setSelectedUnvan(selectedUnvan);
-    if (e.target.value === "0") {
-      setFilteredPersoneller(personeller);
-    } else {
-      let tempPersoneller = personeller.filter(
-        (personel) => personel.title.name === e.target.value
-      );
-      setFilteredPersoneller(tempPersoneller);
-    }
   };
 
   const handleDurusmaKatibiChange = (e) => {
-    if (e.target.checked) {
-      let tempPersoneller = personeller.filter(
-        (personel) => personel.durusmaKatibiMi === true
-      );
-      setFilteredPersoneller(tempPersoneller);
-    } else {
-      setFilteredPersoneller(personeller);
-    }
+    setIsDurusmaKatibiChecked(e.target.checked);
+  };
+
+  const handleGeciciPersonelChange = (e) => {
+    setIsTemporaryChecked(e.target.checked);
+  };
+
+  const handleAciklamaliPersonelChange = (e) => {
+    setHasDescriptionChecked(e.target.checked);
   };
 
   return (
@@ -99,11 +155,23 @@ export default function TumPersonelListe({
             ))}
           </Input>
         </FormGroup>
-        {selectedUnvan.kind === "zabitkatibi" && (
+        <FormGroup>
+          <Label check>
+            <Input onClick={handleGeciciPersonelChange} type="checkbox" />
+            Geçici Personelleri Göster
+          </Label>
+        </FormGroup>
+        <FormGroup>
+          <Label check>
+            <Input onClick={handleAciklamaliPersonelChange} type="checkbox" />
+            Açıklaması Olanları Göster
+          </Label>
+        </FormGroup>
+        {selectedUnvan && selectedUnvan.kind === "zabitkatibi" && (
           <FormGroup>
             <Label check>
               <Input onClick={handleDurusmaKatibiChange} type="checkbox" />
-              Duruşma Katibi
+              Duruşma Katiplerini Göster
             </Label>
           </FormGroup>
         )}
@@ -142,10 +210,13 @@ export default function TumPersonelListe({
                   </td>
                   <td>
                     {personel.description}{" "}
-                    {personel.level ? (
+                    {personel.level && (
                       <Badge color="success">Lvl. {personel.level}</Badge>
-                    ) : (
-                      ""
+                    )}
+                    {personel.isTemporary && (
+                      <Badge color="info" className="ml-1">
+                        Geçici
+                      </Badge>
                     )}
                   </td>
                   <td>{personel.birimID.name}</td>

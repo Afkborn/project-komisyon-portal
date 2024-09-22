@@ -37,6 +37,15 @@ function PersonelEkleModal({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === "isTemporary") {
+      setFormData({
+        ...formData,
+        [name]: e.target.checked,
+      });
+      return;
+    }
+    
+
     if (name === "titleID") {
       const selectedUnvan = unvanlar.find((unvan) => unvan._id === value);
       setSelectedUnvan(selectedUnvan);
@@ -215,6 +224,19 @@ function PersonelEkleModal({
                 onChange={handleInputChange}
               />
             </FormGroup>
+
+            <FormGroup>
+              <Label check>
+                <Input
+                  type="checkbox"
+                  name="isTemporary"
+                  id="isTemporary"
+                  onChange={handleInputChange}
+                />
+                Geçici Personel
+              </Label>
+            </FormGroup>
+
             <FormGroup>
               <Label for="goreveBaslamaTarihi">Göreve Başlama Tarihi</Label>
               <Input

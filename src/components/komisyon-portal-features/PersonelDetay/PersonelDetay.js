@@ -105,6 +105,7 @@ export default function PersonelDetay({
       durusmaKatibiMi: updatedPersonel.durusmaKatibiMi,
       description: updatedPersonel.description,
       level: updatedPersonel.level,
+      isTemporary: updatedPersonel.isTemporary,
     };
   };
 
@@ -469,6 +470,21 @@ export default function PersonelDetay({
                   }
                   disabled
                 />
+              </Col>
+
+              <Col>
+                {console.log(updatedPersonel)}
+                <Label>Geçici Personel</Label>
+                <Input
+                  type="select"
+                  name="isTemporary"
+                  id="isTemporary"
+                  value={updatedPersonel.isTemporary}
+                  onChange={handleInputChange}
+                >
+                  <option value="true">Evet</option>
+                  <option value="false">Hayır</option>
+                </Input>
               </Col>
             </Row>
 
