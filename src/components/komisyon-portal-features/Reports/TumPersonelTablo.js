@@ -159,6 +159,14 @@ export default function TumPersonelTablo({
         );
       }
 
+      if (personel.izindeMi) {
+        badges.push(
+          <Badge color="danger" className="ms-2" key="izin">
+            İzinde
+          </Badge>
+        );
+      }
+
       const personelStyle = {
         fontWeight: "normal",
         cursor: "pointer",
@@ -194,7 +202,7 @@ export default function TumPersonelTablo({
                   isOpen={isHovered} // Benzersiz hover kontrolü
                   target={`badgePopover-${personel._id || personel.id}`} // Benzersiz ID
                 >
-                  <PopoverHeader>Rozetler</PopoverHeader>
+                  <PopoverHeader> {personel.ad} rozetleri.</PopoverHeader>
                   <PopoverBody>{badges}</PopoverBody>
                 </Popover>
               )}
