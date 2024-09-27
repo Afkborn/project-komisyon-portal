@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Button, Spinner, Table } from "reactstrap";
 import alertify from "alertifyjs";
-import { calculateGorevSuresi } from "../../actions/TimeActions";
+import {
+  calculateGorevSuresi,
+  renderDate_GGAAYYYY,
+} from "../../actions/TimeActions";
 
 export default function PasifPersonel({
   selectedKurum,
@@ -78,7 +81,10 @@ export default function PasifPersonel({
                   <td>{personel.ad}</td>
                   <td>{personel.soyad}</td>
                   <td>{personel.deactivationReason}</td>
-                  <td>{calculateGorevSuresi(personel.deactivationDate)}</td>
+                  <td>
+                    {renderDate_GGAAYYYY(personel.deactivationDate)} (
+                    {calculateGorevSuresi(personel.deactivationDate)})
+                  </td>
                   <td>
                     <Button onClick={(e) => showPersonelDetay(personel)}>
                       Detay

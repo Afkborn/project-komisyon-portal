@@ -26,16 +26,17 @@ import KullaniciAyarlari from "../komisyon-portal-features/KullaniciAyarlari";
 import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
+import OzellikAktar from "../komisyon-portal-features/Aktarim/OzellikAktar";
 import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
+import Cookies from "universal-cookie";
+import axios from "axios";
 
 import {
   GET_institutions,
   GET_titles,
   GET_USER_DETAILS,
 } from "../constants/AxiosConfiguration";
-import Cookies from "universal-cookie";
-import axios from "axios";
 
 export default function KomisyonPortalDashboard() {
   const [selectedPersonelID, setSelectedPersonelID] = useState(null);
@@ -132,6 +133,8 @@ export default function KomisyonPortalDashboard() {
   };
 
   function onClick_listGroupItem(rank) {
+    
+    window.scrollTo(0, 0);
     changePage(rank);
   }
 
@@ -235,6 +238,9 @@ export default function KomisyonPortalDashboard() {
             showPersonelDetay={showPersonelDetay}
           />
         );
+
+      case 15:
+        return <OzellikAktar selectedKurum={selectedKurum} token={token} />;
     }
   }
 
@@ -403,6 +409,14 @@ export default function KomisyonPortalDashboard() {
               active={selected === 12}
             >
               Personel Aktar
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={15}
+              onClick={() => onClick_listGroupItem(15)}
+              active={selected === 15}
+            >
+              Özellik Aktar
             </ListGroupItem>
           </ListGroup>
         </Col>

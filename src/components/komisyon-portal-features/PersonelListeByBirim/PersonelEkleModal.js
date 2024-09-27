@@ -44,7 +44,6 @@ function PersonelEkleModal({
       });
       return;
     }
-    
 
     if (name === "titleID") {
       const selectedUnvan = unvanlar.find((unvan) => unvan._id === value);
@@ -116,7 +115,8 @@ function PersonelEkleModal({
         if (error.response.data.code === 11000) {
           alertify.error("Bu sicil numarası zaten kullanılmakta.");
         } else {
-          alertify.error(error.response.data.message || "Hata!");
+          let errorMessage = error.response.data.message || "Hata!";
+          alertify.error(errorMessage);
         }
       });
   };

@@ -194,15 +194,28 @@ export default function PersonelDetay({
     axios(configuration)
       .then((response) => {
         setPersonel(response.data.person);
+
+        if (!response.data.person.birimID) {
+          setLoadSpinner(false);
+          alertify.error(
+            "Personel birimi hatalı, sicil numarası ile destek alın."
+          );
+          setPersonel(null);
+          setUpdatedPersonel(null);
+          return;
+        }
+
         let kurum = kurumlar.find(
           (kurum) => kurum.id === response.data.person.birimID.institutionID
         );
+
         setPersonelKurum(kurum);
 
         setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         setLoadSpinner(false);
       })
       .catch((error) => {
+        console.log(error);
         setLoadSpinner(false);
         alertify.error("Personel bulunamadı.");
         setPersonel(null);
@@ -242,6 +255,17 @@ export default function PersonelDetay({
         } else {
           let person = response.data.persons[0];
           setPersonel(person);
+
+          if (!person.birimID) {
+            setLoadSpinner(false);
+            alertify.error(
+              "Personel birimi hatalı, sicil numarası ile destek alın."
+            );
+            setPersonel(null);
+            setUpdatedPersonel(null);
+            return;
+          }
+
           let kurum = kurumlar.find(
             (kurum) => kurum.id === person.birimID.institutionID
           );
@@ -252,6 +276,7 @@ export default function PersonelDetay({
         }
       })
       .catch((error) => {
+        console.log(error);
         setLoadSpinner(false);
         setPersonel(null);
         setUpdatedPersonel(null);
@@ -417,7 +442,11 @@ export default function PersonelDetay({
                     <td>{person.sicil}</td>
                     <td>{person.ad}</td>
                     <td>{person.soyad}</td>
-                    <td>{person.birimID.name}</td>
+                    <td>
+                      {person.birimID
+                        ? person.birimID.name
+                        : "BİLİNMEYEN BİRİM"}
+                    </td>
                     <td>
                       {person.title ? person.title.name : "BELİRTİLMEMİŞ"}
                     </td>

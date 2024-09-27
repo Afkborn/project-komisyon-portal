@@ -243,8 +243,7 @@ export default function PersonelListeByBirim({
                         <th>Göreve Başlama Tarihi</th>
                         <th>Birimde Geçen Gün</th>
                         <th>Açıklama</th>
-                        <th>Duruşma Ktp.</th>
-                        <th>İzin?</th>
+
                         <th></th>
                       </tr>
                     </thead>
@@ -262,21 +261,31 @@ export default function PersonelListeByBirim({
                             {calculateGorevSuresi(person.goreveBaslamaTarihi)})
                           </td>
                           <td>
-                            {calculateBirimGorevSuresi(person.birimeBaslamaTarihi)}
+                            {renderDate_GGAAYYYY(person.birimeBaslamaTarihi)} (
+                            {calculateBirimGorevSuresi(
+                              person.birimeBaslamaTarihi
+                            )}
+                            )
                           </td>
-                          <td>{person.description}
-                            {person.level ? <Badge color="success">Lvl. {person.level}</Badge> : ""}
-                            {person.isTemporary ? <Badge color="danger">Geçici Personel</Badge> : ""}
+                          <td>
+                            {person.description}{" "}
+                            {person.level ? (
+                              <Badge color="success">Lvl. {person.level}</Badge>
+                            ) : (
+                              ""
+                            )}{" "}
+                            {person.isTemporary ? (
+                              <Badge color="danger">Geçici Personel</Badge>
+                            ) : (
+                              ""
+                            )}
                           </td>
                           <td>
                             {person.durusmaKatibiMi ? (
-                              <Badge color="success">Evet</Badge>
+                              <Badge color="success">Duruşma Katibi</Badge>
                             ) : (
                               <div></div>
                             )}
-                          </td>
-
-                          <td>
                             {person.izindeMi ? (
                               <Badge color="danger">İzinde</Badge>
                             ) : (

@@ -10,6 +10,7 @@ import {
 } from "reactstrap";
 import * as XLSX from "xlsx";
 import axios from "axios";
+
 export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
   const [dosyaSecildiMi, setDosyaSecildiMi] = useState(false);
   const [excelData, setExcelData] = useState([]);
