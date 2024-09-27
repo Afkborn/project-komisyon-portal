@@ -44,6 +44,7 @@ export default function OzellikAktar({ selectedKurum, token }) {
           console.log(error);
         });
     }
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   const handleFileChange = (event) => {
@@ -241,9 +242,9 @@ export default function OzellikAktar({ selectedKurum, token }) {
 
       <div hidden={!yuklemeBasladiMi}>
         <div className="mt-3">
-          <span>Başarılı kişi sayısı: {yuklenecekKisiListesi.length}</span>{" "}
+          <span>Başarılı kişi sayısı: {basariliKisiList.length}</span>{" "}
           <br />
-          <span>Hatalı kişi sayısı: {yuklenecekKisiListesi.length}</span> <br />
+          <span>Hatalı kişi sayısı: {hataliKisiList.length}</span> <br />
           <div>
             <Table>
               <thead>
