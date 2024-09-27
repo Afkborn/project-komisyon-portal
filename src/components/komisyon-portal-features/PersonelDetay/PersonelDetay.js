@@ -106,6 +106,12 @@ export default function PersonelDetay({
       description: updatedPersonel.description,
       level: updatedPersonel.level,
       isTemporary: updatedPersonel.isTemporary,
+      tckn: updatedPersonel.tckn,
+      phoneNumber: updatedPersonel.phoneNumber,
+      birthDate:
+        updatedPersonel.birthDate && updatedPersonel.birthDate.split("T")[0],
+      bloodType: updatedPersonel.bloodType,
+      keyboardType: updatedPersonel.keyboardType,
     };
   };
 
@@ -177,8 +183,11 @@ export default function PersonelDetay({
         alertify.success("Personel bilgisi güncellendi.");
       })
       .catch((error) => {
+        let errorMessage =
+          error.response.data.message ||
+          "Personel Bilgisi Güncellenirken Hata Oluştu!";
         setLoadSpinner(false);
-        alertify.error("Personel bilgisi güncellenemedi.");
+        alertify.error(errorMessage);
       });
   };
 
@@ -668,6 +677,89 @@ export default function PersonelDetay({
                   min={1}
                   max={5}
                 />
+              </Col>
+            </Row>
+
+            <Row className="mt-2">
+              <Col>
+                <Label>TC Kimlik Numarası</Label>
+                <Input
+                  type="text"
+                  id="tckn"
+                  name="tckn"
+                  value={updatedPersonel.tckn}
+                  onChange={handleInputChange}
+                />
+              </Col>
+
+              <Col>
+                <Label>Telefon Numarası</Label>
+                <Input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={updatedPersonel.phoneNumber}
+                  onChange={handleInputChange}
+                />
+              </Col>
+            </Row>
+
+            <Row className="mt-2">
+              <Col>
+                <Label>Doğum Tarihi</Label>
+                <Input
+                  type="date"
+                  id="birthDate"
+                  name="birthDate"
+                  value={updatedPersonel.birthDate}
+                  onChange={handleInputChange}
+                />
+              </Col>
+              <Col hidden={!updatedPersonel.birthDate}>
+                <Label>Yaş</Label>
+                <Input
+                  type="text"
+                  value={calculateGorevSuresi(updatedPersonel.birthDate)}
+                  disabled
+                />
+              </Col>
+            </Row>
+
+            <Row className="mt-2">
+              <Col>
+                <Label>Kan Grubu</Label>
+                <Input
+                  type="select"
+                  name="bloodType"
+                  id="bloodType"
+                  value={updatedPersonel.bloodType}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Seçiniz</option>
+                  <option value="0+">0 Rh+</option>
+                  <option value="0-">0 Rh-</option>
+                  <option value="A+">A Rh+</option>
+                  <option value="A-">A Rh-</option>
+                  <option value="B+">B Rh+</option>
+                  <option value="B-">B Rh-</option>
+                  <option value="AB+">AB Rh+</option>
+                  <option value="AB-">AB Rh-</option>
+                </Input>
+              </Col>
+
+              <Col>
+                <Label>Kullandığı Klavye</Label>
+                <Input
+                  type="select"
+                  name="keyboardType"
+                  id="keyboardType"
+                  value={updatedPersonel.keyboardType}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Seçiniz</option>
+                  <option value="F">F Klavye</option>
+                  <option value="Q">Q Klavye</option>
+                </Input>
               </Col>
             </Row>
 
