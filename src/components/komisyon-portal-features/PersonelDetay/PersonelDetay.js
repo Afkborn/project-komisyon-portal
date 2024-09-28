@@ -655,6 +655,25 @@ export default function PersonelDetay({
               </Row>
             )}
 
+            {personel.title && personel.title.kind === "yaziislerimudürü" && (
+              <Row className="mt-2">
+                <Col>
+                  <Label>İkinci Birim</Label>
+                  <Input
+                    type="text"
+                    name="ikinciBirimID"
+                    id="ikinciBirimID"
+                    value={
+                      personel.ikinciBirimID
+                        ? personel.ikinciBirimID.name
+                        : "İkinci Birim Tanımlanmamış"
+                    }
+                    disabled
+                  ></Input>
+                </Col>
+              </Row>
+            )}
+
             <Row className="mt-2">
               <Col>
                 <Label>Açıklama</Label>

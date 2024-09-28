@@ -29,7 +29,7 @@ export default function KomisyonPortalWelcome({
     setLastActivityListLoading(true);
     let configuration = {
       method: "GET",
-      url: `/api/activities/?page=${currentPage}&pageSize=${pageSize}`,
+      url: `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -117,8 +117,7 @@ export default function KomisyonPortalWelcome({
         </Spinner>
       </div>
       <div>
-
-        <h4> Son Aktiviteler</h4>
+        <h4> Son 100 Aktivite</h4>
 
         <Table striped size="sm">
           <thead>

@@ -21,6 +21,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
   selectedKurum,
   refreshPersonel,
 }) {
+  const [birimSira, setBirimSira] = useState("birinciBirim");
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newCalistigiBirim, setNewCalistigiBirim] = useState(null);
 
@@ -95,35 +96,71 @@ export default function PersonelCalistigiBirimGuncelleModal({
   }
 
   const handleUpdate = () => {
+    if (!newCalistigiBirim) {
+      alertify.error("Yeni çalışacağı birim seçiniz.");
+      return;
+    }
+
     if (newCalistigiBirim._id === personel.birimID._id) {
       alertify.error("Çalıştığı birim aynı olduğu için güncelleme yapılamaz.");
       return;
     }
 
-    const configuration = {
-      method: "POST",
-      url: "api/personunits/changeUnit",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        personID: personel._id,
-        unitID: personel.birimID._id,
-        endDate: endDate,
-        detail: detail,
-        newUnitID: newCalistigiBirim._id,
-      },
-    };
+    if (
+      birimSira === "ikinciBirim" &&
+      newCalistigiBirim._id === personel.ikinciBirimID._id
+    ) {
+      alertify.error("Çalıştığı birim aynı olduğu için güncelleme yapılamaz.");
+      return;
+    }
 
-    axios(configuration)
-      .then((result) => {
-        alertify.success("Çalıştığı birim bilgisi güncellendi.");
-        refreshPersonel();
-        toggle();
-      })
-      .catch((error) => {
-        alertify.error("Çalıştığı birim bilgisi güncellenemedi.");
-      });
+    if (birimSira === "birinciBirim") {
+      const configuration = {
+        method: "POST",
+        url: "api/personunits/changeUnit",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          personID: personel._id,
+          unitID: personel.birimID._id,
+          endDate: endDate,
+          detail: detail,
+          newUnitID: newCalistigiBirim._id,
+        },
+      };
+
+      axios(configuration)
+        .then((result) => {
+          alertify.success("Çalıştığı birim bilgisi güncellendi.");
+          refreshPersonel();
+          toggle();
+        })
+        .catch((error) => {
+          alertify.error("Çalıştığı birim bilgisi güncellenemedi.");
+        });
+    } else {
+      const configuration = {
+        method: "PUT",
+        url: "api/persons/" + personel._id,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          ikinciBirimID: newCalistigiBirim._id,
+        },
+      };
+
+      axios(configuration)
+        .then((response) => {
+          refreshPersonel();
+          alertify.success("Çalıştığı birim bilgisi güncellendi.");
+          toggle();
+        })
+        .catch((error) => {
+          alertify.error("Çalıştığı birim bilgisi güncellenemedi.");
+        });
+    }
   };
 
   return (
@@ -131,6 +168,37 @@ export default function PersonelCalistigiBirimGuncelleModal({
       <ModalHeader toggle={toggle}>Çalıştığı Birimi Güncelle</ModalHeader>
       <ModalBody>
         <Form>
+          {/*  eğer personel yazıişleri müdürü ise 2 tane birimi olabiliyor,  */}
+          {personel && personel.kind === "yaziislerimudürü" && (
+            <FormGroup>
+              <Label for="birimSira">
+                Hangi Birimi Güncellemek İstiyorsunuz{" "}
+              </Label>
+              <br />
+              {/* radiobutton birinci birim ve ikinci birim diye seçilecek  */}
+              <Input
+                className="mr-2"
+                type="radio"
+                name="birimSira"
+                value="birinciBirim"
+                id="birinciBirim"
+                checked={birimSira === "birinciBirim"}
+                onChange={() => setBirimSira("birinciBirim")}
+              />
+              <Label for="birinciBirim">Birinci Birim</Label>
+              <Input
+                className="mr-2"
+                type="radio"
+                name="birimSira"
+                value="ikinciBirim"
+                id="ikinciBirim"
+                checked={birimSira === "ikinciBirim"}
+                onChange={() => setBirimSira("ikinciBirim")}
+              />
+              <Label for="ikinciBirim">İkinci Birim</Label>
+            </FormGroup>
+          )}
+
           {personel && (
             <div>
               <FormGroup>
@@ -138,11 +206,15 @@ export default function PersonelCalistigiBirimGuncelleModal({
                 <Input
                   id="calistigiBirim"
                   type="text"
-                  value={personel.birimID.name}
+                  value={
+                    birimSira === "birinciBirim"
+                      ? personel.birimID.name
+                      : personel.ikinciBirimID.name
+                  }
                   disabled
                 />
               </FormGroup>
-              <FormGroup>
+              <FormGroup hidden={birimSira === "ikinciBirim"}>
                 <Label for="calistigiBirimBaslangicTarihi">
                   Birim Başlangıç Tarihi
                 </Label>
@@ -199,7 +271,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
             />
           </FormGroup>
 
-          <FormGroup>
+          <FormGroup hidden={birimSira === "ikinciBirim"}>
             <Label for="endDate">Değişiklik Tarihi*</Label>
             <Input
               id="endDate"
@@ -210,7 +282,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
             />
           </FormGroup>
 
-          <FormGroup>
+          <FormGroup hidden={birimSira === "ikinciBirim"}>
             <Label for="detail">Gerekçe</Label>
             <Input
               id="detail"
