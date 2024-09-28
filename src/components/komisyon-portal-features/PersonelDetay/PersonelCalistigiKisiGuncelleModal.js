@@ -45,8 +45,8 @@ export default function PersonelCalistigiKisiGuncelleModal({
 
     axios(configuration)
       .then((response) => {
-        alertify.success("Çalıştığı kişi bilgisi güncellendi.");
         refreshPersonel();
+        alertify.success("Çalıştığı kişi bilgisi güncellendi.");
         toggle();
       })
       .catch((error) => {

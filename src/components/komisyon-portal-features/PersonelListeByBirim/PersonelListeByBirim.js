@@ -12,6 +12,7 @@ export default function PersonelListeByBirim({
   token,
   selectedKurum,
   showPersonelDetay,
+  selectedBirimID,
 }) {
   const [kurum, setKurum] = useState(null);
   // const [selectedTypeId, setSelectedTypeId] = useState(null);
@@ -43,6 +44,11 @@ export default function PersonelListeByBirim({
       setKurum(selectedKurum);
       getBirimler(selectedKurum.id);
     }
+
+
+    // EN SON DİREKT TIKLANAN ID'yi aldım şimdi onu yüklemem lazım
+
+
     // eslint-disable-next-line
   }, [selectedKurum]);
 

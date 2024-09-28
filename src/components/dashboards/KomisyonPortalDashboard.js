@@ -39,7 +39,10 @@ import {
 } from "../constants/AxiosConfiguration";
 
 export default function KomisyonPortalDashboard() {
-  const [selectedPersonelID, setSelectedPersonelID] = useState(null);
+  
+  const [selectedPersonelID, setSelectedPersonelID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
+  const [selectedBirimID, setSelectedBirimID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
+
 
   const [selected, setSelected] = useState(0);
   const [user, setUser] = useState(null);
@@ -53,6 +56,7 @@ export default function KomisyonPortalDashboard() {
 
   function changePage(rank) {
     setSelectedPersonelID(null);
+    setSelectedBirimID(null);
     setSelected(rank);
   }
 
@@ -132,8 +136,12 @@ export default function KomisyonPortalDashboard() {
     setSelectedPersonelID(person.sicil);
   };
 
+  const showBirimPersonelListe = (birim) => {
+    changePage(2);
+    setSelectedBirimID(birim._id);
+  };
+
   function onClick_listGroupItem(rank) {
-    
     window.scrollTo(0, 0);
     changePage(rank);
   }
@@ -141,7 +149,14 @@ export default function KomisyonPortalDashboard() {
   function renderScreen() {
     switch (selected) {
       default:
-        return <KomisyonPortalWelcome user={user} token={token} />;
+        return (
+          <KomisyonPortalWelcome
+            user={user}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+            showBirimPersonelListe={showBirimPersonelListe}
+          />
+        );
       case 1:
         return <Birimler selectedKurum={selectedKurum} token={token} />;
       case 2:
@@ -151,6 +166,7 @@ export default function KomisyonPortalDashboard() {
             unvanlar={unvanlar}
             token={token}
             showPersonelDetay={showPersonelDetay}
+            selectedBirimID={selectedBirimID}
           />
         );
       case 4:
