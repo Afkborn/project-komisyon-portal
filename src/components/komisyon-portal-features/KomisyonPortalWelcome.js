@@ -1,4 +1,4 @@
-import React, { useState, useEffect, act } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Pagination,
@@ -17,18 +17,19 @@ export default function KomisyonPortalWelcome({
 }) {
   const [lastActivityList, setLastActivityList] = useState([]);
   const [lastActivityListLoading, setLastActivityListLoading] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // pageSize değiştirilmediği için, setPageSize kaldırılabilir.
 
   useEffect(() => {
-    if (lastActivityList.length === 0) getLastActivityList();
-
-    // eslint-disable-next-line
-  }, [lastActivityList]);
+    getLastActivityList(); // Her sayfa değişikliğinde listeyi tekrar al
+  }, [currentPage]); // currentPage bağımlılığı ile her sayfa değişiminde çağrılır
 
   const getLastActivityList = () => {
     setLastActivityListLoading(true);
     let configuration = {
       method: "GET",
-      url: "/api/activities/?page=1&limit=30",
+      url: `/api/activities/?page=${currentPage}&pageSize=${pageSize}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -37,22 +38,15 @@ export default function KomisyonPortalWelcome({
     axios(configuration)
       .then((response) => {
         setLastActivityList(response.data.activityList);
+        setPageCount(response.data.pageCount); // Sayfa sayısını doğru şekilde ayarladık
         setLastActivityListLoading(false);
       })
       .catch((error) => {
-        let errorMessage = error.response.data.message || "Bir hata oluştu.";
+        let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
         alertify.error(errorMessage);
         setLastActivityListLoading(false);
       });
   };
-
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const timeStyle = {
     float: "right",
@@ -82,7 +76,7 @@ export default function KomisyonPortalWelcome({
       return (
         <td
           style={clickableTdStyle}
-          onClick={(e) => handleTdOnClickBirimPersonelListe(activity.unitID)}
+          onClick={() => handleTdOnClickBirimPersonelListe(activity.unitID)}
         >
           {activity.unitID.name}
         </td>
@@ -93,7 +87,7 @@ export default function KomisyonPortalWelcome({
       return (
         <td
           style={clickableTdStyle}
-          onClick={(e) => handleTdOnClickPersonel(activity.personID)}
+          onClick={() => handleTdOnClickPersonel(activity.personID)}
         >
           {activity.personID.ad} {activity.personID.soyad} (
           {activity.personID.sicil})
@@ -108,31 +102,23 @@ export default function KomisyonPortalWelcome({
 
   return (
     <div>
-      <span style={timeStyle}>Saat {time.toLocaleTimeString()}</span>
+      <span style={timeStyle}>Saat {new Date().toLocaleTimeString()}</span>
       <h3>Hoşgeldin {user && user.name}!</h3>
 
       <p>
         Bu uygulama, personel bilgileri üzerinde okuma, ekleme, güncelleme ve
         silme işlemlerini gerçekleştirmek için geliştirilmiştir.
       </p>
-      <p>
-        Uygulamayı kullanabilmek için menüden ilgili sayfaya giderek
-        işlemlerinizi gerçekleştirebilirsiniz.
-      </p>
       <hr></hr>
 
-      <div>
-        TODO
-        <li>Bugunun nöbetci hakim, savcı ve katipleri listelensin.</li>
-        <li>İzinde olan hakim savcı ve personel listelensin</li>
+      <div hidden={!lastActivityListLoading}>
+        <Spinner color="primary">
+          <span className="sr-only">Yükleniyor...</span>
+        </Spinner>
       </div>
-
       <div>
-        <div hidden={!lastActivityListLoading}>
-          <Spinner color="primary">
-            <span className="sr-only">Yükleniyor...</span>
-          </Spinner>
-        </div>
+
+        <h4> Son Aktiviteler</h4>
 
         <Table striped size="sm">
           <thead>
@@ -148,7 +134,7 @@ export default function KomisyonPortalWelcome({
           <tbody>
             {lastActivityList.map((activity, index) => (
               <tr key={activity._id}>
-                <th scope="row">{index + 1}</th>
+                <th scope="row">{(currentPage - 1) * pageSize + index + 1}</th>
                 <td>
                   {activity.userID.name} {activity.userID.surname}
                 </td>
@@ -158,29 +144,37 @@ export default function KomisyonPortalWelcome({
                 <td>{activity.description}</td>
               </tr>
             ))}
-
-            {/* <Pagination>
-                <PaginationItem>
-                  <PaginationLink previous href="#" />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">2</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">4</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink next href="#" />
-                </PaginationItem>
-              </Pagination> */}
           </tbody>
         </Table>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pagination aria-label="Sayfa navigasyonu">
+            <PaginationItem disabled={currentPage <= 1}>
+              <PaginationLink
+                previous
+                onClick={() => setCurrentPage(currentPage - 1)}
+              />
+            </PaginationItem>
+            {Array.from({ length: pageCount }, (_, i) => (
+              <PaginationItem key={i} active={i + 1 === currentPage}>
+                <PaginationLink onClick={() => setCurrentPage(i + 1)}>
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem disabled={currentPage >= pageCount}>
+              <PaginationLink
+                next
+                onClick={() => setCurrentPage(currentPage + 1)}
+              />
+            </PaginationItem>
+          </Pagination>
+        </div>
       </div>
     </div>
   );
