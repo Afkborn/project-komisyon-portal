@@ -5,25 +5,73 @@ import {
   PaginationItem,
   PaginationLink,
   Spinner,
+  Row,
+  Col,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
+import { PieChart, pieChartDefaultProps } from "react-minimal-pie-chart";
 
 export default function KomisyonPortalWelcome({
   user,
   token,
   showPersonelDetay,
   showBirimPersonelListe,
+  selectedKurum,
 }) {
   const [lastActivityList, setLastActivityList] = useState([]);
   const [lastActivityListLoading, setLastActivityListLoading] = useState(false);
+
+  const [katipChartLoading, setKatipChartLoading] = useState(false);
+  const [katipChart, setKatipChart] = useState([]);
+  const [selected, setSelected] = useState(0);
+  const [hovered, setHovered] = useState(undefined);
+
+  const data = katipChart.map((entry, i) => {
+    if (hovered === i) {
+      return {
+        ...entry,
+        color: "grey",
+      };
+    }
+    return entry;
+  });
+
+  const lineWidth = 60;
+
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10); // pageSize değiştirilmediği için, setPageSize kaldırılabilir.
 
   useEffect(() => {
-    getLastActivityList(); // Her sayfa değişikliğinde listeyi tekrar al
-  }, [currentPage]); // currentPage bağımlılığı ile her sayfa değişiminde çağrılır
+    if (lastActivityList.length === 0) getLastActivityList();
+    if (katipChart.length === 0 && selectedKurum) getKatipChart();
+    // eslint-disable-next-line
+  }, [currentPage, selectedKurum]); // currentPage bağımlılığı ile her sayfa değişiminde çağrılır
+
+  const getKatipChart = () => {
+    setKatipChartLoading(true);
+    let configuration = {
+      method: "GET",
+      url:
+        `/api/reports/mahkemeSavcilikKatipSayisi?institutionId=` +
+        selectedKurum.id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        setKatipChart(response.data.pieChartData);
+        setKatipChartLoading(false);
+      })
+      .catch((error) => {
+        let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
+        alertify.error(errorMessage);
+        setKatipChartLoading(false);
+      });
+  };
 
   const getLastActivityList = () => {
     setLastActivityListLoading(true);
@@ -110,6 +158,80 @@ export default function KomisyonPortalWelcome({
         silme işlemlerini gerçekleştirmek için geliştirilmiştir.
       </p>
       <hr></hr>
+
+      <div>
+        <Row>
+          <Col xs="6" className="text-center">
+            <h4>Personel İstatistikleri</h4>
+            <div>
+              <div
+                className="legend"
+                style={{
+                  display: "flex",
+                  justifyContent: "start",
+                  flexDirection: "column",
+                  alignItems: "start",
+                }}
+              >
+                {data.map((entry, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: entry.color,
+                        marginRight: "8px",
+                      }}
+                    ></div>
+                    <span>{entry.title} ({entry.value} kişi) </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <PieChart
+              style={{
+                fontFamily:
+                  '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
+                fontSize: "8px",
+                height: "300px",
+              }}
+              data={data}
+              radius={pieChartDefaultProps.radius - 6}
+              lineWidth={60}
+              segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
+              segmentsShift={(index) => (index === selected ? 6 : 1)}
+              animate
+              label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
+              labelPosition={100 - lineWidth / 2}
+              labelStyle={{
+                fill: "#fff",
+                opacity: 0.75,
+                pointerEvents: "none",
+              }}
+              onClick={(_, index) => {
+                setSelected(index === selected ? undefined : index);
+              }}
+              onMouseOver={(_, index) => {
+                setHovered(index);
+              }}
+              onMouseOut={() => {
+                setHovered(undefined);
+              }}
+            />
+          </Col>
+
+          <Col xs="6" className="text-center">
+            <h4>BURAYA NE KOYALIM</h4>
+          </Col>
+        </Row>
+      </div>
 
       <div hidden={!lastActivityListLoading}>
         <Spinner color="primary">

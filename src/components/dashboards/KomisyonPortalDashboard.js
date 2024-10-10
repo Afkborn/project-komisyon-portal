@@ -155,6 +155,7 @@ export default function KomisyonPortalDashboard() {
             token={token}
             showPersonelDetay={showPersonelDetay}
             showBirimPersonelListe={showBirimPersonelListe}
+            selectedKurum={selectedKurum}
           />
         );
       case 1:
