@@ -22,6 +22,7 @@ export default function PersonelDurumGuncelleModal({
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newDeactivationReason, setNewDeactivationReason] = useState("");
+  const [newDeactivationDate, setNewDeactivationDate] = useState(new Date());
   useEffect(() => {
     if (personel && !personel.status) {
       setUpdateButtonDisabled(false);
@@ -40,7 +41,7 @@ export default function PersonelDurumGuncelleModal({
       data: {
         status: !personel.status,
         deactivationReason: newDeactivationReason,
-        deactivationDate: new Date(),
+        deactivationDate: newDeactivationDate,
       },
       headers: {
         Authorization: `Bearer ${token}`,
@@ -64,6 +65,10 @@ export default function PersonelDurumGuncelleModal({
     }
     setNewDeactivationReason(event.target.value);
     setUpdateButtonDisabled(false);
+  }
+
+  function handleDateChange(event) {
+    setNewDeactivationDate(event.target.value);
   }
 
   return (
@@ -129,6 +134,16 @@ export default function PersonelDurumGuncelleModal({
                     Diğer
                   </option>
                 </Input>
+              </FormGroup>
+
+              <FormGroup hidden={!personel.status}>
+                <Label for="personelNewDeactivationDate">Ayrılış Tarihi</Label>
+                <Input
+                  id="personelNewDeactivationDate"
+                  type="date"
+                  value={newDeactivationDate}
+                  onChange={(e) => handleDateChange(e)}
+                />
               </FormGroup>
             </div>
           )}

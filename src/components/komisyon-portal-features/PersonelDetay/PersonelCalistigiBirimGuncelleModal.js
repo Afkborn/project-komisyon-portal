@@ -108,6 +108,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
     if (
       birimSira === "ikinciBirim" &&
+      personel.ikinciBirimID &&
       newCalistigiBirim._id === personel.ikinciBirimID._id
     ) {
       alertify.error("Çalıştığı birim aynı olduğu için güncelleme yapılamaz.");
@@ -163,6 +164,29 @@ export default function PersonelCalistigiBirimGuncelleModal({
     }
   };
 
+  const handleClearSecondUnit = () => {
+    const configuration = {
+      method: "PUT",
+      url: "api/persons/" + personel._id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        ikinciBirimID: null,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        refreshPersonel();
+        alertify.success("İkinci birim bilgisi silindi.");
+        toggle();
+      })
+      .catch((error) => {
+        alertify.error("İkinci birim bilgisi silinemedi.");
+      });
+  };
+
   return (
     <Modal isOpen={modal} toggle={toggle}>
       <ModalHeader toggle={toggle}>Çalıştığı Birimi Güncelle</ModalHeader>
@@ -202,14 +226,18 @@ export default function PersonelCalistigiBirimGuncelleModal({
           {personel && (
             <div>
               <FormGroup>
-                <Label for="calistigiBirim">Şuan Çalıştığı Birim</Label>
+                <Label for="calistigiBirim">
+                  {birimSira === "birinicBirim"
+                    ? "Birinci Çalıştığı Birim"
+                    : "İkinci Çalıştığı Birim"}
+                </Label>
                 <Input
                   id="calistigiBirim"
                   type="text"
                   value={
                     birimSira === "birinciBirim"
                       ? personel.birimID.name
-                      : personel.ikinciBirimID.name
+                      : personel.ikinciBirimID && personel.ikinciBirimID.name
                   }
                   disabled
                 />
@@ -304,6 +332,13 @@ export default function PersonelCalistigiBirimGuncelleModal({
         </Button>{" "}
         <Button color="secondary" onClick={handleCancel}>
           İptal
+        </Button>
+        <Button
+          color="danger"
+          hidden={birimSira === "birinciBirim"}
+          onClick={handleClearSecondUnit}
+        >
+          İkinci Birim Sil
         </Button>
       </ModalFooter>
     </Modal>

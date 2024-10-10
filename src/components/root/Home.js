@@ -94,26 +94,27 @@ export default function Home() {
 
   return (
     <div>
-      <>
-        <Navbar className="my-2">
-          <NavbarBrand href="/">
-            <img
-              alt="logo"
-              src={logo}
-              style={{
-                height: 80,
-                width: 80,
-              }}
-            />
-            <span>Adliye Yönetim Sistemi</span>
-          </NavbarBrand>
-          {renderDropdown()}
-        </Navbar>
-      </>
+      <Navbar className="my-2">
+        <NavbarBrand href="/">
+          <img
+            alt="logo"
+            src={logo}
+            style={{
+              height: 80,
+              width: 80,
+            }}
+          />
+          <span>Adliye Yönetim Sistemi</span>
+        </NavbarBrand>
+        {renderDropdown()}
+      </Navbar>
+
       <Container>
-        
         <div className="mt-5">
-          <h5 className="text-center">Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş yapmanız gerekmektektedir.</h5>
+          <h5 className="text-center">
+            Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş yapmanız
+            gerekmektektedir.
+          </h5>
           <CardGroup>
             <Card
               className="m-5"
