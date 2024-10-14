@@ -24,11 +24,24 @@ export default function KomisyonPortalWelcome({
 
   const [katipChartLoading, setKatipChartLoading] = useState(false);
   const [katipChart, setKatipChart] = useState([]);
-  const [selected, setSelected] = useState(0);
-  const [hovered, setHovered] = useState(undefined);
+  const [unvanChart, setUnvanChart] = useState([]);
+  const [katipChartSelected, setKatipChartSelected] = useState(0);
+  const [unvanChartSelected, setUnvanChartSelected] = useState(0);
+  const [katipHovered, setKatipHovered] = useState(undefined);
+  const [unvanHovered, setUnvanHovered] = useState(undefined);
 
-  const data = katipChart.map((entry, i) => {
-    if (hovered === i) {
+  const katipChartData = katipChart.map((entry, i) => {
+    if (katipHovered === i) {
+      return {
+        ...entry,
+        color: "grey",
+      };
+    }
+    return entry;
+  });
+
+  const unvanChartData = unvanChart.map((entry, i) => {
+    if (unvanHovered === i) {
       return {
         ...entry,
         color: "grey",
@@ -53,9 +66,7 @@ export default function KomisyonPortalWelcome({
     setKatipChartLoading(true);
     let configuration = {
       method: "GET",
-      url:
-        `/api/reports/mahkemeSavcilikKatipSayisi?institutionId=` +
-        selectedKurum.id,
+      url: `/api/reports/chartData?institutionId=` + selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -63,7 +74,8 @@ export default function KomisyonPortalWelcome({
 
     axios(configuration)
       .then((response) => {
-        setKatipChart(response.data.pieChartData);
+        setKatipChart(response.data.katipPieChartData);
+        setUnvanChart(response.data.unvanPieChartData);
         setKatipChartLoading(false);
       })
       .catch((error) => {
@@ -161,8 +173,16 @@ export default function KomisyonPortalWelcome({
 
       <div>
         <Row>
+          {katipChartLoading && (
+            <Col xs="12" className="text-center">
+              <Spinner color="primary">
+                <span className="sr-only">Yükleniyor...</span>
+              </Spinner>
+            </Col>
+          )}
+
           <Col xs="6" className="text-center">
-            <h4>Personel İstatistikleri</h4>
+            <h4>Zabıt Katibi İstatistikleri</h4>
             <div>
               <div
                 className="legend"
@@ -173,7 +193,7 @@ export default function KomisyonPortalWelcome({
                   alignItems: "start",
                 }}
               >
-                {data.map((entry, index) => (
+                {katipChartData.map((entry, index) => (
                   <div
                     key={index}
                     style={{
@@ -190,7 +210,9 @@ export default function KomisyonPortalWelcome({
                         marginRight: "8px",
                       }}
                     ></div>
-                    <span>{entry.title} ({entry.value} kişi) </span>
+                    <span>
+                      {entry.title} ({entry.value} kişi){" "}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -202,11 +224,11 @@ export default function KomisyonPortalWelcome({
                 fontSize: "8px",
                 height: "300px",
               }}
-              data={data}
+              data={katipChartData}
               radius={pieChartDefaultProps.radius - 6}
               lineWidth={60}
               segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
-              segmentsShift={(index) => (index === selected ? 6 : 1)}
+              segmentsShift={(index) => (index === katipChartSelected ? 6 : 1)}
               animate
               label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
               labelPosition={100 - lineWidth / 2}
@@ -216,19 +238,87 @@ export default function KomisyonPortalWelcome({
                 pointerEvents: "none",
               }}
               onClick={(_, index) => {
-                setSelected(index === selected ? undefined : index);
+                setKatipChartSelected(
+                  index === katipChartSelected ? undefined : index
+                );
               }}
               onMouseOver={(_, index) => {
-                setHovered(index);
+                setKatipHovered(index);
               }}
               onMouseOut={() => {
-                setHovered(undefined);
+                setKatipHovered(undefined);
               }}
             />
           </Col>
 
           <Col xs="6" className="text-center">
-            <h4>BURAYA NE KOYALIM</h4>
+            <h4>Ünvan İstatistikleri</h4>
+            <div>
+              <div
+                className="legend"
+                style={{
+                  display: "flex",
+                  justifyContent: "start",
+                  flexDirection: "column",
+                  alignItems: "start",
+                }}
+              >
+                {unvanChartData.map((entry, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: entry.color,
+                        marginRight: "8px",
+                      }}
+                    ></div>
+                    <span>
+                      {entry.title} ({entry.value} kişi){" "}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <PieChart
+              style={{
+                fontFamily:
+                  '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
+                fontSize: "8px",
+                height: "300px",
+              }}
+              data={unvanChartData}
+              radius={pieChartDefaultProps.radius - 6}
+              lineWidth={60}
+              segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
+              segmentsShift={(index) => (index === unvanChartSelected ? 6 : 1)}
+              animate
+              label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
+              labelPosition={100 - lineWidth / 2}
+              labelStyle={{
+                fill: "#fff",
+                opacity: 0.75,
+                pointerEvents: "none",
+              }}
+              onClick={(_, index) => {
+                setUnvanChartSelected(
+                  index === unvanChartSelected ? undefined : index
+                );
+              }}
+              onMouseOver={(_, index) => {
+                setUnvanHovered(index);
+              }}
+              onMouseOut={() => {
+                setUnvanHovered(undefined);
+              }}
+            />
           </Col>
         </Row>
       </div>
