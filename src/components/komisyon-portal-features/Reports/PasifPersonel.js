@@ -6,6 +6,7 @@ import {
   calculateGorevSuresi,
   renderDate_GGAAYYYY,
 } from "../../actions/TimeActions";
+import { generatePdf } from "../../actions/PdfActions";
 
 export default function PasifPersonel({
   selectedKurum,
@@ -63,7 +64,7 @@ export default function PasifPersonel({
         </div>
 
         <div hidden={raporGetiriliyorMu || pasifPersonelList.length === 0}>
-          <Table striped>
+          <Table striped id="pasifPersonelTable">
             <thead>
               <tr>
                 <th>Sicil No</th>
@@ -71,7 +72,7 @@ export default function PasifPersonel({
                 <th>Soyadı</th>
                 <th>Gerekçe</th>
                 <th>Tarih</th>
-                <th>İşlemler</th>
+                <th id="detayTD">İşlemler</th>
               </tr>
             </thead>
             <tbody>
@@ -85,7 +86,7 @@ export default function PasifPersonel({
                     {renderDate_GGAAYYYY(personel.deactivationDate)} (
                     {calculateGorevSuresi(personel.deactivationDate)})
                   </td>
-                  <td>
+                  <td id="detayTD">
                     <Button onClick={(e) => showPersonelDetay(personel)}>
                       Detay
                     </Button>
@@ -94,6 +95,30 @@ export default function PasifPersonel({
               ))}
             </tbody>
           </Table>
+          <Button
+            disabled
+            className="m-3"
+            size="lg"
+            id="exportExcel"
+            type="submit"
+          >
+            Excel'e Aktar
+          </Button>
+          <Button
+            className="m-3"
+            size="lg"
+            id="exportPdf"
+            onClick={(e) => {
+              generatePdf(
+                document,
+                "pasifPersonelTable",
+                "Durumu Pasif Personel Listesi",
+                "detayTD"
+              );
+            }}
+          >
+            Pdf'e Aktar
+          </Button>{" "}
         </div>
       </div>
     </div>

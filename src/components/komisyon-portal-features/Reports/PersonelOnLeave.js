@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { Input, Label, Button, Form, Row, Col } from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
+
+// import html2pdf from "html2pdf.js";
+
+import { generatePdf } from "../../actions/PdfActions";
+
 export default function PersonelOnLeave({
   selectedKurum,
   token,
@@ -61,6 +66,28 @@ export default function PersonelOnLeave({
         console.log(error);
       });
   };
+
+  // const exportPdf = () => {
+  //   const element = document.getElementById("personelOnLeaveTable");
+
+  //   // element içinde dön
+  //   // id'si detayTD olanları sil
+  //   let tempElement = element.cloneNode(true);
+  //   let detayTDs = tempElement.querySelectorAll("#detayTD");
+  //   detayTDs.forEach((td) => {
+  //     td.remove();
+  //   });
+
+  //   const options = {
+  //     margin: 0.5,
+  //     filename: "PersonelOnLeave.pdf",
+  //     image: { type: "jpeg", quality: 0.98 },
+  //     html2canvas: { scale: 1 },
+  //     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+  //   };
+
+  //   html2pdf().from(tempElement).set(options).save();
+  // };
 
   return (
     <div>
@@ -144,7 +171,7 @@ export default function PersonelOnLeave({
         {personelList.length > 0 && (
           <div className="mt-3">
             <h5>İzinde Olan Personeller</h5>
-            <table className="table">
+            <table className="table" id="personelOnLeaveTable">
               <thead>
                 <tr>
                   <th scope="col">Sicil No</th>
@@ -153,7 +180,7 @@ export default function PersonelOnLeave({
                   <th scope="col">Birim</th>
                   <th scope="col">Başlangıç Tarihi</th>
                   <th scope="col">Bitiş Tarihi</th>
-                  <th scope="col"></th>
+                  <th scope="col" id="detayTD"></th>
                 </tr>
               </thead>
               <tbody>
@@ -168,7 +195,7 @@ export default function PersonelOnLeave({
                       <td>{personel.birim}</td>
                       <td>{renderDate_GGAAYYYY(personel.izinBaslangic)}</td>
                       <td>{renderDate_GGAAYYYY(personel.izinBitis)}</td>
-                      <td>
+                      <td id="detayTD">
                         <Button
                           color="info"
                           size="sm"
@@ -193,11 +220,17 @@ export default function PersonelOnLeave({
               Excel'e Aktar
             </Button>
             <Button
-              disabled
               className="m-3"
               size="lg"
               id="exportPdf"
-              type="submit"
+              onClick={(e) => {
+                generatePdf(
+                  document,
+                  "personelOnLeaveTable",
+                  "İzinde Olan Personel.pdf",
+                  "detayTD"
+                );
+              }}
             >
               Pdf'e Aktar
             </Button>

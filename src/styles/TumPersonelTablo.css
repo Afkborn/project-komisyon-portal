@@ -1,0 +1,8 @@
+.equal-height .col {
+  display: flex;
+  flex-direction: column;
+}
+
+.equal-height .col > div {
+  flex-grow: 1; /* İçeriklere göre esner */
+}

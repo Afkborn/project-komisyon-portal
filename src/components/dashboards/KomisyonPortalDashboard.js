@@ -75,6 +75,8 @@ export default function KomisyonPortalDashboard() {
   function getKurum() {
     axios(GET_institutions)
       .then((result) => {
+        // sort result.data.InstitutionList by id 
+        result.data.InstitutionList.sort((a, b) => a.id - b.id);
         setKurumlar(result.data.InstitutionList);
         // eğer seçili kurum yoksa liste içerisinde isDefault olanı seç
         if (!selectedKurum) {
@@ -83,6 +85,7 @@ export default function KomisyonPortalDashboard() {
           );
           setSelectedKurum(defaultKurum);
         }
+
       })
       .catch((error) => {
         console.log(error);

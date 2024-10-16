@@ -21,11 +21,11 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
 
       <div className="mt-5">
         <ListGroup>
-          {kurumlar.map((kurum) => (
+          {kurumlar.map((kurum, index) => (
             <ListGroupItem key={kurum.id}>
               <ListGroupItemHeading>
                 <Badge color="info" className="me-2">
-                  {kurum.id}
+                  {index + 1}
                 </Badge>
                 {kurum.name} {kurum.status === false && "(Pasif)"}
                 <Button

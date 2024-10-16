@@ -3,6 +3,8 @@ import { Button, Badge, Spinner, Label, FormGroup, Input } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 
+import { generatePdf } from "../../actions/PdfActions";
+
 export default function UnitMissingClerk({ token, selectedKurum }) {
   const [aramaYapilacakBirimler, setAramaYapilacakBirimler] = useState([]);
   const [eksikKatibiOlanBirimler, setEksikKatibiOlanBirimler] = useState([]);
@@ -118,7 +120,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
 
         {eksikKatibiOlanBirimler.length > 0 && (
           <div>
-            <table className="table">
+            <table className="table" id="unitMissingClerkTable">
               <thead>
                 <tr>
                   <th>Birim Adı</th>
@@ -157,11 +159,17 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
               Excel'e Aktar
             </Button>
             <Button
-              disabled
               className="m-3"
               size="lg"
               id="exportPdf"
-              type="submit"
+              onClick={(e) => {
+                generatePdf(
+                  document,
+                  "unitMissingClerkTable",
+                  "Eksik Katibi Olan Birimler Listesi.pdf",
+                  "detayTD"
+                );
+              }}
             >
               Pdf'e Aktar
             </Button>

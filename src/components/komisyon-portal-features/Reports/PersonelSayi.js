@@ -6,7 +6,9 @@ import {
   AccordionHeader,
   AccordionItem,
   Badge,
+  Button,
 } from "reactstrap";
+import { generatePdf } from "../../actions/PdfActions";
 
 export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
   const [spinner, setSpinner] = useState(false);
@@ -85,7 +87,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 Ünvan Bazlı Sayılar
               </AccordionHeader>
               <AccordionBody accordionId="1">
-                <table className="table table-striped">
+                <table className="table table-striped" id="tableUnvanPersonel">
                   <thead>
                     <tr>
                       <th>Ünvan</th>
@@ -101,6 +103,18 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                     ))}
                   </tbody>
                 </table>
+                <Button
+                  color="primary"
+                  onClick={() =>
+                    generatePdf(
+                      document,
+                      "tableUnvanPersonel",
+                      "Ünvan Bazlı Personel Sayıları"
+                    )
+                  }
+                >
+                  Pdf'e Aktar
+                </Button>
               </AccordionBody>
             </AccordionItem>
             <AccordionItem>
@@ -108,7 +122,10 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 Mahkeme Tipi Bazlı Sayılar
               </AccordionHeader>
               <AccordionBody accordionId="2">
-                <table className="table table-striped">
+                <table
+                  className="table table-striped"
+                  id="tableMahkemeTipPersonel"
+                >
                   <thead>
                     <tr>
                       <th>Mahkeme Tipi</th>
@@ -124,6 +141,18 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                     ))}
                   </tbody>
                 </table>
+                <Button
+                  color="primary"
+                  onClick={() =>
+                    generatePdf(
+                      document,
+                      "tableMahkemeTipPersonel",
+                      "Mahkeme Tipi Bazlı Personel Sayıları"
+                    )
+                  }
+                >
+                  Pdf'e Aktar
+                </Button>
               </AccordionBody>
             </AccordionItem>
             <AccordionItem>
@@ -131,7 +160,10 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 Mahkeme Bazlı Sayılar
               </AccordionHeader>
               <AccordionBody accordionId="3">
-                <table className="table table-striped">
+                <table
+                  className="table table-striped"
+                  id="tableMahkemePersonel"
+                >
                   <thead>
                     <tr>
                       <th>Mahkeme</th>
@@ -147,6 +179,19 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                     ))}
                   </tbody>
                 </table>
+
+                <Button
+                  color="primary"
+                  onClick={() =>
+                    generatePdf(
+                      document,
+                      "tableMahkemePersonel",
+                      "Mahkeme Bazlı Personel Sayıları"
+                    )
+                  }
+                >
+                  Pdf'e Aktar
+                </Button>
               </AccordionBody>
             </AccordionItem>
           </Accordion>

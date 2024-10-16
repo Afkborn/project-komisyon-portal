@@ -15,6 +15,8 @@ import {
 } from "reactstrap";
 import alertify from "alertifyjs";
 
+import "../../../styles/TumPersonelTablo.css";
+
 export default function TumPersonelTablo({
   selectedKurum,
   token,
@@ -99,7 +101,7 @@ export default function TumPersonelTablo({
   const birimTipStyle = {
     fontWeight: "bold",
 
-    //color: "red",
+    color: "red",
     //backgroundColor: "lightgray",
 
     // centering the text
@@ -107,6 +109,17 @@ export default function TumPersonelTablo({
     justifyContent: "center",
     alignItems: "center",
   };
+
+  const divBirimNameStyle = {
+    fontWeight: "bold",
+    color: "black",
+    //backgroundColor: "lightgray",
+    // centering the text
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
 
   const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
 
@@ -213,6 +226,11 @@ export default function TumPersonelTablo({
     });
   }
 
+  const borderDivStyle = {
+    border: "1px solid black",
+    padding: "5px",
+  };
+
   return (
     <div>
       <h3>Personel Tablosu</h3>
@@ -318,16 +336,18 @@ export default function TumPersonelTablo({
         <div hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
           {kontrolEdilecekBirimTipi.length > 0 &&
             kontrolEdilecekBirimTipi.map((birimTip) => (
-              <div key={birimTip.unitTypeID} className="mt-5 border ">
+              <div key={birimTip.unitTypeID} className="mt-5  ">
                 <h2 style={birimTipStyle}>{birimTip.tabloHeaderName}</h2>
-                <Row xs="4" className="">
+                <Row xs="4" className="equal-height">
                   {mahkemeTablo.length > 0 &&
                     mahkemeTablo
                       .filter((birim) => birim.unitTypeID === birimTip.id)
                       .map((birim) => (
-                        <Col key={birim.unitID} className="mt-2">
-                          <div className="bg-light border">
-                            <div id="birimName">
+                        
+                        <Col key={birim.unitID} className="mt-2 col ">
+                          <div style={borderDivStyle} className="bg-light">
+
+                            <div style={divBirimNameStyle}  id="birimName">
                               <h4 className="text-center">{birim.name}</h4>
                             </div>
 
