@@ -16,8 +16,7 @@ function calculateGorevSuresi(date) {
   return `${yil} Yıl ${ay} Ay ${gun} Gün`;
 }
 
-
-function calculateBirimGorevSuresi(date){
+function calculateBirimGorevSuresi(date) {
   // 380 GÜN
   if (!date) return "";
   const d = new Date(date);
@@ -27,8 +26,21 @@ function calculateBirimGorevSuresi(date){
   return `${gun} Gün`;
 }
 
+function calculateKalanGorevSuresi(date) {
+  // örneğin date 31/10/2024
+  // dönmesi gereken data  13 Gün
+  if (!date) return "";
+  const d = new Date(date);
+  const now = new Date();
+  const diff = d - now;
+  const gun = Math.floor(diff / 86400000);
+  return `${gun} Gün`;
+}
+
+
 module.exports = {
   renderDate_GGAAYYYY,
   calculateGorevSuresi,
-  calculateBirimGorevSuresi
+  calculateBirimGorevSuresi,
+  calculateKalanGorevSuresi,
 };

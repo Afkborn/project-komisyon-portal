@@ -14,6 +14,7 @@ import axios from "axios";
 import {
   //   renderDate_GGAAYYYY,
   calculateGorevSuresi,
+  calculateKalanGorevSuresi
 } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
 import PersonelUnvanGuncelleModal from "./PersonelUnvanGuncelleModal";
@@ -87,10 +88,29 @@ export default function PersonelDetay({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    setUpdatedPersonel({
-      ...updatedPersonel,
-      [name]: value,
-    });
+    if (name === "isTemporary") {
+      const isTemporary = value === "true"; // String değeri boolean'a çeviriyoruz
+
+      // Eğer isTemporary false ise, ilgili alanları sıfırla
+      if (!isTemporary) {
+        setUpdatedPersonel({
+          ...updatedPersonel,
+          isTemporary: isTemporary,
+          isTemporaryReason: "",
+          isTemporaryEndDate: "",
+        });
+      } else {
+        setUpdatedPersonel({
+          ...updatedPersonel,
+          isTemporary: isTemporary,
+        });
+      }
+    } else {
+      setUpdatedPersonel({
+        ...updatedPersonel,
+        [name]: value,
+      });
+    }
   };
 
   const handleSearchByChange = (e) => {
@@ -105,14 +125,39 @@ export default function PersonelDetay({
       durusmaKatibiMi: updatedPersonel.durusmaKatibiMi,
       description: updatedPersonel.description,
       level: updatedPersonel.level,
-      isTemporary: updatedPersonel.isTemporary,
+
       tckn: updatedPersonel.tckn,
       phoneNumber: updatedPersonel.phoneNumber,
       birthDate:
         updatedPersonel.birthDate && updatedPersonel.birthDate.split("T")[0],
       bloodType: updatedPersonel.bloodType,
       keyboardType: updatedPersonel.keyboardType,
+
+      isTemporary: updatedPersonel.isTemporary,
+      isTemporaryReason: updatedPersonel.isTemporaryReason,
+      isTemporaryEndDate:
+        updatedPersonel.isTemporaryEndDate &&
+        updatedPersonel.isTemporaryEndDate.split("T")[0],
     };
+  };
+
+  const clearUpdatedPersonel = () => {
+    setUpdatedPersonel({
+      ad: "",
+      soyad: "",
+      goreveBaslamaTarihi: "",
+      durusmaKatibiMi: "",
+      description: "",
+      level: "",
+      isTemporary: "",
+      tckn: "",
+      phoneNumber: "",
+      birthDate: "",
+      bloodType: "",
+      keyboardType: "",
+      isTemporaryReason: "",
+      isTemporaryEndDate: "",
+    });
   };
 
   const refreshPersonel = (afterDelete = false) => {
@@ -169,6 +214,7 @@ export default function PersonelDetay({
 
   const handleUpdate = () => {
     setLoadSpinner(true);
+
     const configuration = {
       method: "PUT",
       url: "api/persons/" + personel._id,
@@ -192,6 +238,7 @@ export default function PersonelDetay({
   };
 
   const getPersonelBySicil = (sicil) => {
+    clearUpdatedPersonel();
     setLoadSpinner(true);
     const configuration = {
       method: "GET",
@@ -236,7 +283,7 @@ export default function PersonelDetay({
 
   const getPersonelByAdSoyad = (ad, soyad) => {
     setLoadSpinner(true);
-
+    clearUpdatedPersonel();
     if (ad) ad = ad.trim();
     if (soyad) soyad = soyad.trim();
 
@@ -511,18 +558,52 @@ export default function PersonelDetay({
               </Col>
 
               <Col>
-                {console.log(updatedPersonel)}
                 <Label>Geçici Personel</Label>
                 <Input
                   type="select"
                   name="isTemporary"
                   id="isTemporary"
-                  value={updatedPersonel.isTemporary}
+                  value={updatedPersonel.isTemporary ? "true" : "false"} // Boolean değeri stringe çeviriyoruz
                   onChange={handleInputChange}
                 >
                   <option value="true">Evet</option>
                   <option value="false">Hayır</option>
                 </Input>
+              </Col>
+            </Row>
+
+            <Row hidden={!updatedPersonel.isTemporary}>
+              {" "}
+              {/* Boolean değeri doğru çalışacak */}
+              <Col>
+                <Label>Geçici Personel Açıklama</Label>
+                <Input
+                  type="text"
+                  name="isTemporaryReason"
+                  id="isTemporaryReason"
+                  value={updatedPersonel.isTemporaryReason}
+                  onChange={handleInputChange}
+                />
+              </Col>
+              <Col>
+                <Label>Geçici Personel Bitiş Tarihi</Label>
+                <Input
+                  type="date"
+                  name="isTemporaryEndDate"
+                  id="isTemporaryEndDate"
+                  value={updatedPersonel.isTemporaryEndDate}
+                  onChange={handleInputChange}
+                />
+              </Col>
+              <Col>
+                <Label> Geçici Personel Kalan Gün </Label>
+                <Input
+                  type="text"
+                  value={calculateKalanGorevSuresi(
+                    updatedPersonel.isTemporaryEndDate
+                  )}
+                  disabled
+                />
               </Col>
             </Row>
 

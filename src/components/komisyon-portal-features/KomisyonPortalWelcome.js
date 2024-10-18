@@ -7,11 +7,15 @@ import {
   Spinner,
   Row,
   Col,
+  Alert,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import { PieChart, pieChartDefaultProps } from "react-minimal-pie-chart";
-
+import {
+  renderDate_GGAAYYYY,
+  calculateKalanGorevSuresi,
+} from "../actions/TimeActions";
 export default function KomisyonPortalWelcome({
   user,
   token,
@@ -19,9 +23,14 @@ export default function KomisyonPortalWelcome({
   showBirimPersonelListe,
   selectedKurum,
 }) {
+  // last aktivite
+  const widthOfLine = 60;
   const [lastActivityList, setLastActivityList] = useState([]);
-  const [lastActivityListLoading, setLastActivityListLoading] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // pageSize değiştirilmediği için, setPageSize kaldırılabilir.
 
+  // pie chart
   const [katipChartLoading, setKatipChartLoading] = useState(false);
   const [katipChart, setKatipChart] = useState([]);
   const [unvanChart, setUnvanChart] = useState([]);
@@ -29,6 +38,10 @@ export default function KomisyonPortalWelcome({
   const [unvanChartSelected, setUnvanChartSelected] = useState(0);
   const [katipHovered, setKatipHovered] = useState(undefined);
   const [unvanHovered, setUnvanHovered] = useState(undefined);
+
+  // urgent jobs
+  const [urgentJobs, setUrgentJobs] = useState([]);
+  const [urgentJobsLoading, setUrgentJobsLoading] = useState(false);
 
   const katipChartData = katipChart.map((entry, i) => {
     if (katipHovered === i) {
@@ -50,17 +63,17 @@ export default function KomisyonPortalWelcome({
     return entry;
   });
 
-  const lineWidth = 60;
-
-  const [pageCount, setPageCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // pageSize değiştirilmediği için, setPageSize kaldırılabilir.
-
   useEffect(() => {
     if (lastActivityList.length === 0) getLastActivityList();
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
+    if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
     // eslint-disable-next-line
   }, [currentPage, selectedKurum]); // currentPage bağımlılığı ile her sayfa değişiminde çağrılır
+
+  const handlePaginationClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    getLastActivityList();
+  };
 
   const getKatipChart = () => {
     setKatipChartLoading(true);
@@ -86,7 +99,6 @@ export default function KomisyonPortalWelcome({
   };
 
   const getLastActivityList = () => {
-    setLastActivityListLoading(true);
     let configuration = {
       method: "GET",
       url: `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`,
@@ -99,12 +111,32 @@ export default function KomisyonPortalWelcome({
       .then((response) => {
         setLastActivityList(response.data.activityList);
         setPageCount(response.data.pageCount); // Sayfa sayısını doğru şekilde ayarladık
-        setLastActivityListLoading(false);
       })
       .catch((error) => {
         let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
         alertify.error(errorMessage);
-        setLastActivityListLoading(false);
+      });
+  };
+
+  const getUrgentJobs = () => {
+    setUrgentJobsLoading(true);
+    let configuration = {
+      method: "GET",
+      url: `/api/reports/urgentJobs?institutionId=${selectedKurum.id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        setUrgentJobs(response.data.urgentJobs);
+        setUrgentJobsLoading(false);
+      })
+      .catch((error) => {
+        let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
+        alertify.error(errorMessage);
+        setUrgentJobsLoading(false);
       });
   };
 
@@ -170,7 +202,7 @@ export default function KomisyonPortalWelcome({
         silme işlemlerini gerçekleştirmek için geliştirilmiştir.
       </p>
       <hr></hr>
-
+      {/* PIE CHARTS */}
       <div>
         <Row>
           {katipChartLoading && (
@@ -231,7 +263,7 @@ export default function KomisyonPortalWelcome({
               segmentsShift={(index) => (index === katipChartSelected ? 6 : 1)}
               animate
               label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
-              labelPosition={100 - lineWidth / 2}
+              labelPosition={100 - widthOfLine / 2}
               labelStyle={{
                 fill: "#fff",
                 opacity: 0.75,
@@ -301,7 +333,7 @@ export default function KomisyonPortalWelcome({
               segmentsShift={(index) => (index === unvanChartSelected ? 6 : 1)}
               animate
               label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
-              labelPosition={100 - lineWidth / 2}
+              labelPosition={100 - widthOfLine / 2}
               labelStyle={{
                 fill: "#fff",
                 opacity: 0.75,
@@ -323,11 +355,54 @@ export default function KomisyonPortalWelcome({
         </Row>
       </div>
 
-      <div hidden={!lastActivityListLoading}>
+      {/* ACELE İŞLER  */}
+      {urgentJobsLoading && (
         <Spinner color="primary">
           <span className="sr-only">Yükleniyor...</span>
         </Spinner>
+      )}
+      <div className="mt-3" hidden={urgentJobsLoading}>
+        {urgentJobs && urgentJobs.length === 0 && (
+          <Alert color="success">
+            Yapılması gereken acele bir iş yok gibi gözüküyor, rahatsın :)
+          </Alert>
+        )}
+        {urgentJobs && urgentJobs.length > 0 && (
+          <div className="mt-2">
+            <h4> Acele İşler</h4>
+            <Table striped size="sm">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>İş Tanımı</th>
+                  <th>Hedef</th>
+                  <th>İşin Bitiş Tarihi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {urgentJobs.map((job, index) => (
+                  <tr key={job.personID}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{job.urgentJobType}</td>
+                    <td
+                      style={clickableTdStyle}
+                      onClick={() => handleTdOnClickPersonel(job)}
+                    >
+                      {job.ad} {job.soyad} ({job.sicil})
+                    </td>
+                    <td>
+                      {renderDate_GGAAYYYY(job.urgentJobEndDate)} (
+                      {calculateKalanGorevSuresi(job.urgentJobEndDate)})
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
       </div>
+
+      {/* SON 100 AKTİVİTE */}
       <div>
         <h4> Son 100 Aktivite</h4>
 
@@ -368,12 +443,12 @@ export default function KomisyonPortalWelcome({
             <PaginationItem disabled={currentPage <= 1}>
               <PaginationLink
                 previous
-                onClick={() => setCurrentPage(currentPage - 1)}
+                onClick={() => handlePaginationClick(currentPage - 1)}
               />
             </PaginationItem>
             {Array.from({ length: pageCount }, (_, i) => (
               <PaginationItem key={i} active={i + 1 === currentPage}>
-                <PaginationLink onClick={() => setCurrentPage(i + 1)}>
+                <PaginationLink onClick={() => handlePaginationClick(i + 1)}>
                   {i + 1}
                 </PaginationLink>
               </PaginationItem>
@@ -381,7 +456,7 @@ export default function KomisyonPortalWelcome({
             <PaginationItem disabled={currentPage >= pageCount}>
               <PaginationLink
                 next
-                onClick={() => setCurrentPage(currentPage + 1)}
+                onClick={() => handlePaginationClick(currentPage + 1)}
               />
             </PaginationItem>
           </Pagination>

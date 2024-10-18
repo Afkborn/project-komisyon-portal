@@ -120,7 +120,6 @@ export default function TumPersonelTablo({
     alignItems: "center",
   };
 
-
   const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
 
   function renderPersonelWithKind(personelTablo, kind) {
@@ -343,11 +342,9 @@ export default function TumPersonelTablo({
                     mahkemeTablo
                       .filter((birim) => birim.unitTypeID === birimTip.id)
                       .map((birim) => (
-                        
                         <Col key={birim.unitID} className="mt-2 col ">
                           <div style={borderDivStyle} className="bg-light">
-
-                            <div style={divBirimNameStyle}  id="birimName">
+                            <div style={divBirimNameStyle} id="birimName">
                               <h4 className="text-center">{birim.name}</h4>
                             </div>
 

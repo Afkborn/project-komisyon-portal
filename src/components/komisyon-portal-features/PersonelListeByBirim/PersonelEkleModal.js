@@ -32,6 +32,9 @@ function PersonelEkleModal({
     goreveBaslamaTarihi: "",
     durusmaKatibiMi: "",
     birimeBaslamaTarihi: new Date().toISOString().substr(0, 10),
+    isTemporary: false,
+    isTemporaryReason: "",
+    isTemporaryEndDate: "",
   });
 
   const handleInputChange = (e) => {
@@ -236,6 +239,32 @@ function PersonelEkleModal({
                 Geçici Personel
               </Label>
             </FormGroup>
+
+            {formData.isTemporary && (
+              <FormGroup>
+                <Label for="isTemporaryReason">Geçici Personel Nedeni</Label>
+                <Input
+                  type="text"
+                  name="isTemporaryReason"
+                  id="isTemporaryReason"
+                  onChange={handleInputChange}
+                />
+              </FormGroup>
+            )}
+
+            {formData.isTemporary && (
+              <FormGroup>
+                <Label for="isTemporaryEndDate">
+                  Geçici Personel Bitiş Tarihi
+                </Label>
+                <Input
+                  type="date"
+                  name="isTemporaryEndDate"
+                  id="isTemporaryEndDate"
+                  onChange={handleInputChange}
+                />
+              </FormGroup>
+            )}
 
             <FormGroup>
               <Label for="goreveBaslamaTarihi">Göreve Başlama Tarihi</Label>
