@@ -9,12 +9,16 @@ import {
   FormGroup,
   Label,
   Input,
+  Tooltip,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 
 function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
   const [updatedBirim, setUpdatedBirim] = useState({ ...birim });
+
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toolTipToogle = () => setTooltipOpen(!tooltipOpen);
 
   const handleCancel = () => {
     setUpdatedBirim({ ...birim });
@@ -63,11 +67,37 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
           {birim && (
             <Form>
               <FormGroup>
+                <Label id="kurumDisiID" for="kurumDisiID">
+                  Kurum ID : {birim._id} <b>Bu Nedir?</b>
+                  <Tooltip
+                    placement="right"
+                    isOpen={tooltipOpen}
+                    target="kurumDisiID"
+                    toggle={toolTipToogle}
+                  >
+                    Kurum ID numarası geçici personeli kurum dışında bir birime
+                    atamak için kullanılır.
+                  </Tooltip>
+                </Label>
+                <br />
+                <Button
+                  color="info"
+                  id="kurumIDCopy"
+                  size="sm"
+                  onClick={(e) => {
+                    navigator.clipboard.writeText(birim._id);
+                    alertify.success("ID Kopyalandı.");
+                  }}
+                >
+                  ID Kopyala
+                </Button>
+              </FormGroup>
+              <FormGroup>
                 <Label for="unitTypeName">
                   Birim Tipi : {birim.unitType.name}
                 </Label>
                 <br />
-                <Label for="unitTypeType"  hidden={!birim.isMahkeme}>
+                <Label for="unitTypeType" hidden={!birim.isMahkeme}>
                   Birim Tipi : {birim.unitType.unitType}
                 </Label>
               </FormGroup>
@@ -100,7 +130,7 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
               </FormGroup>
 
               {/*  minumum katip sayısı */}
-              <FormGroup  hidden={!birim.isMahkeme}>
+              <FormGroup hidden={!birim.isMahkeme}>
                 <Label for="minKatipSayi">Gerekli Minimum Katip Sayısı</Label>
                 <Input
                   type="number"
@@ -129,7 +159,7 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
               </FormGroup>
 
               {/* heyet sayısı */}
-              <FormGroup  hidden={!birim.isMahkeme}>
+              <FormGroup hidden={!birim.isMahkeme}>
                 <Label for="heyetSayi">Heyet Sayısı</Label>
                 <Input
                   type="select"

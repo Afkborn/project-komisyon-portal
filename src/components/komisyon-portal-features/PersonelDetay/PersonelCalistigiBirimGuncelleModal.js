@@ -25,6 +25,11 @@ export default function PersonelCalistigiBirimGuncelleModal({
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newCalistigiBirim, setNewCalistigiBirim] = useState(null);
 
+  const [showKurumDisiBirim, setShowKurumDisiBirim] = useState(false);
+  const [kurumDisiBirimID, setKurumDisiBirimID] = useState(null);
+
+  const [selectValue, setSelectValue] = useState(""); // <select>  tip için state
+
   const [endDate, setEndDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -38,7 +43,22 @@ export default function PersonelCalistigiBirimGuncelleModal({
     setTumBirimler([]);
     setNewCalistigiBirim(null);
     setUpdateButtonDisabled(true);
+    setBirimSira("birinciBirim");
+    setSelectValue("");
+    setShowKurumDisiBirim(false);
+    setKurumDisiBirimID(null);
     toggle();
+  };
+
+  const handleClosed = () => {
+    setBirimler([]);
+    setTumBirimler([]);
+    setNewCalistigiBirim(null);
+    setUpdateButtonDisabled(true);
+    setBirimSira("birinciBirim");
+    setShowKurumDisiBirim(false);
+    setKurumDisiBirimID(null);
+    setSelectValue("");
   };
 
   useEffect(() => {
@@ -50,9 +70,15 @@ export default function PersonelCalistigiBirimGuncelleModal({
   });
 
   function handleTypeChange(event) {
+    setSelectValue(event.target.value);
     if (event.target.value === "Seçiniz") {
       return;
     }
+    if (event.target.value === "Kurum Dışı") {
+      setBirimler([{ _id: "kurumdisi", name: "Kurum Dışı" }]);
+      return;
+    }
+
     let typeId = selectedKurum.types.find(
       (type) => type.name === event.target.value
     ).id;
@@ -88,6 +114,12 @@ export default function PersonelCalistigiBirimGuncelleModal({
     if (event.target.value === "Seçiniz") {
       return;
     }
+    if (event.target.value === "Kurum Dışı") {
+      setShowKurumDisiBirim(true);
+      setUpdateButtonDisabled(false);
+      return;
+    }
+    setShowKurumDisiBirim(false);
     let selectedBirim = birimler.find(
       (birim) => birim.name === event.target.value
     );
@@ -96,12 +128,12 @@ export default function PersonelCalistigiBirimGuncelleModal({
   }
 
   const handleUpdate = () => {
-    if (!newCalistigiBirim) {
+    if (!newCalistigiBirim && !showKurumDisiBirim) {
       alertify.error("Yeni çalışacağı birim seçiniz.");
       return;
     }
 
-    if (newCalistigiBirim._id === personel.birimID._id) {
+    if (!showKurumDisiBirim && newCalistigiBirim._id === personel.birimID._id) {
       alertify.error("Çalıştığı birim aynı olduğu için güncelleme yapılamaz.");
       return;
     }
@@ -112,6 +144,15 @@ export default function PersonelCalistigiBirimGuncelleModal({
       newCalistigiBirim._id === personel.ikinciBirimID._id
     ) {
       alertify.error("Çalıştığı birim aynı olduğu için güncelleme yapılamaz.");
+      return;
+    }
+
+    if (
+      birimSira === "geciciBirim" &&
+      showKurumDisiBirim &&
+      (kurumDisiBirimID === null || kurumDisiBirimID === "")
+    ) {
+      alertify.error("Kurum dışı birim id giriniz.");
       return;
     }
 
@@ -138,6 +179,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
           toggle();
         })
         .catch((error) => {
+          console.log(error);
           alertify.error("Çalıştığı birim bilgisi güncellenemedi.");
         });
     } else {
@@ -147,10 +189,23 @@ export default function PersonelCalistigiBirimGuncelleModal({
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: {
-          ikinciBirimID: newCalistigiBirim._id,
-        },
       };
+
+      if (birimSira === "ikinciBirim") {
+        configuration.data = {
+          ikinciBirimID: newCalistigiBirim._id,
+        };
+      } else {
+        if (kurumDisiBirimID) {
+          configuration.data = {
+            temporaryBirimID: kurumDisiBirimID,
+          };
+        } else {
+          configuration.data = {
+            temporaryBirimID: newCalistigiBirim._id,
+          };
+        }
+      }
 
       axios(configuration)
         .then((response) => {
@@ -187,62 +242,142 @@ export default function PersonelCalistigiBirimGuncelleModal({
       });
   };
 
+  const handleClearTemporaryUnit = () => {
+    const configuration = {
+      method: "PUT",
+      url: "api/persons/" + personel._id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        temporaryBirimID: null,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        refreshPersonel();
+        alertify.success("Geçici birim bilgisi silindi.");
+        toggle();
+      })
+      .catch((error) => {
+        alertify.error("Geçici birim bilgisi silinemedi.");
+      });
+  };
+
+  const handleRadioChange = (e) => {
+    setBirimler([]);
+    setTumBirimler([]);
+    setNewCalistigiBirim(null);
+    setUpdateButtonDisabled(true);
+    setShowKurumDisiBirim(false);
+    setKurumDisiBirimID(null);
+    setSelectValue(""); // <select> değerini sıfırla
+    setBirimSira(e.target.value);
+  };
+
   return (
-    <Modal isOpen={modal} toggle={toggle}>
+    <Modal isOpen={modal} toggle={toggle} onClosed={handleClosed}>
       <ModalHeader toggle={toggle}>Çalıştığı Birimi Güncelle</ModalHeader>
       <ModalBody>
         <Form>
           {/*  eğer personel yazıişleri müdürü ise 2 tane birimi olabiliyor,  */}
-          {personel && personel.kind === "yaziislerimudürü" && (
-            <FormGroup>
-              <Label for="birimSira">
-                Hangi Birimi Güncellemek İstiyorsunuz{" "}
-              </Label>
-              <br /> 
-              {/* radiobutton birinci birim ve ikinci birim diye seçilecek  */}
-              <Input
-                className="mr-2"
-                type="radio"
-                name="birimSira"
-                value="birinciBirim"
-                id="birinciBirim"
-                checked={birimSira === "birinciBirim"}
-                onChange={() => setBirimSira("birinciBirim")}
-              />
-              <Label for="birinciBirim">Birinci Birim</Label>
-              <Input
-                className="mr-2"
-                type="radio"
-                name="birimSira"
-                value="ikinciBirim"
-                id="ikinciBirim"
-                checked={birimSira === "ikinciBirim"}
-                onChange={() => setBirimSira("ikinciBirim")}
-              />
-              <Label for="ikinciBirim">İkinci Birim</Label>
-            </FormGroup>
-          )}
+          {personel &&
+            (personel.kind === "yaziislerimudürü" || personel.isTemporary) && (
+              <FormGroup>
+                <Label for="birimSira">
+                  Hangi Birimi Güncellemek İstiyorsunuz{" "}
+                </Label>
+                <br />
+                {/* radiobutton birinci birim ve ikinci birim diye seçilecek  */}
+                <Input
+                  className="mr-2"
+                  type="radio"
+                  name="birimSira"
+                  value="birinciBirim"
+                  id="birinciBirim"
+                  checked={birimSira === "birinciBirim"}
+                  onChange={(e) => handleRadioChange(e)}
+                />
+                <Label for="birinciBirim">Birinci Birim</Label>
+                <Input
+                  className="mr-2"
+                  type="radio"
+                  name="birimSira"
+                  value="ikinciBirim"
+                  id="ikinciBirim"
+                  checked={birimSira === "ikinciBirim"}
+                  onChange={(e) => handleRadioChange(e)}
+                  hidden={personel.kind === "yaziislerimudürü" ? false : true}
+                />
+                <Label
+                  for="ikinciBirim"
+                  hidden={personel.kind === "yaziislerimudürü" ? false : true}
+                >
+                  İkinci Birim
+                </Label>
+
+                <Input
+                  className="mr-2"
+                  type="radio"
+                  name="birimSira"
+                  value="geciciBirim"
+                  id="geciciBirim"
+                  checked={birimSira === "geciciBirim"}
+                  onChange={(e) => handleRadioChange(e)}
+                  hidden={personel.isTemporary ? false : true}
+                />
+                <Label
+                  for="geciciBirim"
+                  hidden={personel.isTemporary ? false : true}
+                >
+                  Geçici Birim
+                </Label>
+              </FormGroup>
+            )}
 
           {personel && (
             <div>
               <FormGroup>
-                <Label for="calistigiBirim">
-                  {birimSira === "birinicBirim"
-                    ? "Birinci Çalıştığı Birim"
-                    : "İkinci Çalıştığı Birim"}
+                {/* BİRİNCİ BİRİM */}
+                <Label
+                  for="calistigiBirim"
+                  hidden={birimSira !== "birinciBirim"}
+                >
+                  Birinci Birim
                 </Label>
                 <Input
                   id="calistigiBirim"
                   type="text"
+                  hidden={birimSira !== "birinciBirim"}
+                  value={personel.birimID.name}
+                  disabled
+                />
+
+                <Label for="digerBirim" hidden={birimSira === "birinciBirim"}>
+                  {birimSira === "ikinciBirim"
+                    ? "İkinci Birim"
+                    : "Geçici Birim"}
+                </Label>
+                <Input
+                  id="digerBirim"
+                  type="text"
+                  hidden={birimSira === "birinciBirim"}
                   value={
-                    birimSira === "birinciBirim"
-                      ? personel.birimID.name
-                      : personel.ikinciBirimID && personel.ikinciBirimID.name
+                    birimSira === "ikinciBirim"
+                      ? personel.ikinciBirimID && personel.ikinciBirimID.name
+                      : (personel.temporaryBirimID &&
+                          personel.temporaryBirimID.name) ||
+                        "BELİRTİLMEMİŞ"
                   }
                   disabled
                 />
               </FormGroup>
-              <FormGroup hidden={birimSira === "ikinciBirim"}>
+              <FormGroup
+                hidden={
+                  birimSira === "ikinciBirim" || birimSira === "geciciBirim"
+                }
+              >
                 <Label for="calistigiBirimBaslangicTarihi">
                   Birim Başlangıç Tarihi
                 </Label>
@@ -262,8 +397,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
             <Label for="selectType">Tip</Label>
             <Input
               id="selectType"
-              onChange={(e) => handleTypeChange(e)}
+              onChange={handleTypeChange}
               name="select"
+              value={selectValue} // value'yu state'e bağla
               type="select"
             >
               <option key={-1}>Seçiniz</option>
@@ -271,6 +407,13 @@ export default function PersonelCalistigiBirimGuncelleModal({
                 selectedKurum.types.map((type) => (
                   <option key={type.id}>{type.name}</option>
                 ))}
+              {/*  eğer geciciBirim seçili ise kurumdışı seceneği ekle*/}
+              <option
+                key={"optionBirimDisi"}
+                hidden={birimSira !== "geciciBirim"}
+              >
+                Kurum Dışı
+              </option>
             </Input>
           </FormGroup>
           <FormGroup>
@@ -289,7 +432,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
               ))}
             </Input>
           </FormGroup>
-          <FormGroup>
+          <FormGroup hidden={showKurumDisiBirim}>
             <Label for="selectedBirim">Yeni Çalışacağı Birim*</Label>
             <Input
               id="selectedBirim"
@@ -299,7 +442,17 @@ export default function PersonelCalistigiBirimGuncelleModal({
             />
           </FormGroup>
 
-          <FormGroup hidden={birimSira === "ikinciBirim"}>
+          <FormGroup hidden={!showKurumDisiBirim}>
+            <Label for="temporaryBirimID">Kurum Dışı Birim id</Label>
+            <Input
+              id="temporaryBirimID"
+              type="text"
+              value={kurumDisiBirimID}
+              onChange={(e) => setKurumDisiBirimID(e.target.value)}
+            />
+          </FormGroup>
+
+          <FormGroup hidden={birimSira !== "birinciBirim"}>
             <Label for="endDate">Değişiklik Tarihi*</Label>
             <Input
               id="endDate"
@@ -310,7 +463,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
             />
           </FormGroup>
 
-          <FormGroup hidden={birimSira === "ikinciBirim"}>
+          <FormGroup hidden={birimSira !== "birinciBirim"}>
             <Label for="detail">Gerekçe</Label>
             <Input
               id="detail"
@@ -335,10 +488,17 @@ export default function PersonelCalistigiBirimGuncelleModal({
         </Button>
         <Button
           color="danger"
-          hidden={birimSira === "birinciBirim"}
+          hidden={birimSira !== "ikinciBirim"}
           onClick={handleClearSecondUnit}
         >
           İkinci Birim Sil
+        </Button>
+        <Button
+          color="danger"
+          hidden={birimSira !== "geciciBirim"}
+          onClick={handleClearTemporaryUnit}
+        >
+          Geçici Birim Sil
         </Button>
       </ModalFooter>
     </Modal>

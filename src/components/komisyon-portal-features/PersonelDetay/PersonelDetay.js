@@ -96,8 +96,9 @@ export default function PersonelDetay({
         setUpdatedPersonel({
           ...updatedPersonel,
           isTemporary: isTemporary,
-          isTemporaryReason: "",
-          isTemporaryEndDate: "",
+          temporaryReason: "",
+          temporaryEndDate: "",
+          temporaryBirimID: null,
         });
       } else {
         setUpdatedPersonel({
@@ -134,10 +135,10 @@ export default function PersonelDetay({
       keyboardType: updatedPersonel.keyboardType,
 
       isTemporary: updatedPersonel.isTemporary,
-      isTemporaryReason: updatedPersonel.isTemporaryReason,
-      isTemporaryEndDate:
-        updatedPersonel.isTemporaryEndDate &&
-        updatedPersonel.isTemporaryEndDate.split("T")[0],
+      temporaryReason: updatedPersonel.temporaryReason,
+      temporaryEndDate:
+        updatedPersonel.temporaryEndDate &&
+        updatedPersonel.temporaryEndDate.split("T")[0],
     };
   };
 
@@ -155,8 +156,8 @@ export default function PersonelDetay({
       birthDate: "",
       bloodType: "",
       keyboardType: "",
-      isTemporaryReason: "",
-      isTemporaryEndDate: "",
+      temporaryReason: "",
+      temporaryEndDate: "",
     });
   };
 
@@ -579,9 +580,9 @@ export default function PersonelDetay({
                 <Label>Geçici Personel Açıklama</Label>
                 <Input
                   type="text"
-                  name="isTemporaryReason"
-                  id="isTemporaryReason"
-                  value={updatedPersonel.isTemporaryReason}
+                  name="temporaryReason"
+                  id="temporaryReason"
+                  value={updatedPersonel.temporaryReason}
                   onChange={handleInputChange}
                 />
               </Col>
@@ -589,21 +590,20 @@ export default function PersonelDetay({
                 <Label>Geçici Personel Bitiş Tarihi</Label>
                 <Input
                   type="date"
-                  name="isTemporaryEndDate"
-                  id="isTemporaryEndDate"
-                  value={updatedPersonel.isTemporaryEndDate}
+                  name="temporaryEndDate"
+                  id="temporaryEndDate"
+                  value={updatedPersonel.temporaryEndDate}
                   onChange={handleInputChange}
                 />
               </Col>
               <Col>
-                <Label> Geçici Personel Kalan Gün </Label>
+                <Label> Geçici Personel Birim </Label>
                 <Input
                   type="text"
-                  value={calculateKalanGorevSuresi(
-                    updatedPersonel.isTemporaryEndDate
-                  )}
+                  value={personel.temporaryBirimID ? personel.temporaryBirimID.name : "BELİRTİLMEMİŞ"}
                   disabled
                 />
+
               </Col>
             </Row>
 

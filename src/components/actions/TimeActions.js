@@ -27,16 +27,23 @@ function calculateBirimGorevSuresi(date) {
 }
 
 function calculateKalanGorevSuresi(date) {
-  // örneğin date 31/10/2024
-  // dönmesi gereken data  13 Gün
+  // Örneğin date 31/10/2024
+  // Dönmesi gereken data 13 Gün
   if (!date) return "";
+
+  // Girilen tarihi ve bugünü sadece yıl, ay, gün bazında kıyaslıyoruz
   const d = new Date(date);
   const now = new Date();
+
+  // Saat bilgilerini sıfırlayarak, sadece gün üzerinden hesap yapalım
+  d.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+
   const diff = d - now;
-  const gun = Math.floor(diff / 86400000);
+  const gun = Math.ceil(diff / 86400000); // Math.floor yerine Math.ceil ile tam gün elde edilir
+
   return `${gun} Gün`;
 }
-
 
 module.exports = {
   renderDate_GGAAYYYY,
