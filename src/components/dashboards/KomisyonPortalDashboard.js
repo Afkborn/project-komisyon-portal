@@ -29,6 +29,7 @@ import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
 import OzellikAktar from "../komisyon-portal-features/Aktarim/OzellikAktar";
 import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
+import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
 import Cookies from "universal-cookie";
 import axios from "axios";
 
@@ -39,10 +40,8 @@ import {
 } from "../constants/AxiosConfiguration";
 
 export default function KomisyonPortalDashboard() {
-  
   const [selectedPersonelID, setSelectedPersonelID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
   const [selectedBirimID, setSelectedBirimID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
-
 
   const [selected, setSelected] = useState(0);
   const [user, setUser] = useState(null);
@@ -75,7 +74,7 @@ export default function KomisyonPortalDashboard() {
   function getKurum() {
     axios(GET_institutions)
       .then((result) => {
-        // sort result.data.InstitutionList by id 
+        // sort result.data.InstitutionList by id
         result.data.InstitutionList.sort((a, b) => a.id - b.id);
         setKurumlar(result.data.InstitutionList);
         // eğer seçili kurum yoksa liste içerisinde isDefault olanı seç
@@ -85,7 +84,6 @@ export default function KomisyonPortalDashboard() {
           );
           setSelectedKurum(defaultKurum);
         }
-
       })
       .catch((error) => {
         console.log(error);
@@ -253,7 +251,7 @@ export default function KomisyonPortalDashboard() {
       case 14:
         return (
           <PasifPersonel
-            selectedKurum={selectedKurum}
+            // selectedKurum={selectedKurum}
             token={token}
             showPersonelDetay={showPersonelDetay}
           />
@@ -261,6 +259,15 @@ export default function KomisyonPortalDashboard() {
 
       case 15:
         return <OzellikAktar selectedKurum={selectedKurum} token={token} />;
+
+      case 16:
+        return (
+          <GeciciPersonel
+            // selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
     }
   }
 
@@ -417,6 +424,14 @@ export default function KomisyonPortalDashboard() {
               active={selected === 14}
             >
               Pasif Personel
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={16}
+              onClick={() => onClick_listGroupItem(16)}
+              active={selected === 16}
+            >
+              Geçici Personel
             </ListGroupItem>
 
             <ListGroupItemHeading className="mt-3 mb-3 text-center">

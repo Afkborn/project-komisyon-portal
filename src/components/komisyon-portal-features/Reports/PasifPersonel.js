@@ -9,7 +9,7 @@ import {
 import { generatePdf } from "../../actions/PdfActions";
 
 export default function PasifPersonel({
-  selectedKurum,
+  // selectedKurum,
   token,
   showPersonelDetay,
 }) {
