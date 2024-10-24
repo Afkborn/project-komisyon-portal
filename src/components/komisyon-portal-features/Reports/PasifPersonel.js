@@ -18,7 +18,8 @@ export default function PasifPersonel({
   const getPasifPersonel = (e) => {
     const configuration = {
       method: "GET",
-      url: "/api/persons/deactivated?institutionId=" + selectedKurum.id,
+      url: "/api/persons/deactivated", 
+      // ?institutionId=" + selectedKurum.id
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -39,7 +40,7 @@ export default function PasifPersonel({
     <div>
       <h3>Durumu Pasif Olan Personel Listesi</h3>
       <span>
-        Bu rapor ile seçtiğiniz kurumda durumu pasif olan personellerin
+        Bu rapor ile tüm  kurumlarda durumu pasif olan personellerin
         listesini görüntüleyebilirsiniz.
       </span>
       <div>

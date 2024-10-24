@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Pagination,
-  PaginationItem,
-  PaginationLink,
-  Spinner,
-  Row,
-  Col,
-  Alert,
-} from "reactstrap";
+import { Table, Spinner, Row, Col, Alert } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
+import Aktiviteler from "./Aktiviteler";
 import { PieChart, pieChartDefaultProps } from "react-minimal-pie-chart";
 import {
   renderDate_GGAAYYYY,
   calculateKalanGorevSuresi,
-} from "../actions/TimeActions";
+} from "../../actions/TimeActions";
 export default function KomisyonPortalWelcome({
   user,
   token,
@@ -25,10 +17,6 @@ export default function KomisyonPortalWelcome({
 }) {
   // last aktivite
   const widthOfLine = 60;
-  const [lastActivityList, setLastActivityList] = useState([]);
-  const [pageCount, setPageCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // pageSize değiştirilmediği için, setPageSize kaldırılabilir.
 
   // pie chart
   const [katipChartLoading, setKatipChartLoading] = useState(false);
@@ -64,16 +52,10 @@ export default function KomisyonPortalWelcome({
   });
 
   useEffect(() => {
-    if (lastActivityList.length === 0) getLastActivityList();
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
     if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
     // eslint-disable-next-line
-  }, [currentPage, selectedKurum]); // currentPage bağımlılığı ile her sayfa değişiminde çağrılır
-
-  const handlePaginationClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    getLastActivityList();
-  };
+  }, [selectedKurum]);
 
   const getKatipChart = () => {
     setKatipChartLoading(true);
@@ -95,26 +77,6 @@ export default function KomisyonPortalWelcome({
         let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
         alertify.error(errorMessage);
         setKatipChartLoading(false);
-      });
-  };
-
-  const getLastActivityList = () => {
-    let configuration = {
-      method: "GET",
-      url: `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    axios(configuration)
-      .then((response) => {
-        setLastActivityList(response.data.activityList);
-        setPageCount(response.data.pageCount); // Sayfa sayısını doğru şekilde ayarladık
-      })
-      .catch((error) => {
-        let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
-        alertify.error(errorMessage);
       });
   };
 
@@ -154,42 +116,6 @@ export default function KomisyonPortalWelcome({
 
   const handleTdOnClickPersonel = (personel) => {
     showPersonelDetay(personel);
-  };
-
-  const handleTdOnClickBirimPersonelListe = (birim) => {
-    showBirimPersonelListe(birim);
-  };
-
-  const renderHedef = (activity) => {
-    let typeField = activity.type.field || "";
-    if (typeField === "") return <td></td>;
-    if (typeField === "unitID") {
-      if (!activity.unitID) return <td></td>;
-      return (
-        <td
-          style={clickableTdStyle}
-          onClick={() => handleTdOnClickBirimPersonelListe(activity.unitID)}
-        >
-          {activity.unitID.name}
-        </td>
-      );
-    }
-    if (typeField === "personID") {
-      if (!activity.personID) return <td></td>;
-      return (
-        <td
-          style={clickableTdStyle}
-          onClick={() => handleTdOnClickPersonel(activity.personID)}
-        >
-          {activity.personID.ad} {activity.personID.soyad} (
-          {activity.personID.sicil})
-        </td>
-      );
-    }
-    if (typeField === "titleID") {
-      if (!activity.titleID) return <td></td>;
-      return <td>{activity.titleID.name}</td>;
-    }
   };
 
   return (
@@ -404,7 +330,13 @@ export default function KomisyonPortalWelcome({
 
       {/* SON 100 AKTİVİTE */}
       <div>
-        <h4> Son 100 Aktivite</h4>
+        <Aktiviteler
+          token={token}
+          user={user}
+          showPersonelDetay={showPersonelDetay}
+          showBirimPersonelListe={showBirimPersonelListe}
+        />
+        {/* <h4> Son 100 Aktivite</h4>
 
         <Table striped size="sm">
           <thead>
@@ -460,7 +392,7 @@ export default function KomisyonPortalWelcome({
               />
             </PaginationItem>
           </Pagination>
-        </div>
+        </div> */}
       </div>
     </div>
   );

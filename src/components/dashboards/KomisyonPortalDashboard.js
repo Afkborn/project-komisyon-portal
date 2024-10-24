@@ -12,7 +12,7 @@ import {
 
 import logo from "../../assets/logo300.png";
 
-import KomisyonPortalWelcome from "../komisyon-portal-features/KomisyonPortalWelcome";
+import KomisyonPortalWelcome from "../komisyon-portal-features/Welcome/KomisyonPortalWelcome";
 import Birimler from "../komisyon-portal-features/Birimler/Birimler";
 
 import TumPersonelListe from "../komisyon-portal-features/TumPersonelListe/TumPersonelListe";

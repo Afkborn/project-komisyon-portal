@@ -496,7 +496,7 @@ export default function PersonelDetay({
               <tbody>
                 {personeller.map((person) => (
                   <tr key={person._id}>
-                    <td>{person.sicil}</td>
+                    <td>{person.sicil}  {person.status === false && "(P)"}</td>
                     <td>{person.ad}</td>
                     <td>{person.soyad}</td>
                     <td>

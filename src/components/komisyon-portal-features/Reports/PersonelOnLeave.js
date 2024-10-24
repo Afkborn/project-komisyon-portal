@@ -190,8 +190,8 @@ export default function PersonelOnLeave({
                       <td>{personel.sicil}</td>
                       <td>{personel.unvan.name}</td>
                       <td>
-                        {personel.ad} {personel.soyad} (
-                        {personel.isTemporary && "Geçici Personel"})
+                        {personel.ad} {personel.soyad} 
+                        {personel.isTemporary && "(Geçici Personel)"}
                       </td>
                       <td>{personel.birim}</td>
                       <td>{renderDate_GGAAYYYY(personel.izinBaslangic)}</td>
