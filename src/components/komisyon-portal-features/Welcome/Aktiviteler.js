@@ -10,6 +10,7 @@ import {
   Label,
   Row,
   Col,
+  Button,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -31,6 +32,8 @@ export default function Aktiviteler({
   const [filterType, setFilterType] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  const [filtreVarMi, setFiltreVarMi] = useState(false);
 
   const handleFilterTypeChange = (e) => {
     if (e.target.value === "") {
@@ -63,6 +66,13 @@ export default function Aktiviteler({
       return; // Boş seçildiğinde işlemi durdurun
     }
     setSelectedUser(selectedValue);
+  };
+
+  const handleClearFilter = () => {
+    setSelectedUser("");
+    setFilterType("");
+    setStartDate(null);
+    setEndDate(null);
   };
 
   useEffect(() => {
@@ -143,19 +153,24 @@ export default function Aktiviteler({
   };
 
   const getLastActivityList = () => {
+    setFiltreVarMi(false);
     setIsLoading(true);
     let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`;
     if (filterType !== "") {
       url += `&filterType=${filterType}`;
+      setFiltreVarMi(true);
     }
     if (startDate) {
       url += `&startDate=${startDate}`;
+      setFiltreVarMi(true);
     }
     if (endDate) {
       url += `&endDate=${endDate}`;
+      setFiltreVarMi(true);
     }
     if (selectedUser) {
       url += `&userID=${selectedUser}`;
+      setFiltreVarMi(true);
     }
 
     let configuration = {
@@ -181,7 +196,7 @@ export default function Aktiviteler({
 
   return (
     <div>
-      <h4> Son 100 Aktivite</h4>
+      <h5>Son Aktiviteler </h5>
       <div>
         <Row>
           <Col>
@@ -192,6 +207,7 @@ export default function Aktiviteler({
                 name="select"
                 id="userSelect"
                 onChange={handleUserSelectChange}
+                value={selectedUser || ""}
               >
                 <option value="">Seçiniz</option>{" "}
                 {userList &&
@@ -210,6 +226,7 @@ export default function Aktiviteler({
                 type="select"
                 name="select"
                 id="filterType"
+                value={filterType || ""}
                 onChange={handleFilterTypeChange}
               >
                 <option value={""}>Seçiniz</option>
@@ -228,6 +245,7 @@ export default function Aktiviteler({
                 type="date"
                 name="date"
                 id="startDateTime"
+                value={startDate || ""}
                 onChange={handleStartDateChange}
               />
             </FormGroup>
@@ -241,9 +259,18 @@ export default function Aktiviteler({
                 name="date"
                 id="endDateTime"
                 onChange={handleEndDateChange}
+                value={endDate || ""}
               />
             </FormGroup>
           </Col>
+
+          <Button
+            hidden={!filtreVarMi}
+            onClick={handleClearFilter}
+            color="danger"
+          >
+            Filtre sıfırla
+          </Button>
         </Row>
       </div>
 

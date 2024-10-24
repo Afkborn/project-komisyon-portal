@@ -15,13 +15,28 @@ import axios from "axios";
 import alertify from "alertifyjs";
 
 export default function KomisyonPortalKullaniciYonetim({ user, token }) {
+  // Kullanıcı Listesi
   const [userList, setUserList] = useState([]);
+
+  // Yeni Kullanıcı
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    name: "",
+    surname: "",
+    password: "",
+    phoneNumber: "",
+    role: "",
+  });
+
+  // Ortak
+  const [accordionOpen, setAccordionOpen] = useState("1");
 
   useEffect(() => {
     if (userList.length === 0) getUsers();
 
     // eslint-disable-next-line
-  }, [userList]);
+  }, [userList, newUser]);
 
   const getUsers = () => {
     let configuration = {
@@ -42,7 +57,6 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
       });
   };
 
-  const [accordionOpen, setAccordionOpen] = useState("1");
   const accordionToggle = (id) => {
     if (accordionOpen === id) {
       setAccordionOpen();
@@ -51,18 +65,15 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
     }
   };
 
-  const [newUser, setNewUser] = useState({
-    username: "",
-    email: "",
-    name: "",
-    surname: "",
-    password: "",
-    phoneNumber: "",
-    role: "komisyonkatibi",
-  });
-
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "role") {
+      if (value === "") {
+        return;
+      }
+    }
+
     setNewUser((prevState) => ({
       ...prevState,
       [name]: value,
@@ -70,6 +81,17 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
   };
 
   const handleAddUserButton = (e) => {
+    if (
+      newUser.username === "" ||
+      newUser.name === "" ||
+      newUser.surname === "" ||
+      newUser.password === "" ||
+      newUser.role === ""
+    ) {
+      alertify.error("Lütfen tüm alanları doldurunuz.");
+      return;
+    }
+
     const configuration = {
       method: "POST",
       url: "/api/users/register",
@@ -252,13 +274,15 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
                   />
                 </FormGroup>
                 <FormGroup>
-                  <Label for="role">Rol</Label>
+                  <Label for="role">Rol * </Label>
                   <Input
                     type="select"
                     name="role"
                     id="role"
                     onChange={handleChange}
                   >
+                    <option value={""}>Seçiniz</option>
+                    <option value={"komisyonbaskan"}>Komisyon Başkanı</option>
                     <option value={"komisyonkatibi"}>Komisyon Katibi</option>
                     <option value={"santralmemuru"}>Santral Memuru</option>
                   </Input>

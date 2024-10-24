@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Spinner, Row, Col, Alert } from "reactstrap";
+import { Table, Spinner, Row, Col, Alert, FormText, Label } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import Aktiviteler from "./Aktiviteler";
@@ -104,7 +104,7 @@ export default function KomisyonPortalWelcome({
 
   const timeStyle = {
     float: "right",
-    color: "#007bff",
+    color: "#d91d0f",
     fontSize: "20px",
     fontWeight: "bold",
   };
@@ -121,12 +121,14 @@ export default function KomisyonPortalWelcome({
   return (
     <div>
       <span style={timeStyle}>Saat {new Date().toLocaleTimeString()}</span>
-      <h3>Hoşgeldin {user && user.name}!</h3>
+      <div>
+        <h3>Hoşgeldin {user && user.name}!</h3>
+      </div>
 
-      <p>
+      {/* <p>
         Bu uygulama, personel bilgileri üzerinde okuma, ekleme, güncelleme ve
         silme işlemlerini gerçekleştirmek için geliştirilmiştir.
-      </p>
+      </p> */}
       <hr></hr>
       {/* PIE CHARTS */}
       <div>
@@ -295,7 +297,10 @@ export default function KomisyonPortalWelcome({
         )}
         {urgentJobs && urgentJobs.length > 0 && (
           <div className="mt-2">
-            <h4> Acele İşler</h4>
+            <div>
+              <h5>Acele İşler</h5>
+            </div>
+
             <Table striped size="sm">
               <thead>
                 <tr>
@@ -328,7 +333,7 @@ export default function KomisyonPortalWelcome({
         )}
       </div>
 
-      {/* SON 100 AKTİVİTE */}
+      <hr></hr>
       <div>
         <Aktiviteler
           token={token}
@@ -336,63 +341,6 @@ export default function KomisyonPortalWelcome({
           showPersonelDetay={showPersonelDetay}
           showBirimPersonelListe={showBirimPersonelListe}
         />
-        {/* <h4> Son 100 Aktivite</h4>
-
-        <Table striped size="sm">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Kullanıcı</th>
-              <th>İşlem</th>
-              <th>Hedef</th>
-              <th>İşlem Tarihi</th>
-              <th>Açıklama</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lastActivityList.map((activity, index) => (
-              <tr key={activity._id}>
-                <th scope="row">{(currentPage - 1) * pageSize + index + 1}</th>
-                <td>
-                  {activity.userID.name} {activity.userID.surname}
-                </td>
-                <td>{activity.type.name}</td>
-                {renderHedef(activity)}
-                <td>{new Date(activity.createdAt).toLocaleString()}</td>
-                <td>{activity.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Pagination aria-label="Sayfa navigasyonu">
-            <PaginationItem disabled={currentPage <= 1}>
-              <PaginationLink
-                previous
-                onClick={() => handlePaginationClick(currentPage - 1)}
-              />
-            </PaginationItem>
-            {Array.from({ length: pageCount }, (_, i) => (
-              <PaginationItem key={i} active={i + 1 === currentPage}>
-                <PaginationLink onClick={() => handlePaginationClick(i + 1)}>
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem disabled={currentPage >= pageCount}>
-              <PaginationLink
-                next
-                onClick={() => handlePaginationClick(currentPage + 1)}
-              />
-            </PaginationItem>
-          </Pagination>
-        </div> */}
       </div>
     </div>
   );
