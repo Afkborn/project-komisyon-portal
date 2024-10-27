@@ -69,7 +69,9 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                   <th>Sicil No</th>
                   <th>Ad Soyad</th>
                   <th>Asıl Kurum</th>
+                  <th>Asıl Birim</th>
                   <th>Geçici Kurum</th>
+                  <th>Geçici Birim</th>
                   <th>Gerekçe</th>
                   <th>Bitiş Tarihi</th>
                   <th id="detayTD">İşlemler</th>
@@ -83,7 +85,9 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                       {personel.ad} {personel.soyad}
                     </td>
                     <td>{personel.birimID.institution.name}</td>
+                    <td>{personel.birimID.name}</td>
                     <td>{personel.temporaryBirimID.institution.name}</td>
+                    <td>{personel.temporaryBirimID.name}</td>
                     <td>{personel.temporaryReason}</td>
                     <td>
                       {renderDate_GGAAYYYY(personel.temporaryEndDate)} (

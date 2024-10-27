@@ -14,7 +14,6 @@ import axios from "axios";
 import {
   //   renderDate_GGAAYYYY,
   calculateGorevSuresi,
-  calculateKalanGorevSuresi
 } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
 import PersonelUnvanGuncelleModal from "./PersonelUnvanGuncelleModal";
@@ -50,7 +49,7 @@ export default function PersonelDetay({
       getPersonelBySicil(selectedPersonelID);
     }
     // eslint-disable-next-line
-  }, [selectedPersonelID]);
+  }, [selectedPersonelID, personel]);
 
   const [showCalistigiKisiGuncelleModal, setShowCalistigiKisiGuncelleModal] =
     useState(false);
@@ -168,7 +167,7 @@ export default function PersonelDetay({
     } else {
       const configuration = {
         method: "GET",
-        url: "api/persons/bySicil/" + sicil,
+        url: "api/persons/bySicil/" + personel.sicil,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -184,7 +183,6 @@ export default function PersonelDetay({
           setPersonelKurum(kurum);
 
           setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
-          alertify.success("Personel bilgileri güncellendi.");
         })
         .catch((error) => {
           console.log(error);
@@ -193,24 +191,62 @@ export default function PersonelDetay({
   };
 
   const handleIzinDelete = (izin) => {
-    console.log(izin);
-    const configuration = {
-      method: "DELETE",
-      url: "api/leaves/" + izin._id,
-      headers: {
-        Authorization: `Bearer ${token}`,
+    // get alertify confirm
+    alertify.confirm(
+      "İzin Silme",
+      "İzin silmek istediğinize emin misiniz?",
+      () => {
+        const configuration = {
+          method: "DELETE",
+          url: "api/leaves/" + izin._id,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        console.log(configuration);
+        axios(configuration)
+          .then((response) => {
+            alertify.success("İzin silindi.");
+            refreshPersonel(false);
+          })
+          .catch((error) => {
+            console.log(error);
+            alertify.error("İzin silinemedi.");
+          });
       },
-    };
-    console.log(configuration);
-    axios(configuration)
-      .then((response) => {
-        alertify.success("İzin silindi.");
-        refreshPersonel();
-      })
-      .catch((error) => {
-        console.log(error);
-        alertify.error("İzin silinemedi.");
-      });
+      () => {
+        alertify.error("İşlem iptal edildi.");
+      }
+    );
+  };
+
+  const handleGecmisBirimDelete = (birim) => {
+    // get alertify confirm
+    alertify.confirm(
+      "Birim Silme",
+      "Birim silmek istediğinize emin misiniz?",
+      () => {
+        const configuration = {
+          method: "DELETE",
+          url: "api/personunits/" + birim._id,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        axios(configuration)
+          .then((response) => {
+            alertify.success("Birim silindi.");
+            refreshPersonel(false);
+          })
+          .catch((error) => {
+            console.log(error);
+            alertify.error("Birim silinemedi.");
+          });
+      },
+      () => {
+        alertify.error("İşlem iptal edildi.");
+      }
+    );
   };
 
   const handleUpdate = () => {
@@ -496,7 +532,9 @@ export default function PersonelDetay({
               <tbody>
                 {personeller.map((person) => (
                   <tr key={person._id}>
-                    <td>{person.sicil}  {person.status === false && "(P)"}</td>
+                    <td>
+                      {person.sicil} {person.status === false && "(P)"}
+                    </td>
                     <td>{person.ad}</td>
                     <td>{person.soyad}</td>
                     <td>
@@ -600,10 +638,13 @@ export default function PersonelDetay({
                 <Label> Geçici Personel Birim </Label>
                 <Input
                   type="text"
-                  value={personel.temporaryBirimID ? personel.temporaryBirimID.name : "BELİRTİLMEMİŞ"}
+                  value={
+                    personel.temporaryBirimID
+                      ? personel.temporaryBirimID.name
+                      : "BELİRTİLMEMİŞ"
+                  }
                   disabled
                 />
-
               </Col>
             </Row>
 
@@ -982,7 +1023,7 @@ export default function PersonelDetay({
                           size="sm"
                           color="danger"
                           onClick={(e) => {
-                            // handleIzinDelete(izin);
+                            handleGecmisBirimDelete(birim);
                           }}
                         >
                           Sil

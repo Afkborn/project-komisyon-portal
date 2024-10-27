@@ -81,6 +81,7 @@ export default function Aktiviteler({
     if (userList.length === 0) {
       getUserList();
     }
+    // eslint-disable-next-line
   }, [currentPage, filterType, selectedUser, startDate, endDate]);
 
   const getUserList = () => {
