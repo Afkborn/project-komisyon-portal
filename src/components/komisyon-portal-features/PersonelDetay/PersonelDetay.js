@@ -49,7 +49,7 @@ export default function PersonelDetay({
       getPersonelBySicil(selectedPersonelID);
     }
     // eslint-disable-next-line
-  }, [selectedPersonelID, personel]);
+  }, [selectedPersonelID]);
 
   const [showCalistigiKisiGuncelleModal, setShowCalistigiKisiGuncelleModal] =
     useState(false);
@@ -303,7 +303,6 @@ export default function PersonelDetay({
         );
 
         setPersonelKurum(kurum);
-
         setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         setLoadSpinner(false);
       })

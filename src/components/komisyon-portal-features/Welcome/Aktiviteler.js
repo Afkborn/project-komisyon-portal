@@ -19,6 +19,7 @@ export default function Aktiviteler({
   token,
   showPersonelDetay,
   showBirimPersonelListe,
+  personelHareketleri,
 }) {
   const [lastActivityList, setLastActivityList] = useState([]);
   const [pageCount, setPageCount] = useState(0);
@@ -157,9 +158,12 @@ export default function Aktiviteler({
     setFiltreVarMi(false);
     setIsLoading(true);
     let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`;
-    if (filterType !== "") {
+    if (filterType !== "" && personelHareketleri === false) {
       url += `&filterType=${filterType}`;
       setFiltreVarMi(true);
+    }
+    if (personelHareketleri) {
+      url += `&personelHareketleri=${personelHareketleri}`;
     }
     if (startDate) {
       url += `&startDate=${startDate}`;
@@ -197,7 +201,6 @@ export default function Aktiviteler({
 
   return (
     <div>
-      <h5>Son Aktiviteler </h5>
       <div>
         <Row>
           <Col>
@@ -220,7 +223,7 @@ export default function Aktiviteler({
               </Input>
             </FormGroup>
           </Col>
-          <Col>
+          <Col hidden={personelHareketleri}>
             <FormGroup>
               <Label for="filterType">İşlem</Label>
               <Input

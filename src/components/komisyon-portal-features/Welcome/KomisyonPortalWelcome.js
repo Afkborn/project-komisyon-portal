@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Spinner, Row, Col, Alert, FormText, Label } from "reactstrap";
+import { Table, Spinner, Row, Col, Alert } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import Aktiviteler from "./Aktiviteler";
@@ -340,6 +340,7 @@ export default function KomisyonPortalWelcome({
           user={user}
           showPersonelDetay={showPersonelDetay}
           showBirimPersonelListe={showBirimPersonelListe}
+          personelHareketleri={false}
         />
       </div>
     </div>

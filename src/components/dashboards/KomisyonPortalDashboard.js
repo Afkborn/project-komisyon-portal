@@ -30,6 +30,7 @@ import OzellikAktar from "../komisyon-portal-features/Aktarim/OzellikAktar";
 import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
+import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHareketleri";
 import Cookies from "universal-cookie";
 import axios from "axios";
 
@@ -268,6 +269,18 @@ export default function KomisyonPortalDashboard() {
             showPersonelDetay={showPersonelDetay}
           />
         );
+
+      case 17:
+        return (
+          <PersonelHareketleri
+            // selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+            user={user}
+            showBirimPersonelListe={showBirimPersonelListe}
+            selectedKurum={selectedKurum}
+          />
+        );
     }
   }
 
@@ -434,7 +447,18 @@ export default function KomisyonPortalDashboard() {
               Geçici Personel
             </ListGroupItem>
 
-            <ListGroupItemHeading className="mt-3 mb-3 text-center">
+            <ListGroupItem
+              key={17}
+              onClick={() => onClick_listGroupItem(17)}
+              active={selected === 17}
+            >
+              Personel Hareketleri
+            </ListGroupItem>
+
+            <ListGroupItemHeading
+              hidden={user && user.role !== "admin"}
+              className="mt-3 mb-3 text-center"
+            >
               Aktarım
             </ListGroupItemHeading>
 
@@ -442,6 +466,7 @@ export default function KomisyonPortalDashboard() {
               key={12}
               onClick={() => onClick_listGroupItem(12)}
               active={selected === 12}
+              hidden={user && user.role !== "admin"}
             >
               Personel Aktar
             </ListGroupItem>
@@ -450,6 +475,7 @@ export default function KomisyonPortalDashboard() {
               key={15}
               onClick={() => onClick_listGroupItem(15)}
               active={selected === 15}
+              hidden={user && user.role !== "admin"}
             >
               Özellik Aktar
             </ListGroupItem>
