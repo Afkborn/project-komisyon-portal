@@ -31,6 +31,7 @@ import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/Komisyon
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
 import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHareketleri";
+import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
 import Cookies from "universal-cookie";
 import axios from "axios";
 
@@ -281,6 +282,15 @@ export default function KomisyonPortalDashboard() {
             selectedKurum={selectedKurum}
           />
         );
+
+      case 18:
+        return (
+          <UzaklastirilmisPersonel
+            // selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
     }
   }
 
@@ -436,7 +446,7 @@ export default function KomisyonPortalDashboard() {
               onClick={() => onClick_listGroupItem(14)}
               active={selected === 14}
             >
-              Pasif Personel
+              Devren Gidenler
             </ListGroupItem>
 
             <ListGroupItem
@@ -445,6 +455,14 @@ export default function KomisyonPortalDashboard() {
               active={selected === 16}
             >
               Geçici Personel
+            </ListGroupItem>
+
+            <ListGroupItem
+              key={18}
+              onClick={() => onClick_listGroupItem(18)}
+              active={selected === 18}
+            >
+              Uzaklaştırılmış Personel
             </ListGroupItem>
 
             <ListGroupItem

@@ -12,7 +12,7 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import {
-  //   renderDate_GGAAYYYY,
+  renderDate_GGAAYYYY,
   calculateGorevSuresi,
 } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
@@ -578,7 +578,13 @@ export default function PersonelDetay({
                 <Label>Personel Durum</Label>
                 <Input
                   type="text"
-                  value={personel.status ? "Aktif" : "Pasif"}
+                  value={
+                    personel.status
+                      ? personel.isSuspended
+                        ? "Aktif (Uzaklaştırma)"
+                        : "Aktif"
+                      : "Pasif"
+                  }
                   disabled
                 />
               </Col>
@@ -610,9 +616,34 @@ export default function PersonelDetay({
               </Col>
             </Row>
 
+            <Row hidden={personel.isSuspended === false}>
+              <Col>
+                <Label>Uzaklaştırma Gerekçe</Label>
+                <Input
+                  type="text"
+                  name="suspensionReason"
+                  id="suspensionReason"
+                  value={
+                    personel.suspensionReason
+                      ? personel.suspensionReason
+                      : "BELİRTİLMEMİŞ"
+                  }
+                  disabled
+                />
+              </Col>
+              <Col>
+                <Label>Uzaklaştırma Bitiş Tarihi</Label>
+                <Input
+                  type="text"
+                  name="suspensionEndDate"
+                  id="suspensionEndDate"
+                  value={renderDate_GGAAYYYY(personel.suspensionEndDate)}
+                  disabled
+                />
+              </Col>
+            </Row>
+
             <Row hidden={!updatedPersonel.isTemporary}>
-              {" "}
-              {/* Boolean değeri doğru çalışacak */}
               <Col>
                 <Label>Geçici Personel Açıklama</Label>
                 <Input
