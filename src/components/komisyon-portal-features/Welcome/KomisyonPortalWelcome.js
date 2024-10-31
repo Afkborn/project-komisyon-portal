@@ -64,11 +64,18 @@ export default function KomisyonPortalWelcome({
   });
 
   useEffect(() => {
+    
+    const interval = setInterval(() => {
+      setSaat(new Date().toLocaleTimeString());
+    }, 1000);
+
+    
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
     if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
 
-    // eslint-disable-next-line
-  }, [selectedKurum]);
+    // Cleanup fonksiyonu
+    return () => clearInterval(interval);
+  }, [selectedKurum]); // selectedKurum değiştiğinde effect'i tekrar çalıştır
 
   const getKatipChart = () => {
     setKatipChartLoading(true);
@@ -133,19 +140,6 @@ export default function KomisyonPortalWelcome({
 
   return (
     <div>
-      {/* <span style={timeStyle}>Saat {new Date().toLocaleTimeString()}</span> */}
-      {/* <div>
-        <h3>
-          Hoşgeldin{" "}
-          {user && (
-            <span style={{ color: "red" }}>
-              {user.role === "komisyonbaskan" ? "REİS " : ""}
-            </span>
-          )}
-          {user && user.name}
-        </h3>
-      </div> */}
-
       <div>
         <Card>
           <CardBody>
@@ -162,16 +156,57 @@ export default function KomisyonPortalWelcome({
               <span style={timeStyle}>{saat}</span>
             </CardTitle>
             <CardText className="lead">
-              
+              Komisyon Portal sistemine hoşgeldiniz. Sistemdeki güncel bilgilere
+              ulaşabilir, işlemlerinizi gerçekleştirebilirsiniz.
             </CardText>
           </CardBody>
         </Card>
       </div>
 
-      {/* <p>
-        Bu uygulama, personel bilgileri üzerinde okuma, ekleme, güncelleme ve
-        silme işlemlerini gerçekleştirmek için geliştirilmiştir.
-      </p> */}
+      <div className="mt-3" hidden={urgentJobsLoading}>
+        {urgentJobs && urgentJobs.length === 0 && (
+          <Alert color="success">
+            Acele bir iş yok gibi görünüyor, hayırlı işler dilerim 😊
+          </Alert>
+        )}
+        {urgentJobs && urgentJobs.length > 0 && (
+          <div className="mt-2">
+            <div>
+              <h5>Acele İşler</h5>
+            </div>
+
+            <Table striped size="sm">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>İş Tanımı</th>
+                  <th>Hedef</th>
+                  <th>İşin Bitiş Tarihi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {urgentJobs.map((job, index) => (
+                  <tr key={job.personID}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{job.urgentJobType}</td>
+                    <td
+                      style={clickableTdStyle}
+                      onClick={() => handleTdOnClickPersonel(job)}
+                    >
+                      {job.ad} {job.soyad} ({job.sicil})
+                    </td>
+                    <td>
+                      {renderDate_GGAAYYYY(job.urgentJobEndDate)} (
+                      {calculateKalanGorevSuresi(job.urgentJobEndDate)})
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
+      </div>
+
       <hr></hr>
       {/* PIE CHARTS */}
       <div>
@@ -327,57 +362,16 @@ export default function KomisyonPortalWelcome({
       </div>
 
       {/* ACELE İŞLER  */}
-      {urgentJobsLoading && (
+      {/* {urgentJobsLoading && (
         <Spinner color="primary">
           <span className="sr-only">Yükleniyor...</span>
         </Spinner>
-      )}
-      <div className="mt-3" hidden={urgentJobsLoading}>
-        {urgentJobs && urgentJobs.length === 0 && (
-          <Alert color="success">
-            Yapılması gereken acele bir iş yok gibi gözüküyor, rahatsın :)
-          </Alert>
-        )}
-        {urgentJobs && urgentJobs.length > 0 && (
-          <div className="mt-2">
-            <div>
-              <h5>Acele İşler</h5>
-            </div>
+      )} */}
 
-            <Table striped size="sm">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>İş Tanımı</th>
-                  <th>Hedef</th>
-                  <th>İşin Bitiş Tarihi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {urgentJobs.map((job, index) => (
-                  <tr key={job.personID}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{job.urgentJobType}</td>
-                    <td
-                      style={clickableTdStyle}
-                      onClick={() => handleTdOnClickPersonel(job)}
-                    >
-                      {job.ad} {job.soyad} ({job.sicil})
-                    </td>
-                    <td>
-                      {renderDate_GGAAYYYY(job.urgentJobEndDate)} (
-                      {calculateKalanGorevSuresi(job.urgentJobEndDate)})
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
-      </div>
 
       <hr></hr>
       <div>
+        <h5>Aktiviteler</h5>
         <Aktiviteler
           token={token}
           user={user}

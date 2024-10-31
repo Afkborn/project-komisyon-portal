@@ -355,9 +355,9 @@ export default function KomisyonPortalDashboard() {
             {user && (
               <div>
                 <Alert className="bg-danger text-white">
-                  Hoşgeldin
+                  Hoşgeldin{" "}
                   <b>
-                    {user.name} {user.surname}
+                    {user.name}
                   </b>{" "}
                   <img
                     src={logoutSvg}
