@@ -75,6 +75,7 @@ export default function KomisyonPortalWelcome({
 
     // Cleanup fonksiyonu
     return () => clearInterval(interval);
+    // eslint-disable-next-line
   }, [selectedKurum]); // selectedKurum değiştiğinde effect'i tekrar çalıştır
 
   const getKatipChart = () => {
