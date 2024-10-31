@@ -78,7 +78,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
         <div>
           <h4>
             {selectedKurum.name}nde toplam{" "}
-            <Badge color="success">{personelSayisi}</Badge> adet personel
+            <Badge color="danger">{personelSayisi}</Badge> adet personel
             bulunmaktadır.
           </h4>
           <Accordion open={accordionOpen} toggle={accordionToggle}>
@@ -104,7 +104,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                   </tbody>
                 </table>
                 <Button
-                  color="primary"
+                  color="danger"
                   onClick={() =>
                     generatePdf(
                       document,
@@ -142,7 +142,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                   </tbody>
                 </table>
                 <Button
-                  color="primary"
+                  color="danger"
                   onClick={() =>
                     generatePdf(
                       document,
@@ -181,7 +181,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 </table>
 
                 <Button
-                  color="primary"
+                  color="danger"
                   onClick={() =>
                     generatePdf(
                       document,

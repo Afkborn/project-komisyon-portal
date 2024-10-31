@@ -12,6 +12,8 @@ import Login from "../login/Login";
 import KomisyonPortalDashboard from "../dashboards/KomisyonPortalDashboard";
 import SantralPortalDashboard from "../dashboards/SantralPortalDashboard";
 
+import "../../styles/App.css"
+
 function App() {
   // const location = useLocation();
   // const validPaths = ["/"]; // navigation ve footer olacak  yolları tanımlayalım

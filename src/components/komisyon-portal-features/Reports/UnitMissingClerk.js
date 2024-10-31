@@ -98,6 +98,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
           disabled={aramaYapilacakBirimler.length === 0}
           className="m-3"
           size="lg"
+          color="danger"
           id="getRapor"
           onClick={(e) => handleGetRapor(e)}
         >
@@ -154,6 +155,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
               className="m-3"
               size="lg"
               id="exportExcel"
+              color="danger"
               type="submit"
             >
               Excel'e Aktar
@@ -162,6 +164,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
               className="m-3"
               size="lg"
               id="exportPdf"
+              color="danger"
               onClick={(e) => {
                 generatePdf(
                   document,

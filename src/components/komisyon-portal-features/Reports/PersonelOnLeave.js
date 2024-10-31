@@ -127,7 +127,7 @@ export default function PersonelOnLeave({
                 Tarih Aralığında İzinde Olanlar
               </Label>
             </Col>
-            <Button type="submit" onClick={(e) => handleFormSubmit(e)}>
+            <Button  color="danger" type="submit" onClick={(e) => handleFormSubmit(e)}>
               Getir
             </Button>
           </Row>
@@ -213,6 +213,7 @@ export default function PersonelOnLeave({
             </table>
             <Button
               disabled
+              color="danger"
               className="m-3"
               size="lg"
               id="exportExcel"
@@ -224,6 +225,7 @@ export default function PersonelOnLeave({
               className="m-3"
               size="lg"
               id="exportPdf"
+              color="danger"
               onClick={(e) => {
                 generatePdf(
                   document,

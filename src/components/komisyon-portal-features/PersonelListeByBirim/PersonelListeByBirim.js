@@ -230,7 +230,7 @@ export default function PersonelListeByBirim({
                 </div>
                 <div>
                   <Button
-                    color="primary"
+                    color="success"
                     onClick={personelEkleToggle}
                     className="mt-2"
                   >

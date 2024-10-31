@@ -43,10 +43,12 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
         </span>
         <div>
           <Button
+          color="danger"
             className="m-3"
             size="lg"
             id="getGeciciPersonel"
             onClick={(e) => getGeciciPersonel(e)}
+            style={{ width: "200px" }}
           >
             Rapor Getir
           </Button>
@@ -94,7 +96,7 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                       {calculateKalanGorevSuresi(personel.temporaryEndDate)})
                     </td>
                     <td id="detayTD">
-                      <Button onClick={(e) => showPersonelDetay(personel)}>
+                      <Button color="info" onClick={(e) => showPersonelDetay(personel)}>
                         Detay
                       </Button>
                     </td>
@@ -104,6 +106,7 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
             </Table>
             <Button
               disabled
+              color="danger"
               className="m-3"
               size="lg"
               id="exportExcel"
@@ -114,6 +117,7 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
             <Button
               className="m-3"
               size="lg"
+              color="danger"
               id="exportPdf"
               onClick={(e) => {
                 generatePdf(

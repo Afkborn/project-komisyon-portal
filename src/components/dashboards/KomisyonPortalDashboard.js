@@ -7,7 +7,6 @@ import {
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
-  Button,
 } from "reactstrap";
 
 import logo from "../../assets/logo300.png";
@@ -34,6 +33,8 @@ import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHar
 import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
 import Cookies from "universal-cookie";
 import axios from "axios";
+
+import logoutSvg from "../../assets/logout.svg";
 
 import {
   GET_institutions,
@@ -303,6 +304,46 @@ export default function KomisyonPortalDashboard() {
     window.location.href = "/";
   }
 
+  const listGroupItems = [
+    { id: 0, label: "Ana Sayfa", type: "item" },
+    { id: 8, label: "Hesap Ayarları", type: "item" },
+    {
+      id: 13,
+      label: "Portal Kullanıcı Yönetim",
+      type: "item",
+      visibleRoles: ["admin"],
+    },
+    { id: 1001, label: "Adliye Yönetim Sistemi", type: "heading" },
+    { id: 5, label: "Kurum", type: "item" },
+    { id: 4, label: "Ünvanlar", type: "item", hiddenRoles: ["komisyonbaskan"] },
+    { id: 1, label: "Birimler", type: "item" },
+    { id: 9, label: "Tüm Personel Listesi", type: "item" },
+    { id: 2, label: "Birim Personel Listele", type: "item" },
+    { id: 3, label: "Personel Detay", type: "item" },
+    { id: 1002, label: "Raporlar", type: "heading" },
+    { id: 6, label: "İzinde Olan Personel", type: "item" },
+    { id: 7, label: "Eksik Katibi Olan Birimler", type: "item" },
+    { id: 10, label: "Personel Sayısı", type: "item" },
+    { id: 11, label: "Personel Tablosu", type: "item" },
+    { id: 14, label: "Devren Gidenler", type: "item" },
+    { id: 16, label: "Geçici Personel", type: "item" },
+    { id: 18, label: "Uzaklaştırılmış Personel", type: "item" },
+    { id: 17, label: "Personel Hareketleri", type: "item" },
+    { id: 1003, label: "Aktarım", type: "heading", visibleRoles: ["admin"] },
+    { id: 12, label: "Personel Aktar", type: "item", visibleRoles: ["admin"] },
+    { id: 15, label: "Özellik Aktar", type: "item", visibleRoles: ["admin"] },
+  ];
+
+  const imgStyle = {
+    cursor: "pointer",
+    width: "22px",
+    height: "22px",
+    float: "right",
+    marginLeft: "10px",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
   return (
     <Container className="mt-5" fluid>
       <Row>
@@ -313,190 +354,66 @@ export default function KomisyonPortalDashboard() {
           <div className="mt-2">
             {user && (
               <div>
-                <Alert color="primary">
-                  Hoşgeldin {user.name}{" "}
-                  <Button size="sm" color="danger" onClick={() => logout()}>
-                    Çıkış Yap
-                  </Button>{" "}
+                <Alert className="bg-danger text-white">
+                  Hoşgeldin
+                  <b>
+                    {user.name} {user.surname}
+                  </b>{" "}
+                  <img
+                    src={logoutSvg}
+                    style={imgStyle}
+                    alt="logout"
+                    onClick={() => {
+                      logout();
+                    }}
+                  />
                 </Alert>
               </div>
             )}
           </div>
 
           <ListGroup className="mt-2" style={listGroupStyle}>
-            <ListGroupItem
-              key={0}
-              onClick={() => onClick_listGroupItem(0)}
-              active={selected === 0}
-            >
-              Ana Sayfa
-            </ListGroupItem>
+            {listGroupItems.map((item) => {
+              const isVisibleForRole =
+                (!item.visibleRoles ||
+                  item.visibleRoles.length === 0 ||
+                  (user && item.visibleRoles.includes(user.role))) &&
+                (!item.hiddenRoles ||
+                  item.hiddenRoles.length === 0 ||
+                  (user && !item.hiddenRoles.includes(user.role)));
 
-            <ListGroupItem
-              key={8}
-              onClick={() => onClick_listGroupItem(8)}
-              active={selected === 8}
-            >
-              Hesap Ayarları
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={13}
-              onClick={() => onClick_listGroupItem(13)}
-              active={selected === 13}
-              hidden={user && user.role !== "admin"}
-            >
-              Portal Kullanıcı Yönetim
-            </ListGroupItem>
-
-            <ListGroupItemHeading className="mt-3 text-center">
-              Adliye Yönetim Sistemi <br />
-            </ListGroupItemHeading>
-
-            <ListGroupItemHeading className=" small mb-3 text-center">
-              Seçili Kurum: <br />
-              {selectedKurum && selectedKurum.name}
-            </ListGroupItemHeading>
-
-            <ListGroupItem
-              key={5}
-              onClick={() => onClick_listGroupItem(5)}
-              active={selected === 5}
-            >
-              Kurum
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={4}
-              onClick={() => onClick_listGroupItem(4)}
-              active={selected === 4}
-            >
-              Ünvanlar
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={1}
-              onClick={() => onClick_listGroupItem(1)}
-              active={selected === 1}
-            >
-              Birimler
-            </ListGroupItem>
-            <ListGroupItem
-              key={9}
-              onClick={() => onClick_listGroupItem(9)}
-              active={selected === 9}
-            >
-              Tüm Personel Listesi
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={2}
-              onClick={() => onClick_listGroupItem(2)}
-              active={selected === 2}
-            >
-              Birim Personel Listele
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={3}
-              onClick={() => onClick_listGroupItem(3)}
-              active={selected === 3}
-            >
-              Personel Detay
-            </ListGroupItem>
-
-            <ListGroupItemHeading className="mt-3 mb-3 text-center">
-              Raporlar
-            </ListGroupItemHeading>
-
-            <ListGroupItem
-              key={6}
-              onClick={() => onClick_listGroupItem(6)}
-              active={selected === 6}
-            >
-              İzinde Olan Personel
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={7}
-              onClick={() => onClick_listGroupItem(7)}
-              active={selected === 7}
-            >
-              Eksik Katibi Olan Birimler
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={10}
-              onClick={() => onClick_listGroupItem(10)}
-              active={selected === 10}
-            >
-              Personel Sayısı
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={11}
-              onClick={() => onClick_listGroupItem(11)}
-              active={selected === 11}
-            >
-              Personel Tablosu
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={14}
-              onClick={() => onClick_listGroupItem(14)}
-              active={selected === 14}
-            >
-              Devren Gidenler
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={16}
-              onClick={() => onClick_listGroupItem(16)}
-              active={selected === 16}
-            >
-              Geçici Personel
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={18}
-              onClick={() => onClick_listGroupItem(18)}
-              active={selected === 18}
-            >
-              Uzaklaştırılmış Personel
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={17}
-              onClick={() => onClick_listGroupItem(17)}
-              active={selected === 17}
-            >
-              Personel Hareketleri
-            </ListGroupItem>
-
-            <ListGroupItemHeading
-              hidden={user && user.role !== "admin"}
-              className="mt-3 mb-3 text-center"
-            >
-              Aktarım
-            </ListGroupItemHeading>
-
-            <ListGroupItem
-              key={12}
-              onClick={() => onClick_listGroupItem(12)}
-              active={selected === 12}
-              hidden={user && user.role !== "admin"}
-            >
-              Personel Aktar
-            </ListGroupItem>
-
-            <ListGroupItem
-              key={15}
-              onClick={() => onClick_listGroupItem(15)}
-              active={selected === 15}
-              hidden={user && user.role !== "admin"}
-            >
-              Özellik Aktar
-            </ListGroupItem>
+              if (item.type === "heading") {
+                return (
+                  <ListGroupItemHeading
+                    key={item.id}
+                    hidden={!isVisibleForRole}
+                    className="mt-3 text-center font-weight-bold"
+                  >
+                    {item.label}
+                  </ListGroupItemHeading>
+                );
+              } else {
+                return (
+                  <ListGroupItem
+                    key={item.id}
+                    onClick={() => onClick_listGroupItem(item.id)}
+                    active={selected === item.id}
+                    hidden={!isVisibleForRole}
+                    className={
+                      selected === item.id ? "bg-danger text-white" : ""
+                    }
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "#f8d7da";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "";
+                    }}
+                  >
+                    {item.label}
+                  </ListGroupItem>
+                );
+              }
+            })}
           </ListGroup>
         </Col>
         <Col xs="12" lg="9">

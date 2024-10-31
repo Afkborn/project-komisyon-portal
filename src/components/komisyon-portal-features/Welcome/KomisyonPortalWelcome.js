@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Table, Spinner, Row, Col, Alert } from "reactstrap";
+import {
+  Table,
+  Spinner,
+  Row,
+  Col,
+  Alert,
+  Card,
+  CardBody,
+  CardTitle,
+  CardText,
+} from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import Aktiviteler from "./Aktiviteler";
@@ -15,6 +25,8 @@ export default function KomisyonPortalWelcome({
   showBirimPersonelListe,
   selectedKurum,
 }) {
+  const [saat, setSaat] = useState(new Date().toLocaleTimeString());
+
   // last aktivite
   const widthOfLine = 60;
 
@@ -54,6 +66,7 @@ export default function KomisyonPortalWelcome({
   useEffect(() => {
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
     if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
+
     // eslint-disable-next-line
   }, [selectedKurum]);
 
@@ -120,9 +133,39 @@ export default function KomisyonPortalWelcome({
 
   return (
     <div>
-      <span style={timeStyle}>Saat {new Date().toLocaleTimeString()}</span>
+      {/* <span style={timeStyle}>Saat {new Date().toLocaleTimeString()}</span> */}
+      {/* <div>
+        <h3>
+          Hoşgeldin{" "}
+          {user && (
+            <span style={{ color: "red" }}>
+              {user.role === "komisyonbaskan" ? "REİS " : ""}
+            </span>
+          )}
+          {user && user.name}
+        </h3>
+      </div> */}
+
       <div>
-        <h3>Hoşgeldin {user && user.name}!</h3>
+        <Card>
+          <CardBody>
+            <CardTitle tag="h3" className="font-weight-bold">
+              Hoşgeldin{" "}
+              {user && (
+                <span style={{ color: "red" }}>
+                  {user.role === "komisyonbaskan" ? "REİS" : ""}
+                </span>
+              )}
+              {user && user.role !== "komisyonbaskan" && (
+                <span style={{ color: "red" }}>{user.name}</span>
+              )}
+              <span style={timeStyle}>{saat}</span>
+            </CardTitle>
+            <CardText className="lead">
+              
+            </CardText>
+          </CardBody>
+        </Card>
       </div>
 
       {/* <p>

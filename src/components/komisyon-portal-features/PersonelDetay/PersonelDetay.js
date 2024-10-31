@@ -473,7 +473,7 @@ export default function PersonelDetay({
                   />
                 </Col>
                 <Col>
-                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>
+                  <Button color="danger" type="submit" onClick={(e) => handleFormSubmit(e)}>
                     Getir
                   </Button>
                 </Col>
@@ -497,7 +497,7 @@ export default function PersonelDetay({
                   />
                 </Col>
                 <Col>
-                  <Button type="submit" onClick={(e) => handleFormSubmit(e)}>
+                  <Button color="danger"  type="submit" onClick={(e) => handleFormSubmit(e)}>
                     Getir
                   </Button>
                 </Col>
@@ -558,7 +558,7 @@ export default function PersonelDetay({
                           setPersoneller([]);
                         }}
                       >
-                        Detayları Gör
+                        DETAY
                       </Button>
                     </td>
                   </tr>

@@ -29,9 +29,9 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
                 </Badge>
                 {kurum.name} {kurum.status === false && "(Pasif)"}
                 <Button
-                  className="float-end"
+                  className="float-end "
                   onClick={() => setSelectedKurum(kurum)}
-                  color="success"
+                  color="danger"
                   disabled={
                     (selectedKurum && selectedKurum.id === kurum.id) ||
                     kurum.status === false

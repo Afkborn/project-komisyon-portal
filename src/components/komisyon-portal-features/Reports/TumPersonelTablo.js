@@ -312,11 +312,13 @@ export default function TumPersonelTablo({
         </FormGroup>
 
         <Button
+          color="danger"
           disabled={kontrolEdilecekBirimler.length === 0}
           className="m-3"
           size="lg"
           id="getPersonelTablo"
           onClick={(e) => getPersonelTablo(e)}
+          style={{ width: "100%" }}
         >
           Rapor Getir
         </Button>

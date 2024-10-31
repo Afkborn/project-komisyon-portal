@@ -24,6 +24,7 @@ function KomisyonRoutes({ component: Component, ...rest }) {
           // Check if the role is "komisyonkatibi"
           if (
             decodedToken.role === "komisyonkatibi" ||
+            decodedToken.role === "komisyonbaskan" ||
             decodedToken.role === "admin"
           ) {
             return <Component {...props} />;

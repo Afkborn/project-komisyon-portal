@@ -45,9 +45,11 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
         <div>
           <Button
             className="m-3"
+            color="danger"
             size="lg"
             id="getGeciciPersonel"
             onClick={(e) => getGeciciPersonel(e)}
+            style={{ width: "200px" }}
           >
             Rapor Getir
           </Button>
@@ -99,7 +101,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
                       {calculateKalanGorevSuresi(personel.suspensionEndDate)})
                     </td>
                     <td id="detayTD">
-                      <Button onClick={(e) => showPersonelDetay(personel)}>
+                      <Button  color="info" onClick={(e) => showPersonelDetay(personel)}>
                         Detay
                       </Button>
                     </td>
@@ -109,6 +111,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
             </Table>
             <Button
               disabled
+              color="danger"
               className="m-3"
               size="lg"
               id="exportExcel"
@@ -120,6 +123,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
               className="m-3"
               size="lg"
               id="exportPdf"
+              color="danger"
               onClick={(e) => {
                 generatePdf(
                   document,

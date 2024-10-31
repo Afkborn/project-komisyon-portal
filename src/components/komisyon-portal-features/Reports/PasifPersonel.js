@@ -46,9 +46,11 @@ export default function PasifPersonel({
       <div>
         <Button
           className="m-3"
+          color="danger"
           size="lg"
           id="getPasifPersonel"
           onClick={(e) => getPasifPersonel(e)}
+          style={{ width: "200px" }}
         >
           Rapor Getir
         </Button>
@@ -88,7 +90,7 @@ export default function PasifPersonel({
                     {calculateGorevSuresi(personel.deactivationDate)})
                   </td>
                   <td id="detayTD">
-                    <Button onClick={(e) => showPersonelDetay(personel)}>
+                    <Button color="info" onClick={(e) => showPersonelDetay(personel)}>
                       Detay
                     </Button>
                   </td>
@@ -99,6 +101,7 @@ export default function PasifPersonel({
           <Button
             disabled
             className="m-3"
+            color="danger"
             size="lg"
             id="exportExcel"
             type="submit"
@@ -109,6 +112,7 @@ export default function PasifPersonel({
             className="m-3"
             size="lg"
             id="exportPdf"
+            color="danger"
             onClick={(e) => {
               generatePdf(
                 document,
