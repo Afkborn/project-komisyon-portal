@@ -32,6 +32,8 @@ import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
 import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHareketleri";
 import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
+import SehitGaziYakiniPersonel from "../komisyon-portal-features/Reports/SehitGaziYakiniPersonel";
+import EngelliPersonel from "../komisyon-portal-features/Reports/EngelliPersonel";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -331,6 +333,25 @@ export default function KomisyonPortalDashboard() {
             showPersonelDetay={showPersonelDetay}
           />
         );
+
+      case 19:
+        return (
+          <SehitGaziYakiniPersonel
+            // selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
+
+      case 20:
+        return (
+          <EngelliPersonel
+            // selectedKurum={selectedKurum}
+            token={token}
+            showPersonelDetay={showPersonelDetay}
+          />
+        );
+
     }
   }
 
@@ -373,6 +394,8 @@ export default function KomisyonPortalDashboard() {
     { id: 14, label: "Devren Gidenler", type: "item" },
     { id: 16, label: "Geçici Personel", type: "item" },
     { id: 18, label: "Uzaklaştırılmış Personel", type: "item" },
+    { id: 19, label: "Şehit/Gazi Yakını Personel", type: "item" },
+    { id: 20, label: "Engelli Personel", type: "item" },
     { id: 17, label: "Personel Hareketleri", type: "item" },
     { id: 1003, label: "Aktarım", type: "heading", visibleRoles: ["admin"] },
     { id: 12, label: "Personel Aktar", type: "item", visibleRoles: ["admin"] },
