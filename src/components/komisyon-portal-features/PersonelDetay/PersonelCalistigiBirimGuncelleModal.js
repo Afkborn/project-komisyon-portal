@@ -168,9 +168,15 @@ export default function PersonelCalistigiBirimGuncelleModal({
           unitID: personel.birimID._id,
           endDate: endDate,
           detail: detail,
-          newUnitID: newCalistigiBirim._id,
+          newUnitID: "",
         },
       };
+
+      if (kurumDisiBirimID) {
+        configuration.data.newUnitID = kurumDisiBirimID;
+      } else {
+        configuration.data.newUnitID = newCalistigiBirim._id;
+      }
 
       axios(configuration)
         .then((result) => {
@@ -283,7 +289,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
         <Form>
           {/*  eğer personel yazıişleri müdürü ise 2 tane birimi olabiliyor,  */}
           {personel &&
-            (personel.kind === "yaziislerimudürü" || personel.isTemporary) && (
+            (personel.kind === "yaziislerimudürü" ||
+              personel.kind === "mubasir" ||
+              personel.isTemporary) && (
               <FormGroup>
                 <Label for="birimSira">
                   Hangi Birimi Güncellemek İstiyorsunuz{" "}
@@ -308,11 +316,21 @@ export default function PersonelCalistigiBirimGuncelleModal({
                   id="ikinciBirim"
                   checked={birimSira === "ikinciBirim"}
                   onChange={(e) => handleRadioChange(e)}
-                  hidden={personel.kind === "yaziislerimudürü" ? false : true}
+                  hidden={
+                    personel.kind === "yaziislerimudürü" ||
+                    personel.kind === "mubasir"
+                      ? false
+                      : true
+                  }
                 />
                 <Label
                   for="ikinciBirim"
-                  hidden={personel.kind === "yaziislerimudürü" ? false : true}
+                  hidden={
+                    personel.kind === "yaziislerimudürü" ||
+                    personel.kind === "mubasir"
+                      ? false
+                      : true
+                  }
                 >
                   İkinci Birim
                 </Label>
@@ -365,7 +383,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
                   hidden={birimSira === "birinciBirim"}
                   value={
                     birimSira === "ikinciBirim"
-                      ? personel.ikinciBirimID && personel.ikinciBirimID.name
+                      ? personel.ikinciBirimID
+                        ? personel.ikinciBirimID.name
+                        : "BELİRTİLMEMİŞ"
                       : (personel.temporaryBirimID &&
                           personel.temporaryBirimID.name) ||
                         "BELİRTİLMEMİŞ"
@@ -410,7 +430,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
               {/*  eğer geciciBirim seçili ise kurumdışı seceneği ekle*/}
               <option
                 key={"optionBirimDisi"}
-                hidden={birimSira !== "geciciBirim"}
+                // hidden={birimSira !== "geciciBirim"}
               >
                 Kurum Dışı
               </option>

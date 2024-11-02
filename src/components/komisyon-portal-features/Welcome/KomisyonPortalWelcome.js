@@ -38,6 +38,7 @@ export default function KomisyonPortalWelcome({
   const [unvanChartSelected, setUnvanChartSelected] = useState(0);
   const [katipHovered, setKatipHovered] = useState(undefined);
   const [unvanHovered, setUnvanHovered] = useState(undefined);
+  const [katipTitleChartVisible, setKatipTitleChartVisible] = useState(true);
 
   // urgent jobs
   const [urgentJobs, setUrgentJobs] = useState([]);
@@ -64,12 +65,10 @@ export default function KomisyonPortalWelcome({
   });
 
   useEffect(() => {
-    
     const interval = setInterval(() => {
       setSaat(new Date().toLocaleTimeString());
     }, 1000);
 
-    
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
     if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
 
@@ -90,14 +89,20 @@ export default function KomisyonPortalWelcome({
 
     axios(configuration)
       .then((response) => {
+        setKatipTitleChartVisible(true);
         setKatipChart(response.data.katipPieChartData);
         setUnvanChart(response.data.unvanPieChartData);
         setKatipChartLoading(false);
       })
       .catch((error) => {
-        let errorMessage = error.response?.data?.message || "Bir hata oluştu.";
-        alertify.error(errorMessage);
         setKatipChartLoading(false);
+        if (error.response?.data?.katipTitleChartVisible === false) {
+          setKatipTitleChartVisible(false);
+        } else {
+          let errorMessage =
+            error.response?.data?.message || "Bir hata oluştu.";
+          alertify.error(errorMessage);
+        }
       });
   };
 
@@ -210,7 +215,7 @@ export default function KomisyonPortalWelcome({
 
       <hr></hr>
       {/* PIE CHARTS */}
-      <div>
+      <div hidden={!katipTitleChartVisible}>
         <Row>
           {katipChartLoading && (
             <Col xs="12" className="text-center">
@@ -269,7 +274,10 @@ export default function KomisyonPortalWelcome({
               segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
               segmentsShift={(index) => (index === katipChartSelected ? 6 : 1)}
               animate
-              label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
+              label={({ dataEntry }) => {
+                if (dataEntry.percentage < 5) return "";
+                return Math.round(dataEntry.percentage) + "%";
+              }}
               labelPosition={100 - widthOfLine / 2}
               labelStyle={{
                 fill: "#fff",
@@ -339,7 +347,10 @@ export default function KomisyonPortalWelcome({
               segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
               segmentsShift={(index) => (index === unvanChartSelected ? 6 : 1)}
               animate
-              label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
+              label={({ dataEntry }) => {
+                if (dataEntry.percentage < 5) return "";
+                return Math.round(dataEntry.percentage) + "%";
+              }}
               labelPosition={100 - widthOfLine / 2}
               labelStyle={{
                 fill: "#fff",
@@ -368,7 +379,6 @@ export default function KomisyonPortalWelcome({
           <span className="sr-only">Yükleniyor...</span>
         </Spinner>
       )} */}
-
 
       <hr></hr>
       <div>

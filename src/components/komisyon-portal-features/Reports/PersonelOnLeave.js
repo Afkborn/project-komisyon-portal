@@ -7,6 +7,7 @@ import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
 
 import { generatePdf } from "../../actions/PdfActions";
 
+
 export default function PersonelOnLeave({
   selectedKurum,
   token,
@@ -51,6 +52,7 @@ export default function PersonelOnLeave({
 
     axios(configuration)
       .then((response) => {
+
         let izinliPersonelList = response.data.izinliPersonelList;
 
         // sort unvan.oncelikSirasi
@@ -127,7 +129,11 @@ export default function PersonelOnLeave({
                 Tarih Aralığında İzinde Olanlar
               </Label>
             </Col>
-            <Button  color="danger" type="submit" onClick={(e) => handleFormSubmit(e)}>
+            <Button
+              color="danger"
+              type="submit"
+              onClick={(e) => handleFormSubmit(e)}
+            >
               Getir
             </Button>
           </Row>
@@ -190,7 +196,7 @@ export default function PersonelOnLeave({
                       <td>{personel.sicil}</td>
                       <td>{personel.unvan.name}</td>
                       <td>
-                        {personel.ad} {personel.soyad} 
+                        {personel.ad} {personel.soyad}
                         {personel.isTemporary && "(Geçici Personel)"}
                       </td>
                       <td>{personel.birim}</td>

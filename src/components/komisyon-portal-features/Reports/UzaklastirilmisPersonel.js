@@ -24,8 +24,12 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
     setRaporGetiriliyorMu(true);
     axios(configuration)
       .then((response) => {
-        setUzaklastirilmisPersonelList(response.data.personList);
         setRaporGetiriliyorMu(false);
+        if (response.data.personList.length === 0) {
+          alertify.error("Uzaklaştırılmış personel bulunamadı.");
+        } else {
+          setUzaklastirilmisPersonelList(response.data.personList);
+        }
       })
       .catch((error) => {
         alertify.error("Geçici personel listesi getirilirken bir hata oluştu.");
@@ -77,6 +81,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
                   <th>Ad Soyad</th>
                   <th>Kurum</th>
                   <th>Birim</th>
+                  <th>Unvan</th>
                   <th>Gerekçe</th>
                   <th>Bitiş Tarihi</th>
                   <th id="detayTD">İşlemler</th>
@@ -91,6 +96,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
                     </td>
                     <td>{personel.birimID.institution.name}</td>
                     <td>{personel.birimID.name}</td>
+                    <td>{personel.title.name}</td>
                     <td>
                       {personel.suspensionReason
                         ? personel.suspensionReason
@@ -101,7 +107,10 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
                       {calculateKalanGorevSuresi(personel.suspensionEndDate)})
                     </td>
                     <td id="detayTD">
-                      <Button  color="info" onClick={(e) => showPersonelDetay(personel)}>
+                      <Button
+                        color="info"
+                        onClick={(e) => showPersonelDetay(personel)}
+                      >
                         Detay
                       </Button>
                     </td>

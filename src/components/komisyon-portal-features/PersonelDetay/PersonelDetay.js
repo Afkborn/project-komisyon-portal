@@ -9,6 +9,7 @@ import {
   Spinner,
   Table,
   Badge,
+  FormGroup,
 } from "reactstrap";
 import axios from "axios";
 import {
@@ -31,6 +32,8 @@ export default function PersonelDetay({
   token,
   selectedPersonelID,
   unvanlar,
+  goBackButtonVisible,
+  goBack,
 }) {
   const [personel, setPersonel] = useState(null);
   const [personelKurum, setPersonelKurum] = useState(null);
@@ -105,6 +108,11 @@ export default function PersonelDetay({
           isTemporary: isTemporary,
         });
       }
+    } else if (name === "isMartyrRelative" || name === "isDisabled") {
+      setUpdatedPersonel({
+        ...updatedPersonel,
+        [name]: !updatedPersonel[name],
+      });
     } else {
       setUpdatedPersonel({
         ...updatedPersonel,
@@ -130,6 +138,7 @@ export default function PersonelDetay({
       phoneNumber: updatedPersonel.phoneNumber,
       birthDate:
         updatedPersonel.birthDate && updatedPersonel.birthDate.split("T")[0],
+      birthPlace: updatedPersonel.birthPlace,
       bloodType: updatedPersonel.bloodType,
       keyboardType: updatedPersonel.keyboardType,
 
@@ -138,6 +147,9 @@ export default function PersonelDetay({
       temporaryEndDate:
         updatedPersonel.temporaryEndDate &&
         updatedPersonel.temporaryEndDate.split("T")[0],
+
+      isMartyrRelative: updatedPersonel.isMartyrRelative,
+      isDisabled: updatedPersonel.isDisabled,
     };
   };
 
@@ -149,12 +161,14 @@ export default function PersonelDetay({
       durusmaKatibiMi: "",
       description: "",
       level: "",
-      isTemporary: "",
+
       tckn: "",
       phoneNumber: "",
       birthDate: "",
       bloodType: "",
       keyboardType: "",
+
+      isTemporary: "",
       temporaryReason: "",
       temporaryEndDate: "",
     });
@@ -473,7 +487,11 @@ export default function PersonelDetay({
                   />
                 </Col>
                 <Col>
-                  <Button color="danger" type="submit" onClick={(e) => handleFormSubmit(e)}>
+                  <Button
+                    color="danger"
+                    type="submit"
+                    onClick={(e) => handleFormSubmit(e)}
+                  >
                     Getir
                   </Button>
                 </Col>
@@ -497,7 +515,11 @@ export default function PersonelDetay({
                   />
                 </Col>
                 <Col>
-                  <Button color="danger"  type="submit" onClick={(e) => handleFormSubmit(e)}>
+                  <Button
+                    color="danger"
+                    type="submit"
+                    onClick={(e) => handleFormSubmit(e)}
+                  >
                     Getir
                   </Button>
                 </Col>
@@ -556,6 +578,7 @@ export default function PersonelDetay({
                           setPersonelKurum(kurum);
                           setUpdatedPersonel(updatedPersonelAttributes(person));
                           setPersoneller([]);
+                          window.scrollTo(0, 0);
                         }}
                       >
                         DETAY
@@ -572,6 +595,11 @@ export default function PersonelDetay({
           <div className="mt-5">
             <h4>Özlük</h4>
             <hr />
+            {goBackButtonVisible && (
+              <Button color="danger" onClick={goBack}>
+                Geri Dön
+              </Button>
+            )}
 
             <Row className="mt-2">
               <Col>
@@ -708,6 +736,32 @@ export default function PersonelDetay({
                   onChange={handleInputChange}
                 />
               </Col>
+              <Col>
+                <FormGroup className="my-2">
+                  <Label for="isMartyrRelative" className="toggle-switch">
+                    <Input
+                      type="checkbox"
+                      name="isMartyrRelative"
+                      id="isMartyrRelative"
+                      checked={updatedPersonel.isMartyrRelative}
+                      onChange={handleInputChange}
+                    />
+                    <span></span> Şehit Gazi Yakını
+                  </Label>
+                </FormGroup>
+                <FormGroup className="my-2">
+                  <Label for="isDisabled" className="toggle-switch">
+                    <Input
+                      type="checkbox"
+                      name="isDisabled"
+                      id="isDisabled"
+                      checked={updatedPersonel.isDisabled}
+                      onChange={handleInputChange}
+                    />
+                    <span></span> Engelli
+                  </Label>
+                </FormGroup>
+              </Col>
             </Row>
             <Row className="mt-2">
               <Col hidden>
@@ -807,24 +861,26 @@ export default function PersonelDetay({
               </Row>
             )}
 
-            {personel.title && personel.title.kind === "yaziislerimudürü" && (
-              <Row className="mt-2">
-                <Col>
-                  <Label>İkinci Birim</Label>
-                  <Input
-                    type="text"
-                    name="ikinciBirimID"
-                    id="ikinciBirimID"
-                    value={
-                      personel.ikinciBirimID
-                        ? personel.ikinciBirimID.name
-                        : "İkinci Birim Tanımlanmamış"
-                    }
-                    disabled
-                  ></Input>
-                </Col>
-              </Row>
-            )}
+            {personel.title &&
+              (personel.title.kind === "yaziislerimudürü" ||
+                personel.title.kind === "mubasir") && (
+                <Row className="mt-2">
+                  <Col>
+                    <Label>İkinci Birim</Label>
+                    <Input
+                      type="text"
+                      name="ikinciBirimID"
+                      id="ikinciBirimID"
+                      value={
+                        personel.ikinciBirimID
+                          ? personel.ikinciBirimID.name
+                          : "İkinci Birim Tanımlanmamış"
+                      }
+                      disabled
+                    ></Input>
+                  </Col>
+                </Row>
+              )}
 
             <Row className="mt-2">
               <Col>
@@ -892,6 +948,16 @@ export default function PersonelDetay({
                   type="text"
                   value={calculateGorevSuresi(updatedPersonel.birthDate)}
                   disabled
+                />
+              </Col>
+              <Col>
+                <Label>Doğum Yeri</Label>
+                <Input
+                  type="text"
+                  id="birthPlace"
+                  name="birthPlace"
+                  value={updatedPersonel.birthPlace}
+                  onChange={handleInputChange}
                 />
               </Col>
             </Row>

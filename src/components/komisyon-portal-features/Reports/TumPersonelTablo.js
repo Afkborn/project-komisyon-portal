@@ -21,6 +21,7 @@ export default function TumPersonelTablo({
   selectedKurum,
   token,
   showPersonelDetay,
+  tableResults,
 }) {
   const [kontrolEdilecekBirimTipi, setKontrolEdilecekBirimTipi] = useState([]);
   const [kontrolEdilecekBirimler, setKontrolEdilecekBirimler] = useState([]);
@@ -31,6 +32,10 @@ export default function TumPersonelTablo({
   useEffect(() => {
     if (selectedKurum) {
       getKontrolEdilecekBirimler(selectedUnitType);
+    }
+    if (tableResults.length !== 0) {
+      setMahkemeTablo(tableResults);
+      
     }
     // eslint-disable-next-line
   }, [selectedKurum]);
@@ -90,6 +95,8 @@ export default function TumPersonelTablo({
       .then((response) => {
         setRaporGetiriliyorMu(false);
         setMahkemeTablo(response.data.personelTablo);
+
+        
       })
       .catch((error) => {
         let errorMessage = error.response.data.message || "Bir hata oluştu.";
@@ -189,7 +196,7 @@ export default function TumPersonelTablo({
         <h6
           style={personelStyle}
           key={personel._id || personel.id}
-          onClick={() => showPersonelDetay(personel)}
+          onClick={() => showPersonelDetay(personel, mahkemeTablo)}
           onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
           onMouseLeave={() => setHoveredPersonelId(null)}
         >

@@ -7,7 +7,7 @@ import {
   Button,
 } from "reactstrap";
 
-export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
+export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum}) {
   return (
     <div>
       <h3>Kurum Listesi</h3>

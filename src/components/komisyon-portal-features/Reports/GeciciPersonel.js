@@ -4,7 +4,7 @@ import { Button, Spinner, Table } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   renderDate_GGAAYYYY,
-  calculateKalanGorevSuresi
+  calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
 
@@ -23,13 +23,24 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
     setRaporGetiriliyorMu(true);
     axios(configuration)
       .then((response) => {
-        setGeciciPersonelList(response.data.personList);
         setRaporGetiriliyorMu(false);
+        if (response.data.personList.length === 0) {
+          alertify.error("Geçici personel bulunamadı.");
+        } else {
+          setGeciciPersonelList(response.data.personList);
+        }
       })
       .catch((error) => {
         alertify.error("Geçici personel listesi getirilirken bir hata oluştu.");
         setRaporGetiriliyorMu(false);
       });
+  };
+
+  const renderText = (text1, text2) => {
+    if (text1 === text2) {
+      return text1;
+    }
+    return text1 + " (" + text2 + ")";
   };
 
   return (
@@ -43,7 +54,7 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
         </span>
         <div>
           <Button
-          color="danger"
+            color="danger"
             className="m-3"
             size="lg"
             id="getGeciciPersonel"
@@ -70,10 +81,11 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                 <tr>
                   <th>Sicil No</th>
                   <th>Ad Soyad</th>
-                  <th>Asıl Kurum</th>
-                  <th>Asıl Birim</th>
-                  <th>Geçici Kurum</th>
-                  <th>Geçici Birim</th>
+                  <th>Unvan</th>
+                  <th>Asıl Kurum - Birim</th>
+                  {/* <th>Asıl Birim</th> */}
+                  <th>Geçici Birim - Kurum </th>
+                  {/* <th>Geçici Birim</th> */}
                   <th>Gerekçe</th>
                   <th>Bitiş Tarihi</th>
                   <th id="detayTD">İşlemler</th>
@@ -86,17 +98,31 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                     <td>
                       {personel.ad} {personel.soyad}
                     </td>
-                    <td>{personel.birimID.institution.name}</td>
-                    <td>{personel.birimID.name}</td>
-                    <td>{personel.temporaryBirimID.institution.name}</td>
-                    <td>{personel.temporaryBirimID.name}</td>
+                    <td>{personel.title.name}</td>
+                    <td>
+                      {renderText(
+                        personel.birimID.name,
+                        personel.birimID.institution.name
+                      )}
+                    </td>
+
+                    <td>
+                      {renderText(
+                        personel.temporaryBirimID.name,
+                        personel.temporaryBirimID.institution.name
+                      )}
+                    </td>
+
                     <td>{personel.temporaryReason}</td>
                     <td>
                       {renderDate_GGAAYYYY(personel.temporaryEndDate)} (
                       {calculateKalanGorevSuresi(personel.temporaryEndDate)})
                     </td>
                     <td id="detayTD">
-                      <Button color="info" onClick={(e) => showPersonelDetay(personel)}>
+                      <Button
+                        color="info"
+                        onClick={(e) => showPersonelDetay(personel)}
+                      >
                         Detay
                       </Button>
                     </td>

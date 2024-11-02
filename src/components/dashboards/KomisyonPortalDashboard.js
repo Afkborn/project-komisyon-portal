@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Container,
@@ -7,6 +7,7 @@ import {
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
+  Badge,
 } from "reactstrap";
 
 import logo from "../../assets/logo300.png";
@@ -33,7 +34,7 @@ import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHar
 import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
 import Cookies from "universal-cookie";
 import axios from "axios";
-
+import alertify from "alertifyjs";
 import logoutSvg from "../../assets/logout.svg";
 
 import {
@@ -46,6 +47,10 @@ export default function KomisyonPortalDashboard() {
   const [selectedPersonelID, setSelectedPersonelID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
   const [selectedBirimID, setSelectedBirimID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
 
+  // tablodan bir personel'e tıklandığı zaman tabloya tekrar dönmek için tablo sonuçlarını saklayalım
+  const [tableResults, setTableResults] = useState([]);
+  const [goBackButtonVisible, setGoBackButtonVisible] = useState(false);
+
   const [selected, setSelected] = useState(0);
   const [user, setUser] = useState(null);
   const [kurumlar, setKurumlar] = useState([]);
@@ -56,10 +61,33 @@ export default function KomisyonPortalDashboard() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
 
+  function changeKurum(kurum) {
+    alertify.confirm(
+      "Kurum Değiştirme",
+      "Kurumu değiştirmek istediğinize emin misiniz?",
+      () => {
+        alertify.success("Kurum değiştirildi.");
+        setSelectedKurum(kurum);
+        changePage(0);
+      },
+      () => {}
+    );
+  }
+
   function changePage(rank) {
+    window.scrollTo(0, 0);
     setSelectedPersonelID(null);
     setSelectedBirimID(null);
     setSelected(rank);
+    if (rank === 11 || rank === 3) {
+      return;
+    }
+    setTableResults([]);
+    setGoBackButtonVisible(false);
+  }
+
+  function goBack() {
+    changePage(11);
   }
 
   useState(() => {
@@ -73,6 +101,8 @@ export default function KomisyonPortalDashboard() {
       getUnvanlar();
     }
   }, []);
+
+  useEffect(() => {}, [tableResults]);
 
   function getKurum() {
     axios(GET_institutions)
@@ -135,9 +165,14 @@ export default function KomisyonPortalDashboard() {
     cursor: "pointer",
   };
 
-  const showPersonelDetay = (person) => {
+  const showPersonelDetay = (person, result = null) => {
     changePage(3);
     setSelectedPersonelID(person.sicil);
+
+    if (result) {
+      setTableResults(result);
+      setGoBackButtonVisible(true);
+    }
   };
 
   const showBirimPersonelListe = (birim) => {
@@ -190,6 +225,8 @@ export default function KomisyonPortalDashboard() {
             selectedKurum={selectedKurum}
             token={token}
             unvanlar={unvanlar}
+            goBackButtonVisible={goBackButtonVisible}
+            goBack={goBack}
           />
         );
       case 5:
@@ -197,7 +234,7 @@ export default function KomisyonPortalDashboard() {
           <Kurum
             kurumlar={kurumlar}
             selectedKurum={selectedKurum}
-            setSelectedKurum={setSelectedKurum}
+            setSelectedKurum={changeKurum}
           />
         );
       case 6:
@@ -237,6 +274,8 @@ export default function KomisyonPortalDashboard() {
             selectedKurum={selectedKurum}
             token={token}
             showPersonelDetay={showPersonelDetay}
+            tableResults={tableResults}
+            // setTableResults={setTableResults}
           />
         );
       case 12:
@@ -314,6 +353,12 @@ export default function KomisyonPortalDashboard() {
       visibleRoles: ["admin"],
     },
     { id: 1001, label: "Adliye Yönetim Sistemi", type: "heading" },
+    {
+      id: 1004,
+      label: "",
+      type: "heading",
+      detail: selectedKurum ? selectedKurum.name : "",
+    },
     { id: 5, label: "Kurum", type: "item" },
     { id: 4, label: "Ünvanlar", type: "item", hiddenRoles: ["komisyonbaskan"] },
     { id: 1, label: "Birimler", type: "item" },
@@ -355,10 +400,7 @@ export default function KomisyonPortalDashboard() {
             {user && (
               <div>
                 <Alert className="bg-danger text-white">
-                  Hoşgeldin{" "}
-                  <b>
-                    {user.name}
-                  </b>{" "}
+                  Hoşgeldin <b>{user.name}</b>{" "}
                   <img
                     src={logoutSvg}
                     style={imgStyle}
@@ -389,7 +431,8 @@ export default function KomisyonPortalDashboard() {
                     hidden={!isVisibleForRole}
                     className="mt-3 text-center font-weight-bold"
                   >
-                    {item.label}
+                    {item.label}{" "}
+                    {item.detail && <Badge color="danger">{item.detail}</Badge>}
                   </ListGroupItemHeading>
                 );
               } else {

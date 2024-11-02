@@ -18,7 +18,7 @@ export default function PasifPersonel({
   const getPasifPersonel = (e) => {
     const configuration = {
       method: "GET",
-      url: "/api/persons/deactivated", 
+      url: "/api/persons/deactivated",
       // ?institutionId=" + selectedKurum.id
       headers: {
         Authorization: `Bearer ${token}`,
@@ -27,21 +27,27 @@ export default function PasifPersonel({
     setRaporGetiriliyorMu(true);
     axios(configuration)
       .then((response) => {
-        setPasifPersonelList(response.data.personList);
         setRaporGetiriliyorMu(false);
+        if (response.data.personList.length === 0) {
+          alertify.error("Devren giden personel bulunamadı.");
+        } else {
+          setPasifPersonelList(response.data.personList);
+        }
       })
       .catch((error) => {
-        alertify.error("Pasif personel listesi getirilirken bir hata oluştu.");
+        alertify.error(
+          "Devren giden personel listesi getirilirken bir hata oluştu."
+        );
         setRaporGetiriliyorMu(false);
       });
   };
 
   return (
     <div>
-      <h3>Durumu Pasif Olan Personel Listesi</h3>
+      <h3>Devren Giden Personel Listesi</h3>
       <span>
-        Bu rapor ile tüm  kurumlarda durumu pasif olan personellerin
-        listesini görüntüleyebilirsiniz.
+        Bu rapor ile tüm kurumlarda devren giden personellerin listesini
+        görüntüleyebilirsiniz.
       </span>
       <div>
         <Button
@@ -74,6 +80,7 @@ export default function PasifPersonel({
                 <th>Adı</th>
                 <th>Soyadı</th>
                 <th>Gerekçe</th>
+                <th>Unvan</th>
                 <th>Tarih</th>
                 <th id="detayTD">İşlemler</th>
               </tr>
@@ -85,12 +92,16 @@ export default function PasifPersonel({
                   <td>{personel.ad}</td>
                   <td>{personel.soyad}</td>
                   <td>{personel.deactivationReason}</td>
+                  <td>{personel.title.name}</td>
                   <td>
                     {renderDate_GGAAYYYY(personel.deactivationDate)} (
                     {calculateGorevSuresi(personel.deactivationDate)})
                   </td>
                   <td id="detayTD">
-                    <Button color="info" onClick={(e) => showPersonelDetay(personel)}>
+                    <Button
+                      color="info"
+                      onClick={(e) => showPersonelDetay(personel)}
+                    >
                       Detay
                     </Button>
                   </td>
@@ -117,7 +128,7 @@ export default function PasifPersonel({
               generatePdf(
                 document,
                 "pasifPersonelTable",
-                "Durumu Pasif Personel Listesi",
+                "Devren Giden Personel Listesi",
                 "detayTD"
               );
             }}
