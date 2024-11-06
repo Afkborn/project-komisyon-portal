@@ -50,12 +50,18 @@ function Login() {
       setErrorMessage("Lütfen tüm alanları doldurunuz");
       return false;
     }
+
+
     return true;
   };
   const login = () => {
     if (!validateForm()) {
       return;
     }
+
+    // username and password ttrim
+    configuration.data.username = sicilNo.trim();
+    configuration.data.password = sifre.trim();
 
     axios(configuration)
       .then((result) => {

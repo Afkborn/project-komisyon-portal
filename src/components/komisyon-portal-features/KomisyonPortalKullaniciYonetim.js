@@ -103,12 +103,13 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
 
     axios(configuration)
       .then((response) => {
-        console.log(response);
-        alertify.success("Kullanıcı başarıyla eklendi");
+        // console.log(response);
+        alert("Kullanıcı başarıyla eklendi.");
+        setAccordionOpen("1");
         getUsers();
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         let errorCode = error.response.data.error.code || "";
         if (errorCode === 11000) {
           alertify.error("Bu kullanıcı adı zaten kullanımda.");
@@ -122,10 +123,15 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
   };
 
   const handleDeleteButton = (userId) => {
-    if (!window.confirm("Kullanıcıyı silmek istediğinize emin misiniz?")) {
-      return;
-    }
+    alertify.confirm(
+      "Kullanıcı Silme",
+      "Kullanıcıyı silmek istediğinize emin misiniz?",
+      () => deleteUser(userId),
+      () => {}
+    );
+  };
 
+  const deleteUser = (userId) => {
     const configuration = {
       method: "DELETE",
       url: "/api/users/" + userId,
@@ -269,7 +275,7 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
                     name="phoneNumber"
                     id="phoneNumber"
                     placeholder="Telefon Numarası"
-                    value={user.phoneNumber}
+                    value={newUser.phoneNumber}
                     onChange={handleChange}
                   />
                 </FormGroup>

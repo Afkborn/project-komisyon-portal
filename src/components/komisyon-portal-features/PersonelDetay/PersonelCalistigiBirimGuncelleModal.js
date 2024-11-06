@@ -220,6 +220,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
           toggle();
         })
         .catch((error) => {
+          
           alertify.error("Çalıştığı birim bilgisi güncellenemedi.");
         });
     }
