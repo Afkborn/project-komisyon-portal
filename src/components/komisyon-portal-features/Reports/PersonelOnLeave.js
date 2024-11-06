@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { Input, Label, Button, Form, Row, Col } from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
-import { getIzinType} from "../../actions/IzinActions";
+import { getIzinType } from "../../actions/IzinActions";
 // import html2pdf from "html2pdf.js";
 
 import { generatePdf } from "../../actions/PdfActions";
-
 
 export default function PersonelOnLeave({
   selectedKurum,
@@ -16,6 +15,7 @@ export default function PersonelOnLeave({
   const [searchBy, setSearchBy] = useState("current");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [reason, setReason] = useState("");
   const [personelList, setPersonelList] = useState([]);
   const [aramaYapildiMi, setAramaYapildiMi] = useState(false);
 
@@ -31,6 +31,10 @@ export default function PersonelOnLeave({
     setAramaYapildiMi(false);
   };
 
+  const handleReasonChange = (e) => {
+    setReason(e.target.value);
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
@@ -39,7 +43,11 @@ export default function PersonelOnLeave({
     let url = "api/reports/izinliPersoneller?institutionId=" + selectedKurum.id;
 
     if (searchBy === "byDate") {
-      url += `?startDate=${startDate}&endDate=${endDate}`;
+      url += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+
+    if (reason) {
+      url += `&reason=${reason}`;
     }
 
     let configuration = {
@@ -52,7 +60,6 @@ export default function PersonelOnLeave({
 
     axios(configuration)
       .then((response) => {
-
         let izinliPersonelList = response.data.izinliPersonelList;
 
         // sort unvan.oncelikSirasi
@@ -95,9 +102,9 @@ export default function PersonelOnLeave({
     <div>
       <h3>Rapor - İzinde Olan Personel</h3>
       <span>
-        Bu rapor sayesinde seçili olan kurumda tarih bazlı veya güncel olarak
-        izinde olan personelleri listeyebilir, excel veya pdf formatında dışa
-        aktarabilirsiniz.
+        Bu rapor sayesinde <b> seçili olan kurumda</b> tarih bazlı veya güncel
+        olarak izinde olan personelleri listeyebilir, excel veya pdf formatında
+        dışa aktarabilirsiniz.
       </span>
 
       <hr />
@@ -129,13 +136,6 @@ export default function PersonelOnLeave({
                 Tarih Aralığında İzinde Olanlar
               </Label>
             </Col>
-            <Button
-              color="danger"
-              type="submit"
-              onClick={(e) => handleFormSubmit(e)}
-            >
-              Getir
-            </Button>
           </Row>
 
           {/* arama eğer sicil ile yapılacak ise gösterilecek  form */}
@@ -165,9 +165,66 @@ export default function PersonelOnLeave({
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </Col>
+              <Col>
+                <Label for="reason">İzin Tipi</Label>
+                <Input
+                  type="select"
+                  name="reason"
+                  onChange={handleReasonChange}
+                  id="reason"
+                >
+                  <option>Seçiniz</option>
+
+                  <option value={"YILLIK_IZIN"}>Yıllık İzin</option>
+                  <option value={"RAPOR_IZIN"}>Raporlu İzin</option>
+                  <option value={"UCRETSIZ_IZIN"}>Ücretsiz İzin</option>
+                  <option value={"MAZERET_IZIN"}>Mazeret İzin</option>
+                  <option value={"DOGUM_IZIN"}>Doğum İzni</option>
+                  <option value={"OLUM_IZIN"}>Ölüm İzni</option>
+                  <option value={"EVLENME_IZIN"}>Evlenme İzni</option>
+                  <option value={"REFAKAT_IZIN"}>Refakat İzni</option>
+                  <option value={"DIGER_IZIN"}>Diğer</option>
+                </Input>
+              </Col>
+            </Row>
+          )}
+          {searchBy !== "byDate" && (
+            <Row className="row-cols-lg-auto g-3 align-items-center mt-2">
+              <Col>
+                <Label for="reason">İzin Tipi</Label>
+                <Input
+                  type="select"
+                  name="reason"
+                  onChange={handleReasonChange}
+                  id="reason"
+                >
+                  <option>Seçiniz</option>
+
+                  <option value={"YILLIK_IZIN"}>Yıllık İzin</option>
+                  <option value={"RAPOR_IZIN"}>Raporlu İzin</option>
+                  <option value={"UCRETSIZ_IZIN"}>Ücretsiz İzin</option>
+                  <option value={"MAZERET_IZIN"}>Mazeret İzin</option>
+                  <option value={"DOGUM_IZIN"}>Doğum İzni</option>
+                  <option value={"OLUM_IZIN"}>Ölüm İzni</option>
+                  <option value={"EVLENME_IZIN"}>Evlenme İzni</option>
+                  <option value={"REFAKAT_IZIN"}>Refakat İzni</option>
+                  <option value={"DIGER_IZIN"}>Diğer</option>
+                </Input>
+              </Col>
             </Row>
           )}
         </Form>
+
+        <div className="mt-3">
+          <Button
+            size="lg"
+            color="danger"
+            id="getRapor"
+            onClick={(e) => handleFormSubmit(e)}
+          >
+            Rapor Getir
+          </Button>
+        </div>
 
         {aramaYapildiMi && personelList.length === 0 && (
           <div className="alert alert-info mt-3" role="alert">
