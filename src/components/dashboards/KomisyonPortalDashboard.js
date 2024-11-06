@@ -281,7 +281,6 @@ export default function KomisyonPortalDashboard() {
             showPersonelDetay={showPersonelDetay}
             tableResults={tableResults}
             tableType={tableType}
-            
           />
         );
       case 12:
@@ -355,7 +354,6 @@ export default function KomisyonPortalDashboard() {
             showPersonelDetay={showPersonelDetay}
           />
         );
-
     }
   }
 
@@ -420,8 +418,26 @@ export default function KomisyonPortalDashboard() {
     <Container className="mt-5" fluid>
       <Row>
         <Col xs="12" lg="2">
-          <div style={centerImage} onClick={(e) => handleHome()}>
-            <img src={logo} style={{ width: "150px" }} alt="logo" />
+          <div
+            style={centerImage}
+            onClick={(e) => handleHome()}
+            onMouseOver={(e) =>
+              (e.currentTarget.querySelector("img").style.transform =
+                "rotateY(360deg)")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.querySelector("img").style.transform =
+                "rotateY(0deg)")
+            }
+          >
+            <img
+              src={logo}
+              style={{
+                width: "150px",
+                transition: "transform 0.5s ease-in-out",
+              }}
+              alt="logo"
+            />
           </div>
           <div className="mt-2">
             {user && (
@@ -474,9 +490,13 @@ export default function KomisyonPortalDashboard() {
                     }
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = "#f8d7da";
+                      // text bold
+                      e.target.style.fontWeight = "bold";
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.backgroundColor = "";
+                      // text normal
+                      e.target.style.fontWeight = "normal";
                     }}
                   >
                     {item.label}
