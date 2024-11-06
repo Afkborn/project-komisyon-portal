@@ -4,6 +4,13 @@ function renderDate_GGAAYYYY(date) {
   return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
 }
 
+function renderDate_GGAA(date) {
+  if (!date) return "";
+  const d = new Date(date);
+  return d.getDate() + "/" + (d.getMonth() + 1);
+}
+
+
 function calculateGorevSuresi(date) {
   //  0 Yıl 2 Ay 3 Gün
   if (!date) return "";
@@ -47,6 +54,7 @@ function calculateKalanGorevSuresi(date) {
 
 module.exports = {
   renderDate_GGAAYYYY,
+  renderDate_GGAA,
   calculateGorevSuresi,
   calculateBirimGorevSuresi,
   calculateKalanGorevSuresi,

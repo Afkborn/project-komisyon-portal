@@ -51,6 +51,7 @@ export default function KomisyonPortalDashboard() {
 
   // tablodan bir personel'e tıklandığı zaman tabloya tekrar dönmek için tablo sonuçlarını saklayalım
   const [tableResults, setTableResults] = useState([]);
+  const [tableType, setTableType] = useState(null);
   const [goBackButtonVisible, setGoBackButtonVisible] = useState(false);
 
   const [selected, setSelected] = useState(0);
@@ -85,6 +86,7 @@ export default function KomisyonPortalDashboard() {
       return;
     }
     setTableResults([]);
+    setTableType(null);
     setGoBackButtonVisible(false);
   }
 
@@ -167,12 +169,13 @@ export default function KomisyonPortalDashboard() {
     cursor: "pointer",
   };
 
-  const showPersonelDetay = (person, result = null) => {
+  const showPersonelDetay = (person, result = null, tableType = null) => {
     changePage(3);
     setSelectedPersonelID(person.sicil);
 
     if (result) {
       setTableResults(result);
+      setTableType(tableType);
       setGoBackButtonVisible(true);
     }
   };
@@ -277,7 +280,8 @@ export default function KomisyonPortalDashboard() {
             token={token}
             showPersonelDetay={showPersonelDetay}
             tableResults={tableResults}
-            // setTableResults={setTableResults}
+            tableType={tableType}
+            
           />
         );
       case 12:

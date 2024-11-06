@@ -117,12 +117,15 @@ export default function PersonelIzinEkleModal({
               id="reason"
             >
               <option>Seçiniz</option>
+              
               <option value={"YILLIK_IZIN"}>Yıllık İzin</option>
               <option value={"RAPOR_IZIN"}>Raporlu İzin</option>
               <option value={"UCRETSIZ_IZIN"}>Ücretsiz İzin</option>
               <option value={"MAZERET_IZIN"}>Mazeret İzin</option>
               <option value={"DOGUM_IZIN"}>Doğum İzni</option>
               <option value={"OLUM_IZIN"}>Ölüm İzni</option>
+              <option value={"EVLENME_IZIN"}>Evlenme İzni</option>
+              <option value={"REFAKAT_IZIN"}>Refakat İzni</option>
               <option value={"DIGER_IZIN"}>Diğer</option>
             </Input>
           </FormGroup>

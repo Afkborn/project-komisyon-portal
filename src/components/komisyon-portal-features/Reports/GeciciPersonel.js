@@ -79,6 +79,7 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
             <Table striped id="pasifPersonelTable">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>Sicil No</th>
                   <th>Ad Soyad</th>
                   <th>Unvan</th>
@@ -92,8 +93,9 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                 </tr>
               </thead>
               <tbody>
-                {geciciPersonelList.map((personel) => (
+                {geciciPersonelList.map((personel, index) => (
                   <tr key={personel._id}>
+                    <th scope="row">{index + 1}</th>
                     <td>{personel.sicil}</td>
                     <td>
                       {personel.ad} {personel.soyad}
@@ -150,7 +152,8 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
                   document,
                   "pasifPersonelTable",
                   "Geçici Personel Listesi",
-                  "detayTD"
+                  "detayTD",
+                  true
                 );
               }}
             >

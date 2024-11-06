@@ -4,7 +4,8 @@ export function generatePdf(
   document,
   elementIDName,
   fileName,
-  deleteID = null
+  deleteID = null,
+  rotate = false
 ) {
   const element = document.getElementById(elementIDName);
 
@@ -29,7 +30,7 @@ export function generatePdf(
     jsPDF: {
       unit: "in",
       format: "letter",
-      orientation: "portrait",
+      orientation: rotate ? "landscape" : "portrait",
     },
   };
 

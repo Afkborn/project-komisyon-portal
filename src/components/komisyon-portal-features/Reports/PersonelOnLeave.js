@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input, Label, Button, Form, Row, Col } from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
-
+import { getIzinType} from "../../actions/IzinActions";
 // import html2pdf from "html2pdf.js";
 
 import { generatePdf } from "../../actions/PdfActions";
@@ -180,10 +180,12 @@ export default function PersonelOnLeave({
             <table className="table" id="personelOnLeaveTable">
               <thead>
                 <tr>
+                  <th scope="col">#</th>
                   <th scope="col">Sicil No</th>
                   <th scope="col">Ünvan</th>
                   <th scope="col">Adı Soyadı</th>
                   <th scope="col">Birim</th>
+                  <th scope="col">İzin Türü</th>
                   <th scope="col">Başlangıç Tarihi</th>
                   <th scope="col">Bitiş Tarihi</th>
                   <th scope="col" id="detayTD"></th>
@@ -191,8 +193,9 @@ export default function PersonelOnLeave({
               </thead>
               <tbody>
                 {personelList &&
-                  personelList.map((personel) => (
+                  personelList.map((personel, index) => (
                     <tr key={personel._id}>
+                      <th scope="row">{index + 1}</th>
                       <td>{personel.sicil}</td>
                       <td>{personel.unvan.name}</td>
                       <td>
@@ -200,6 +203,7 @@ export default function PersonelOnLeave({
                         {personel.isTemporary && "(Geçici Personel)"}
                       </td>
                       <td>{personel.birim}</td>
+                      <td>{getIzinType(personel.izinTur)}</td>
                       <td>{renderDate_GGAAYYYY(personel.izinBaslangic)}</td>
                       <td>{renderDate_GGAAYYYY(personel.izinBitis)}</td>
                       <td id="detayTD">
@@ -236,8 +240,9 @@ export default function PersonelOnLeave({
                 generatePdf(
                   document,
                   "personelOnLeaveTable",
-                  "İzinde Olan Personel.pdf",
-                  "detayTD"
+                  "İzinde Olan Personel",
+                  "detayTD",
+                  true
                 );
               }}
             >

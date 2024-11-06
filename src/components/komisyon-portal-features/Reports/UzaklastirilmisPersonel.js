@@ -77,6 +77,7 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
             <Table striped id="uzaklastirilmisPersonelTable">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>Sicil No</th>
                   <th>Ad Soyad</th>
                   <th>Kurum</th>
@@ -88,8 +89,9 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
                 </tr>
               </thead>
               <tbody>
-                {uzaklastirilmisPersonelList.map((personel) => (
+                {uzaklastirilmisPersonelList.map((personel, index) => (
                   <tr key={personel._id}>
+                    <td>{index + 1}</td>
                     <td>{personel.sicil}</td>
                     <td>
                       {personel.ad} {personel.soyad}

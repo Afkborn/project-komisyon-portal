@@ -40,6 +40,9 @@ export default function KomisyonPortalWelcome({
   const [unvanHovered, setUnvanHovered] = useState(undefined);
   const [katipTitleChartVisible, setKatipTitleChartVisible] = useState(true);
 
+  // infaz koruma table
+  const [infazKorumaTableData, setInfazKorumaTableData] = useState([]);
+  const [infazKorumaTableVisible, setInfazKorumaTableVisible] = useState(false);
   // urgent jobs
   const [urgentJobs, setUrgentJobs] = useState([]);
   const [urgentJobsLoading, setUrgentJobsLoading] = useState(false);
@@ -71,11 +74,39 @@ export default function KomisyonPortalWelcome({
 
     if (katipChart.length === 0 && selectedKurum) getKatipChart();
     if (urgentJobs.length === 0 && selectedKurum) getUrgentJobs();
-
+    if (infazKorumaTableData.length === 0 && selectedKurum)
+      getİnfazKorumaTable();
     // Cleanup fonksiyonu
     return () => clearInterval(interval);
     // eslint-disable-next-line
   }, [selectedKurum]); // selectedKurum değiştiğinde effect'i tekrar çalıştır
+
+  const getİnfazKorumaTable = () => {
+    let configuration = {
+      method: "GET",
+      url:
+        `/api/reports/infazKorumaMemurSayisi?institutionId=` + selectedKurum.id,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        setInfazKorumaTableVisible(true);
+        setInfazKorumaTableData(response.data.infazKorumaTable);
+      })
+      .catch((error) => {
+        if (error.response?.data?.infazKorumaTitleChartVisible === false) {
+          setInfazKorumaTableVisible(false);
+        } else {
+          console.log(error);
+          let errorMessage =
+            error.response?.data?.message || "Bir hata oluştu.";
+          alertify.error(errorMessage);
+        }
+      });
+  };
 
   const getKatipChart = () => {
     setKatipChartLoading(true);
@@ -371,6 +402,28 @@ export default function KomisyonPortalWelcome({
             />
           </Col>
         </Row>
+      </div>
+
+      {/* İNFAZ KORUMA TABLE */}
+      <div hidden={!infazKorumaTableVisible}>
+        <Table striped size="sm">
+          <thead>
+            <tr>
+              <th>Kurum Adı</th>
+              <th>Toplam İnfaz Koruma Memuru Sayısı </th>
+              <th>Toplam İnfaz Koruma Baş Memur Sayısı</th>
+            </tr>
+          </thead>
+          <tbody>
+            {infazKorumaTableData.map((entry, index) => (
+              <tr key={index}>
+                <td>{entry.institutionName}</td>
+                <td>{entry.infazKorumaMemurSayisi}</td>
+                <td>{entry.infazKorumaBasMemurSayisi}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </div>
 
       {/* ACELE İŞLER  */}

@@ -13,6 +13,7 @@ import {
   PopoverHeader,
   PopoverBody,
 } from "reactstrap";
+import { renderDate_GGAA } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
 
 import "../../../styles/TumPersonelTablo.css";
@@ -22,6 +23,7 @@ export default function TumPersonelTablo({
   token,
   showPersonelDetay,
   tableResults,
+  tableType,
 }) {
   const [kontrolEdilecekBirimTipi, setKontrolEdilecekBirimTipi] = useState([]);
   const [kontrolEdilecekBirimler, setKontrolEdilecekBirimler] = useState([]);
@@ -34,7 +36,11 @@ export default function TumPersonelTablo({
       getKontrolEdilecekBirimler(selectedUnitType);
     }
     if (tableResults.length !== 0) {
+      setSelectedUnitType(tableType);
+      getKontrolEdilecekBirimler(tableType);
       setMahkemeTablo(tableResults);
+      
+      
       
     }
     // eslint-disable-next-line
@@ -95,8 +101,6 @@ export default function TumPersonelTablo({
       .then((response) => {
         setRaporGetiriliyorMu(false);
         setMahkemeTablo(response.data.personelTablo);
-
-        
       })
       .catch((error) => {
         let errorMessage = error.response.data.message || "Bir hata oluştu.";
@@ -179,9 +183,16 @@ export default function TumPersonelTablo({
       }
 
       if (personel.izindeMi) {
+        // personel.izinleri endDate'e göre sırala en sonuncusunu al
+
+        let lastPersonelIzin = personel.izinler.sort((a, b) => {
+          return new Date(b.endDate) - new Date(a.endDate);
+        })[0];
+
         badges.push(
           <Badge color="danger" className="ms-2" key="izin">
-            İzinde
+            İzinde {renderDate_GGAA(lastPersonelIzin.startDate)} -{" "}
+            {renderDate_GGAA(lastPersonelIzin.endDate)}
           </Badge>
         );
       }
@@ -196,7 +207,7 @@ export default function TumPersonelTablo({
         <h6
           style={personelStyle}
           key={personel._id || personel.id}
-          onClick={() => showPersonelDetay(personel, mahkemeTablo)}
+          onClick={() => showPersonelDetay(personel, mahkemeTablo, selectedUnitType)}
           onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
           onMouseLeave={() => setHoveredPersonelId(null)}
         >

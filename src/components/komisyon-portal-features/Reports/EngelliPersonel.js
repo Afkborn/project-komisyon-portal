@@ -71,6 +71,7 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
             <Table striped id="engelliPersonelTable">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>Sicil No</th>
                   <th>Ad Soyad</th>
                   <th>Kurum</th>
@@ -80,8 +81,9 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
                 </tr>
               </thead>
               <tbody>
-                {engelliPersonelList.map((personel) => (
+                {engelliPersonelList.map((personel, index) => (
                   <tr key={personel._id}>
+                    <th scope="row">{index + 1}</th>
                     <td>{personel.sicil}</td>
                     <td>
                       {personel.ad} {personel.soyad}

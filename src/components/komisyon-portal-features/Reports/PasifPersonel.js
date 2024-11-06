@@ -76,6 +76,7 @@ export default function PasifPersonel({
           <Table striped id="pasifPersonelTable">
             <thead>
               <tr>
+                <th>#</th>
                 <th>Sicil No</th>
                 <th>Adı</th>
                 <th>Soyadı</th>
@@ -86,8 +87,9 @@ export default function PasifPersonel({
               </tr>
             </thead>
             <tbody>
-              {pasifPersonelList.map((personel) => (
+              {pasifPersonelList.map((personel, index) => (
                 <tr key={personel._id}>
+                  <th scope="row">{index + 1}</th>
                   <td>{personel.sicil}</td>
                   <td>{personel.ad}</td>
                   <td>{personel.soyad}</td>
@@ -129,7 +131,8 @@ export default function PasifPersonel({
                 document,
                 "pasifPersonelTable",
                 "Devren Giden Personel Listesi",
-                "detayTD"
+                "detayTD",
+                true
               );
             }}
           >

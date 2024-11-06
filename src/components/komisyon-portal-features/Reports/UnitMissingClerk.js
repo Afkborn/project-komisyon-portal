@@ -169,7 +169,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
                 generatePdf(
                   document,
                   "unitMissingClerkTable",
-                  "Eksik Katibi Olan Birimler Listesi.pdf",
+                  "Eksik Katibi Olan Birimler Listesi",
                   "detayTD"
                 );
               }}

@@ -1,3 +1,4 @@
+
 function getIzinType(type) {
   switch (type) {
     case "YILLIK_IZIN":
@@ -12,12 +13,17 @@ function getIzinType(type) {
       return "Doğum İzni";
     case "OLUM_IZIN":
       return "Ölüm İzni";
+    case "EVLENME_IZIN":
+      return "Evlenme İzni";
+    case "REFAKAT_IZIN":
+      return "Refakat İzni";
     case "DIGER_IZIN":
       return "Diğer";
     default:
       return "Bilinmeyen";
   }
 }
+
 
 module.exports = {
   getIzinType,
