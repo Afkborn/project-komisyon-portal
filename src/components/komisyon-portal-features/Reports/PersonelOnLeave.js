@@ -32,6 +32,10 @@ export default function PersonelOnLeave({
   };
 
   const handleReasonChange = (e) => {
+    if (e.target.value === "Tüm İzin Türleri") {
+      setReason("");
+      return;
+    }
     setReason(e.target.value);
   };
 
@@ -173,7 +177,7 @@ export default function PersonelOnLeave({
                   onChange={handleReasonChange}
                   id="reason"
                 >
-                  <option>Seçiniz</option>
+                  <option>Tüm İzin Türleri</option>
 
                   <option value={"YILLIK_IZIN"}>Yıllık İzin</option>
                   <option value={"RAPOR_IZIN"}>Raporlu İzin</option>
@@ -198,7 +202,7 @@ export default function PersonelOnLeave({
                   onChange={handleReasonChange}
                   id="reason"
                 >
-                  <option>Seçiniz</option>
+                  <option>Tüm İzin Türleri</option>
 
                   <option value={"YILLIK_IZIN"}>Yıllık İzin</option>
                   <option value={"RAPOR_IZIN"}>Raporlu İzin</option>
