@@ -8,6 +8,7 @@ import {
   ListGroupItem,
   ListGroupItemHeading,
   Badge,
+  Tooltip,
 } from "reactstrap";
 
 import logo from "../../assets/logo300.png";
@@ -414,6 +415,9 @@ export default function KomisyonPortalDashboard() {
     alignItems: "center",
   };
 
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toolTipToogle = () => setTooltipOpen(!tooltipOpen);
+
   return (
     <Container className="mt-5" fluid>
       <Row>
@@ -431,6 +435,7 @@ export default function KomisyonPortalDashboard() {
             }
           >
             <img
+              id="logo"
               src={logo}
               style={{
                 width: "150px",
@@ -439,12 +444,14 @@ export default function KomisyonPortalDashboard() {
               alt="logo"
             />
           </div>
+
           <div className="mt-2">
             {user && (
               <div>
                 <Alert className="bg-danger text-white">
                   Hoşgeldin <b>{user.name}</b>{" "}
                   <img
+                    id="logout"
                     src={logoutSvg}
                     style={imgStyle}
                     alt="logout"
@@ -452,6 +459,14 @@ export default function KomisyonPortalDashboard() {
                       logout();
                     }}
                   />
+                  <Tooltip
+                    placement="right"
+                    isOpen={tooltipOpen}
+                    target="logout"
+                    toggle={toolTipToogle}
+                  >
+                    Çıkış Yap
+                  </Tooltip>
                 </Alert>
               </div>
             )}

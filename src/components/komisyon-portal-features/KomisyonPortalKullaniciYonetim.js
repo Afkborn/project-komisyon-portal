@@ -271,10 +271,10 @@ export default function KomisyonPortalKullaniciYonetim({ user, token }) {
                 <FormGroup>
                   <Label for="phoneNumber">Telefon Numarası</Label>
                   <Input
-                    type="text"
+                    type="number"
                     name="phoneNumber"
                     id="phoneNumber"
-                    placeholder="Telefon Numarası"
+                    placeholder="Telefon Numarası (5XXXXXXXXX)"
                     value={newUser.phoneNumber}
                     onChange={handleChange}
                   />

@@ -13,6 +13,7 @@ import {
   Row,
   Col,
   Badge,
+  Tooltip,
 } from "reactstrap";
 import BirimEkleModal from "./BirimEkleModal";
 import BirimSilModal from "./BirimSilModal";
@@ -156,6 +157,7 @@ export default function Birimler({ token, selectedKurum }) {
         <td>{birim.delegationType}</td>
         <td>
           <img
+            id="update"
             src={updateSvg}
             style={clikableStyle}
             alt="update"
@@ -163,8 +165,17 @@ export default function Birimler({ token, selectedKurum }) {
               handleBirimUpdate(birim);
             }}
           />
+          <Tooltip
+            placement="right"
+            isOpen={tooltipOpen}
+            target="update"
+            toggle={toolTipToogle}
+          >
+            Birim Güncelle
+          </Tooltip>
 
           <img
+            id="delete"
             className="ms-2"
             src={copSepeti}
             style={clikableStyle}
@@ -173,10 +184,25 @@ export default function Birimler({ token, selectedKurum }) {
               handleBirimDelete(birim);
             }}
           />
+          <Tooltip
+            placement="right"
+            isOpen={tooltipOpenDelete}
+            target="delete"
+            toggle={toolTipToogleDelete}
+          >
+            Birim Sil
+          </Tooltip>
         </td>
       </tr>
     );
   }
+
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toolTipToogle = () => setTooltipOpen(!tooltipOpen);
+
+
+  const [tooltipOpenDelete, setTooltipOpenDelete] = useState(false);
+  const toolTipToogleDelete = () => setTooltipOpenDelete(!tooltipOpenDelete);
 
   function renderSavcilikVeGenel(birim) {
     return (
@@ -192,6 +218,7 @@ export default function Birimler({ token, selectedKurum }) {
         </td>
         <td>
           <img
+            id="update"
             src={updateSvg}
             style={clikableStyle}
             alt="update"
@@ -199,8 +226,17 @@ export default function Birimler({ token, selectedKurum }) {
               handleBirimUpdate(birim, false);
             }}
           />
+          <Tooltip
+            placement="right"
+            isOpen={tooltipOpen}
+            target="update"
+            toggle={toolTipToogle}
+          >
+            Birim Güncelle
+          </Tooltip>
 
           <img
+            id="delete"
             className="ms-2"
             src={copSepeti}
             style={clikableStyle}
@@ -209,6 +245,14 @@ export default function Birimler({ token, selectedKurum }) {
               handleBirimDelete(birim);
             }}
           />
+          <Tooltip
+            placement="right"
+            isOpen={tooltipOpenDelete}
+            target="delete"
+            toggle={toolTipToogleDelete}
+          >
+            Birim Sil
+          </Tooltip>
         </td>
       </tr>
     );
