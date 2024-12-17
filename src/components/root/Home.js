@@ -22,6 +22,7 @@ import guide_red from "../../assets/guide-red.svg";
 import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
 import humanresources_red from "../../assets/humanresources-red.svg";
+import epsisLogo from "../../assets/epsis-logo.png";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -126,12 +127,12 @@ export default function Home() {
     // hiddenRoles, visibleRoles
     {
       id: 1,
-      label: "Komisyon Portal",
+      label: "EPSİS",
       detail:
-        "Komisyon kalemi için geliştirilen portalda Adliye Personel İşlemleri için özel raporlar ve işlemler bulunmaktadır.",
+        "Eskişehir Personel Sistemi ile adliye personellerinin bilgilerini görüntüleyebilirsiniz.",
       type: "item",
       visibleRoles: ["komisyonbaskan", "komisyonkatibi", "admin"],
-      image: humanresources_red,
+      image: epsisLogo,
       onClick: handleKomisyonPortal,
     },
     {

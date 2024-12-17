@@ -51,7 +51,6 @@ function Login() {
       return false;
     }
 
-
     return true;
   };
   const login = () => {
@@ -190,6 +189,7 @@ function Login() {
           </div>
         </MDBCol>
       </MDBRow>
+      <p>Developed by Bilgehan Kalay</p>
     </MDBContainer>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FormGroup, Input, Label, Badge, Spinner } from "reactstrap";
+import { FormGroup, Input, Label, Badge, Spinner, Button } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 export default function TumPersonelListe({
@@ -221,13 +221,13 @@ export default function TumPersonelListe({
                   </td>
                   <td>{personel.birimID.name}</td>
                   <td>
-                    <Badge
+                    <Button
                       color="info"
                       size="sm"
                       onClick={() => showPersonelDetay(personel)}
                     >
                       Detay
-                    </Badge>
+                    </Button>
                   </td>
                 </tr>
               ))}

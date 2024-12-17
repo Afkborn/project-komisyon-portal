@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "reactstrap";
 
-import logo from "../../assets/logo300.png";
+import logo from "../../assets/epsis-logo.png";
 
 import KomisyonPortalWelcome from "../komisyon-portal-features/Welcome/KomisyonPortalWelcome";
 import Birimler from "../komisyon-portal-features/Birimler/Birimler";
@@ -376,7 +376,7 @@ export default function KomisyonPortalDashboard() {
       type: "item",
       visibleRoles: ["admin"],
     },
-    { id: 1001, label: "Adliye Yönetim Sistemi", type: "heading" },
+    { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
     {
       id: 1004,
       label: "",

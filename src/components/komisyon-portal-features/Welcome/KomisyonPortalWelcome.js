@@ -193,7 +193,7 @@ export default function KomisyonPortalWelcome({
               <span style={timeStyle}>{saat}</span>
             </CardTitle>
             <CardText className="lead">
-              Komisyon Portal sistemine hoşgeldiniz. Sistemdeki güncel bilgilere
+              EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere
               ulaşabilir, işlemlerinizi gerçekleştirebilirsiniz.
             </CardText>
           </CardBody>
