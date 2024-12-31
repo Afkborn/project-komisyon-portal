@@ -1071,8 +1071,10 @@ export default function PersonelDetay({
                   {personel.izinler.map((izin) => (
                     <tr key={izin._id}>
                       <td>{getIzinType(izin.reason)}</td>
-                      <td>{izin.startDate.split("T")[0]}</td>
-                      <td>{izin.endDate.split("T")[0]}</td>
+                      <td>
+                        {renderDate_GGAAYYYY(izin.startDate.split("T")[0])}
+                      </td>
+                      <td> {renderDate_GGAAYYYY(izin.endDate.split("T")[0])}</td>
                       <td>{izin.comment}</td>
                       <td>
                         <Button

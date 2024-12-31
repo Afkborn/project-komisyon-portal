@@ -7,7 +7,7 @@ import {
   calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
-
+import { printDocument } from "../../actions/PrintActions";
 export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
   const [uzaklastirilmisPersonelList, setUzaklastirilmisPersonelList] =
     useState([]);
@@ -145,7 +145,23 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
               }}
             >
               Pdf'e Aktar
-            </Button>{" "}
+            </Button>
+
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(
+                  document,
+                  "uzaklastirilmisPersonelTable",
+                  "detayTD"
+                );
+              }}
+            >
+              Yazdır
+            </Button>
           </div>
         </div>
       </div>

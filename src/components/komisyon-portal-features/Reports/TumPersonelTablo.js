@@ -39,9 +39,6 @@ export default function TumPersonelTablo({
       setSelectedUnitType(tableType);
       getKontrolEdilecekBirimler(tableType);
       setMahkemeTablo(tableResults);
-      
-      
-      
     }
     // eslint-disable-next-line
   }, [selectedKurum]);
@@ -134,9 +131,24 @@ export default function TumPersonelTablo({
   const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
 
   function renderPersonelWithKind(personelTablo, kind) {
-    const filteredPersonel = personelTablo.filter(
+    let filteredPersonel = personelTablo.filter(
       (personel) => personel.title && personel.title.kind === kind
     );
+    if (kind === "other") {
+      // başkan,uyehakim,hakim,yaziislerimudürü,mubasir,zabitkatibi dışındakileri yazdır
+      filteredPersonel = personelTablo.filter(
+        (personel) =>
+          personel.title &&
+          ![
+            "baskan",
+            "uyehakim",
+            "hakim",
+            "yaziislerimudürü",
+            "mubasir",
+            "zabitkatibi",
+          ].includes(personel.title.kind)
+      );
+    }
 
     if (filteredPersonel.length === 0) {
       return <p>Tanımlı kişi bulunamadı</p>;
@@ -145,6 +157,14 @@ export default function TumPersonelTablo({
     return filteredPersonel.map((personel) => {
       const isHovered = hoveredPersonelId === (personel._id || personel.id);
       let badges = [];
+
+      if (kind === "other") {
+        badges.push(
+          <Badge color="secondary" className="ms-2" key="unvan">
+            {personel.title.name}
+          </Badge>
+        );
+      }
 
       if (personel.durusmaKatibiMi) {
         badges.push(
@@ -207,7 +227,9 @@ export default function TumPersonelTablo({
         <h6
           style={personelStyle}
           key={personel._id || personel.id}
-          onClick={() => showPersonelDetay(personel, mahkemeTablo, selectedUnitType)}
+          onClick={() =>
+            showPersonelDetay(personel, mahkemeTablo, selectedUnitType)
+          }
           onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
           onMouseLeave={() => setHoveredPersonelId(null)}
         >
@@ -426,6 +448,12 @@ export default function TumPersonelTablo({
                                   birim.persons,
                                   "zabitkatibi"
                                 )}
+                            </div>
+
+                            <div className="text-center" id="diger">
+                              <h5>Diğer Personel</h5>
+                              {birim.persons &&
+                                renderPersonelWithKind(birim.persons, "other")}
                             </div>
                           </div>
                         </Col>

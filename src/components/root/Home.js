@@ -21,7 +21,7 @@ import logo from "../../assets/logo300.png";
 import guide_red from "../../assets/guide-red.svg";
 import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
-import humanresources_red from "../../assets/humanresources-red.svg";
+// import humanresources_red from "../../assets/humanresources-red.svg";
 import epsisLogo from "../../assets/epsis-logo.png";
 
 export default function Home() {

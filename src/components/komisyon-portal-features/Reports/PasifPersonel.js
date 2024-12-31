@@ -7,6 +7,8 @@ import {
   renderDate_GGAAYYYY,
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
+
 
 export default function PasifPersonel({
   // selectedKurum,
@@ -137,7 +139,18 @@ export default function PasifPersonel({
             }}
           >
             Pdf'e Aktar
-          </Button>{" "}
+          </Button>
+          <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "pasifPersonelTable", "detayTD");
+              }}
+            >
+              Yazdır
+            </Button>
         </div>
       </div>
     </div>

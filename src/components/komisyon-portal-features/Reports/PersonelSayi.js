@@ -9,6 +9,7 @@ import {
   Button,
 } from "reactstrap";
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
 
 export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
   const [spinner, setSpinner] = useState(false);
@@ -105,6 +106,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 </table>
                 <Button
                   color="danger"
+                  className="m-1"
                   onClick={() =>
                     generatePdf(
                       document,
@@ -114,6 +116,16 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                   }
                 >
                   Pdf'e Aktar
+                </Button>
+
+                <Button
+                  color="danger"
+                  className="m-1"
+                  onClick={(e) => {
+                    printDocument(document, "tableUnvanPersonel");
+                  }}
+                >
+                  Yazdır
                 </Button>
               </AccordionBody>
             </AccordionItem>
@@ -143,6 +155,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 </table>
                 <Button
                   color="danger"
+                  className="m-1"
                   onClick={() =>
                     generatePdf(
                       document,
@@ -152,6 +165,15 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                   }
                 >
                   Pdf'e Aktar
+                </Button>
+                <Button
+                  color="danger"
+                  className="m-1"
+                  onClick={(e) => {
+                    printDocument(document, "tableMahkemeTipPersonel");
+                  }}
+                >
+                  Yazdır
                 </Button>
               </AccordionBody>
             </AccordionItem>
@@ -182,6 +204,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
 
                 <Button
                   color="danger"
+                  className="m-1"
                   onClick={() =>
                     generatePdf(
                       document,
@@ -191,6 +214,16 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                   }
                 >
                   Pdf'e Aktar
+                </Button>
+
+                <Button
+                  color="danger"
+                  className="m-1"
+                  onClick={(e) => {
+                    printDocument(document, "tableMahkemePersonel");
+                  }}
+                >
+                  Yazdır
                 </Button>
               </AccordionBody>
             </AccordionItem>

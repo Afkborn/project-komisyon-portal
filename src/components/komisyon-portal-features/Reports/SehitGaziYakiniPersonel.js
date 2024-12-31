@@ -3,9 +3,11 @@ import axios from "axios";
 import { Button, Spinner, Table } from "reactstrap";
 import alertify from "alertifyjs";
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
 
 export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
-  const [sehitGaziYakiniPersonelList, setSehirGaziYakiniPersonelList] = useState([]);
+  const [sehitGaziYakiniPersonelList, setSehirGaziYakiniPersonelList] =
+    useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
 
   const getSehitGaziyakiniPersonel = (e) => {
@@ -27,7 +29,9 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
         }
       })
       .catch((error) => {
-        let errorMessage = error.response.data.message || "Şehit/Gazi yakını personel listesi getirilirken bir hata oluştu.";
+        let errorMessage =
+          error.response.data.message ||
+          "Şehit/Gazi yakını personel listesi getirilirken bir hata oluştu.";
         alertify.error(errorMessage);
         setRaporGetiriliyorMu(false);
       });
@@ -39,8 +43,8 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
       <div>
         <h3>Şehit/Gazi Yakını Personel Listesi</h3>
         <span>
-          Bu rapor ile tüm kurumlardaki şehit/gazi yakını olan personellerin listesini
-          görüntüleyebilirsiniz.
+          Bu rapor ile tüm kurumlardaki şehit/gazi yakını olan personellerin
+          listesini görüntüleyebilirsiniz.
         </span>
         <div>
           <Button
@@ -65,7 +69,11 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
             )}
           </div>
 
-          <div hidden={raporGetiriliyorMu || sehitGaziYakiniPersonelList.length === 0}>
+          <div
+            hidden={
+              raporGetiriliyorMu || sehitGaziYakiniPersonelList.length === 0
+            }
+          >
             <Table striped id="sehitGaziYakiniPersonelTable">
               <thead>
                 <tr>
@@ -126,7 +134,18 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
               }}
             >
               Pdf'e Aktar
-            </Button>{" "}
+            </Button>
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "sehitGaziYakiniPersonelTable", "detayTD");
+              }}
+            >
+              Yazdır
+            </Button>
           </div>
         </div>
       </div>

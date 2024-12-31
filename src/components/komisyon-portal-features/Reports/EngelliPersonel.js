@@ -3,7 +3,7 @@ import axios from "axios";
 import { Button, Spinner, Table } from "reactstrap";
 import alertify from "alertifyjs";
 import { generatePdf } from "../../actions/PdfActions";
-
+import { printDocument } from "../../actions/PrintActions";
 export default function EngelliPersonel({ token, showPersonelDetay }) {
   const [engelliPersonelList, setEngelliPersonelList] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
@@ -129,6 +129,17 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
             >
               Pdf'e Aktar
             </Button>{" "}
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "engelliPersonelTable", "detayTD");
+              }}
+            >
+              Yazdır
+            </Button>
           </div>
         </div>
       </div>

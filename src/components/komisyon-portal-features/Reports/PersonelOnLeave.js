@@ -3,9 +3,9 @@ import { Input, Label, Button, Form, Row, Col } from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
 import { getIzinType } from "../../actions/IzinActions";
-// import html2pdf from "html2pdf.js";
 
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
 
 export default function PersonelOnLeave({
   selectedKurum,
@@ -44,14 +44,18 @@ export default function PersonelOnLeave({
 
     setPersonelList([]);
 
-    let url = "api/reports/izinliPersoneller?institutionId=" + selectedKurum.id;
+    let url = "api/reports/izinliPersoneller";
 
     if (searchBy === "byDate") {
-      url += `&startDate=${startDate}&endDate=${endDate}`;
+      url += `?startDate=${startDate}&endDate=${endDate}`;
     }
 
     if (reason) {
-      url += `&reason=${reason}`;
+      if (url.includes("?")) {
+        url += `&reason=${reason}`;
+      } else {
+        url += `?reason=${reason}`;
+      }
     }
 
     let configuration = {
@@ -106,9 +110,9 @@ export default function PersonelOnLeave({
     <div>
       <h3>Rapor - İzinde Olan Personel</h3>
       <span>
-        Bu rapor sayesinde <b> seçili olan kurumda</b> tarih bazlı veya güncel
-        olarak izinde olan personelleri listeyebilir, excel veya pdf formatında
-        dışa aktarabilirsiniz.
+        Bu rapor sayesinde <b> tüm kurumlarda</b> tarih bazlı veya güncel olarak
+        izinde olan personelleri listeyebilir, excel veya pdf formatında dışa
+        aktarabilirsiniz.
       </span>
 
       <hr />
@@ -238,6 +242,11 @@ export default function PersonelOnLeave({
         {personelList.length > 0 && (
           <div className="mt-3">
             <h5>İzinde Olan Personeller</h5>
+
+            <div className="alert alert-info" role="alert">
+              Toplam {personelList.length} personel bulundu.
+            </div>
+
             <table className="table" id="personelOnLeaveTable">
               <thead>
                 <tr>
@@ -308,6 +317,18 @@ export default function PersonelOnLeave({
               }}
             >
               Pdf'e Aktar
+            </Button>
+
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "personelOnLeaveTable", "detayTD");
+              }}
+            >
+              Yazdır
             </Button>
           </div>
         )}

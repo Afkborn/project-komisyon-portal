@@ -4,6 +4,8 @@ import axios from "axios";
 import alertify from "alertifyjs";
 
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
+
 
 export default function UnitMissingClerk({ token, selectedKurum }) {
   const [aramaYapilacakBirimler, setAramaYapilacakBirimler] = useState([]);
@@ -11,6 +13,8 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const getEksikKatipAramasiYapilacakBirimler = () => {
+    setIsLoading(true);
+
     const configuration = {
       method: "GET",
       url:
@@ -26,8 +30,14 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
         setAramaYapilacakBirimler(
           response.data.eksikKatipKontrolEdilecekBirimler
         );
+
+        if (response.data.eksikKatipKontrolEdilecekBirimler.length === 0) {
+          alertify.error("Rapor için birim bulunamadı.");
+        }
+        setIsLoading(false);
       })
       .catch((error) => {
+        setIsLoading(false);
         let errorMessage = error.response.data.message || "Bir hata oluştu.";
         console.log(errorMessage);
         alertify.error(errorMessage);
@@ -35,12 +45,11 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
   };
 
   useEffect(() => {
-    if (!token) return;
-    if (aramaYapilacakBirimler.length === 0) {
+    if (token) {
       getEksikKatipAramasiYapilacakBirimler();
     }
     // eslint-disable-next-line
-  }, [token, aramaYapilacakBirimler]);
+  }, [token]);
 
   const handleGetRapor = (e) => {
     setIsLoading(true);
@@ -105,17 +114,10 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
           Rapor Getir
         </Button>
 
-        {aramaYapilacakBirimler.length === 0 && (
-          <div>
-            <Spinner color="primary" />
-            <span>Rapor için birimler yükleniyor...</span>
-          </div>
-        )}
-
         {isLoading && (
           <div>
             <Spinner color="primary" />{" "}
-            <span>Rapor yükleniyor, bu işlem biraz zaman alabilir.</span>
+            <span>yükleniyor...</span>
           </div>
         )}
 
@@ -175,6 +177,17 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
               }}
             >
               Pdf'e Aktar
+            </Button>
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "unitMissingClerkTable", "detayTD");
+              }}
+            >
+              Yazdır
             </Button>
           </div>
         )}

@@ -7,6 +7,7 @@ import {
   calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
 
 export default function GeciciPersonel({ token, showPersonelDetay }) {
   const [geciciPersonelList, setGeciciPersonelList] = useState([]);
@@ -159,6 +160,17 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
             >
               Pdf'e Aktar
             </Button>{" "}
+            <Button
+              className="m-3"
+              size="lg"
+              id="print"
+              color="danger"
+              onClick={(e) => {
+                printDocument(document, "pasifPersonelTable", "detayTD");
+              }}
+            >
+              Yazdır
+            </Button>
           </div>
         </div>
       </div>
