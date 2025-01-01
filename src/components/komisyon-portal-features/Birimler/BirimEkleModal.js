@@ -309,7 +309,7 @@ function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
                 </Label>
               </FormGroup>
 
-              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
+              <FormGroup >
                 <Label for="minKatipSayi">Gerekli Katip Sayısı</Label>
                 <Input
                   type="number"

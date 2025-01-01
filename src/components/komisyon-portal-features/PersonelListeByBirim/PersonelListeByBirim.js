@@ -45,9 +45,7 @@ export default function PersonelListeByBirim({
       getBirimler(selectedKurum.id);
     }
 
-
     // EN SON DİREKT TIKLANAN ID'yi aldım şimdi onu yüklemem lazım
-
 
     // eslint-disable-next-line
   }, [selectedKurum]);
@@ -294,6 +292,14 @@ export default function PersonelListeByBirim({
                             )}
                             {person.izindeMi ? (
                               <Badge color="danger">İzinde</Badge>
+                            ) : (
+                              <div></div>
+                            )}
+                            {person.calistigiKisi ? (
+                              <Badge color="info">
+                                Çalıştığı Kişi {person.calistigiKisi.ad}{" "}
+                                {person.calistigiKisi.soyad}
+                              </Badge>
                             ) : (
                               <div></div>
                             )}

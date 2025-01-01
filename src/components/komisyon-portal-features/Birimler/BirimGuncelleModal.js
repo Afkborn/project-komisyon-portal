@@ -130,7 +130,7 @@ function BirimGuncelleModal({ modal, toggle, birim, token, getBirimler }) {
               </FormGroup>
 
               {/*  minumum katip sayısı */}
-              <FormGroup hidden={!birim.isMahkeme}>
+              <FormGroup >
                 <Label for="minKatipSayi">Gerekli Minimum Katip Sayısı</Label>
                 <Input
                   type="number"

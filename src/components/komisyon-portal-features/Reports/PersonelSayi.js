@@ -26,6 +26,17 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
     }
   };
 
+  const tableMahkemePersonelAccordionToggle = (id) => {
+    if (openItems.includes(id)) {
+      setOpenItems(openItems.filter((item) => item !== id)); // Kapalı hale getirme
+    } else {
+      setOpenItems([...openItems, id]); // Açık hale getirme
+    }
+  };
+  const [openItems, setOpenItems] = React.useState(
+    personelBirimleri.map((birim) => birim.unit) // Tüm birimlerin açık olması için birim.unit listesini alıyoruz.
+  );
+
   const getPersonelSayisi = async () => {
     setSpinner(true);
     const configuration = {
@@ -43,6 +54,10 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
         setPersonelSayisi(response.data.personCount);
         setPersonelUnvanlari(response.data.titlePersonCountList);
         setPersonelBirimleri(response.data.unitPersonCountList);
+        setOpenItems(
+          response.data.unitPersonCountList.map((birim) => birim.unit)
+        );
+
         setPersonelUnvanTipi(response.data.unitTypePersonCountList);
       })
       .catch((error) => {
@@ -182,25 +197,40 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                 Mahkeme Bazlı Sayılar
               </AccordionHeader>
               <AccordionBody accordionId="3">
-                <table
+                <Accordion
                   className="table table-striped"
                   id="tableMahkemePersonel"
+                  open={openItems}
+                  toggle={tableMahkemePersonelAccordionToggle}
+                  stayOpen
                 >
-                  <thead>
-                    <tr>
-                      <th>Mahkeme</th>
-                      <th>Personel Sayısı</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {personelBirimleri.map((birim) => (
-                      <tr key={birim.unit}>
-                        <td>{birim.unit}</td>
-                        <td>{birim.personCount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  {personelBirimleri.map((birim) => (
+                    <AccordionItem key={birim.unit}>
+                      <AccordionHeader targetId={birim.unit}>
+                        {birim.unit} (Toplam Personel Sayısı:{" "}
+                        {birim.personCount})
+                      </AccordionHeader>
+                      <AccordionBody accordionId={birim.unit}>
+                        <table className="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Ünvan</th>
+                              <th>Sayı</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {birim.titlePersonCountList.map((unvan) => (
+                              <tr key={unvan.title}>
+                                <td>{unvan.title}</td>
+                                <td>{unvan.personCount}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </AccordionBody>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
 
                 <Button
                   color="danger"
