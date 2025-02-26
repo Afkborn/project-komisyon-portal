@@ -21,9 +21,12 @@ import BirimGuncelleModal from "./BirimGuncelleModal";
 import axios from "axios";
 import updateSvg from "../../../assets/edit.svg";
 import copSepeti from "../../../assets/delete.svg";
-import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
+import {
+  GET_UNITS_BY_INSTITUTİON,
+  GET_institutions,
+} from "../../constants/AxiosConfiguration";
 
-export default function Birimler({ token, selectedKurum }) {
+export default function Birimler({ selectedKurum, token }) {
   const [selectedFilterOption, setSelectedFilterOption] = useState("Ceza");
 
   const handleRadioFilterChange = (e) => {
@@ -100,7 +103,9 @@ export default function Birimler({ token, selectedKurum }) {
     setShowBirimEkleModal(true);
   }
 
-  function getBirimler() {
+  function getBirimler(kurum) {
+    if (!kurum) return;
+
     axios(GET_UNITS_BY_INSTITUTİON(kurum.id, token))
       .then((result) => {
         result.data.unitList.sort((a, b) => {
@@ -199,7 +204,6 @@ export default function Birimler({ token, selectedKurum }) {
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const toolTipToogle = () => setTooltipOpen(!tooltipOpen);
-
 
   const [tooltipOpenDelete, setTooltipOpenDelete] = useState(false);
   const toolTipToogleDelete = () => setTooltipOpenDelete(!tooltipOpenDelete);
@@ -384,16 +388,24 @@ export default function Birimler({ token, selectedKurum }) {
   }
 
   useEffect(() => {
-    if (selectedKurum) {
+    if (!selectedKurum) {
+      // Kurum seçili değilse kurumları getir ve default kurumu seç
+      axios(GET_institutions)
+        .then((result) => {
+          const defaultKurum = result.data.InstitutionList.find(
+            (kurum) => kurum.isDefault
+          );
+          setKurum(defaultKurum);
+          getBirimler(defaultKurum);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
       setKurum(selectedKurum);
+      getBirimler(selectedKurum);
     }
-    if (kurum) {
-      if (birimler.length === 0) {
-        getBirimler();
-      }
-    }
-    // eslint-disable-next-line
-  }, [kurum, selectedTypeId]);
+  }, [selectedKurum]);
 
   return (
     <div>

@@ -1,22 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, FormGroup, Label, Input } from "reactstrap";
+import { Button, Form, FormGroup, Label, Input, Spinner } from "reactstrap";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import alertify from "alertifyjs";
 
-export default function KullaniciAyarlari({ user, token, getUser }) {
+export default function KullaniciAyarlari({ token, getUser }) {
   const cookies = new Cookies();
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPassword2, setNewPassword2] = useState("");
   const [updateUser, setUpdateUser] = useState({
-    email: user.email,
-    phoneNumber: user.phoneNumber,
+    email: "",
+    phoneNumber: "",
   });
 
   useEffect(() => {
-    setUpdateUser({ email: user.email, phoneNumber: user.phoneNumber });
-  }, [user]);
+    getUserDetails();
+  }, []);
+
+  const getUserDetails = () => {
+    const configuration = {
+      method: "GET",
+      url: "/api/users/details",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        setUserData(response.data.user);
+        setUpdateUser({
+          email: response.data.user.email,
+          phoneNumber: response.data.user.phoneNumber,
+        });
+        setLoading(false);
+      })
+      .catch((error) => {
+        alertify.error("Kullanıcı bilgileri alınamadı");
+        setLoading(false);
+      });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -123,6 +149,25 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
       });
   };
 
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "200px" }}
+      >
+        <Spinner color="danger" />
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="alert alert-danger">
+        Kullanıcı bilgileri yüklenemedi. Lütfen sayfayı yenileyin.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mt-5">
@@ -134,8 +179,7 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
               type="text"
               name="name"
               id="name"
-              placeholder="Ad Soyad"
-              value={user.name + " " + user.surname}
+              value={`${userData.name} ${userData.surname}`}
               disabled
             />
           </FormGroup>
@@ -146,7 +190,7 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
               name="role"
               id="role"
               placeholder="Rol"
-              value={user.role}
+              value={userData.role}
               disabled
             />
           </FormGroup>
@@ -158,7 +202,7 @@ export default function KullaniciAyarlari({ user, token, getUser }) {
               name="username"
               id="username"
               placeholder="Kullanıcı Adı"
-              value={user.username}
+              value={userData.username}
               disabled
             />
           </FormGroup>

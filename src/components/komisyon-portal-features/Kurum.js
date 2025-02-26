@@ -7,7 +7,11 @@ import {
   Button,
 } from "reactstrap";
 
-export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum}) {
+export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
+  const handleKurumChange = (kurum) => {
+    setSelectedKurum(kurum);
+  };
+
   return (
     <div>
       <h3>Kurum Listesi</h3>
@@ -29,8 +33,8 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum}) {
                 </Badge>
                 {kurum.name} {kurum.status === false && "(Pasif)"}
                 <Button
-                  className="float-end "
-                  onClick={() => setSelectedKurum(kurum)}
+                  className="float-end"
+                  onClick={() => handleKurumChange(kurum)}
                   color="danger"
                   disabled={
                     (selectedKurum && selectedKurum.id === kurum.id) ||

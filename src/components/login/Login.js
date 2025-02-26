@@ -7,7 +7,7 @@ import {
   MDBInput,
   MDBCheckbox,
 } from "mdb-react-ui-kit";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // useHistory yerine useNavigate
 import { useEffect } from "react";
 import logo from "../../assets/logo300.png";
 import "../../styles/Login.css";
@@ -23,12 +23,12 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  const navigate = useHistory();
+  const navigate = useNavigate(); // useHistory yerine useNavigate
 
   useEffect(() => {
     const token = cookies.get("TOKEN");
     if (token) {
-      navigate.push("/");
+      navigate("/"); // history.push yerine navigate
     }
   }, [navigate]);
 
@@ -107,9 +107,7 @@ function Login() {
           <form onSubmit={handleSubmit}>
             <div className="d-flex flex-column ms-5">
               <div
-                onClick={(e) => {
-                  navigate.push("/");
-                }}
+                onClick={() => navigate("/")} // history.push yerine navigate
                 className="text-center mt-5"
                 style={{
                   cursor: "pointer",
@@ -177,10 +175,10 @@ function Login() {
         </MDBCol>
 
         <MDBCol col="6" className="mb-5">
-          <div className="d-flex flex-column  justify-content-center gradient-custom-2 h-100 mb-4">
+          <div className="d-flex flex-column justify-content-center gradient-custom-2 h-100 mb-4">
             <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-              <h4 class="mb-4"> Eskişehir Adliyesi Yönetim Sistemi </h4>
-              <p class="small mb-0">
+              <h4 className="mb-4">Eskişehir Adliyesi Yönetim Sistemi</h4>
+              <p className="small mb-0">
                 Eskişehir Adliyesi Yönetim Sistemi, Eskişehir Adliyesi
                 personelinin işlemlerini kolaylaştırmak ve hızlandırmak amacıyla
                 geliştirilmiştir.

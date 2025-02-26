@@ -92,7 +92,7 @@ export default function PersonelListeByBirim({
     setPersonel([]);
     const configuration = {
       method: "GET",
-      url: "api/persons/" + selectedBirim._id,
+      url: "/api/persons/" + selectedBirim._id,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -121,7 +121,7 @@ export default function PersonelListeByBirim({
   function getBirimler(typeID) {
     const configuration = {
       method: "GET",
-      url: "api/units/institution/" + typeID,
+      url: "/api/units/institution/" + typeID,
       headers: {
         Authorization: `Bearer ${token}`,
       },

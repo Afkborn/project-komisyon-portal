@@ -18,7 +18,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
     const configuration = {
       method: "GET",
       url:
-        "api/reports/eksikKatipAramasiYapilacakBirimler?institutionId=" +
+        "/api/reports/eksikKatipAramasiYapilacakBirimler?institutionId=" +
         selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
     let configuration = {
       method: "GET",
       url:
-        "api/reports/eksikKatibiOlanBirimler?institutionId=" + selectedKurum.id,
+        "/api/reports/eksikKatibiOlanBirimler?institutionId=" + selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
       },

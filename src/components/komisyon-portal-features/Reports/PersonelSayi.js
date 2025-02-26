@@ -41,7 +41,7 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
     setSpinner(true);
     const configuration = {
       method: "GET",
-      url: "api/reports/toplamPersonelSayisi?institutionId=" + selectedKurum.id,
+      url: "/api/reports/toplamPersonelSayisi?institutionId=" + selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -46,24 +46,28 @@ import {
   GET_USER_DETAILS,
 } from "../constants/AxiosConfiguration";
 
+import {
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom"; // useNavigate ve useLocation ekledik
+
 export default function KomisyonPortalDashboard() {
-  const [selectedPersonelID, setSelectedPersonelID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
   const [selectedBirimID, setSelectedBirimID] = useState(null); // personel detay ekranında seçili personelin sicil numarası
 
   // tablodan bir personel'e tıklandığı zaman tabloya tekrar dönmek için tablo sonuçlarını saklayalım
   const [tableResults, setTableResults] = useState([]);
   const [tableType, setTableType] = useState(null);
-  const [goBackButtonVisible, setGoBackButtonVisible] = useState(false);
-
-  const [selected, setSelected] = useState(0);
   const [user, setUser] = useState(null);
   const [kurumlar, setKurumlar] = useState([]);
   const [selectedKurum, setSelectedKurum] = useState(null);
   const [unvanlar, setUnvanlar] = useState([]);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   function changeKurum(kurum) {
     alertify.confirm(
@@ -72,7 +76,8 @@ export default function KomisyonPortalDashboard() {
       () => {
         alertify.success("Kurum değiştirildi.");
         setSelectedKurum(kurum);
-        changePage(0);
+        localStorage.setItem("selectedKurum", JSON.stringify(kurum)); // Kurum bilgisini sakla
+        navigate("/komisyon-portal/ana-sayfa"); // Ana sayfaya yönlendir
       },
       () => {}
     );
@@ -80,19 +85,14 @@ export default function KomisyonPortalDashboard() {
 
   function changePage(rank) {
     window.scrollTo(0, 0);
-    setSelectedPersonelID(null);
+
     setSelectedBirimID(null);
-    setSelected(rank);
+
     if (rank === 11 || rank === 3) {
       return;
     }
     setTableResults([]);
     setTableType(null);
-    setGoBackButtonVisible(false);
-  }
-
-  function goBack() {
-    changePage(11);
   }
 
   useState(() => {
@@ -107,6 +107,14 @@ export default function KomisyonPortalDashboard() {
     }
   }, []);
 
+  useEffect(() => {
+    // Sayfa yüklendiğinde local storage'dan kurum bilgisini al
+    const savedKurum = localStorage.getItem("selectedKurum");
+    if (savedKurum && !selectedKurum) {
+      setSelectedKurum(JSON.parse(savedKurum));
+    }
+  }, []);
+
   useEffect(() => {}, [tableResults]);
 
   function getKurum() {
@@ -115,12 +123,17 @@ export default function KomisyonPortalDashboard() {
         // sort result.data.InstitutionList by id
         result.data.InstitutionList.sort((a, b) => a.id - b.id);
         setKurumlar(result.data.InstitutionList);
-        // eğer seçili kurum yoksa liste içerisinde isDefault olanı seç
-        if (!selectedKurum) {
+        // Local storage'dan kayıtlı kurum bilgisini al
+        const savedKurum = localStorage.getItem("selectedKurum");
+        if (savedKurum) {
+          setSelectedKurum(JSON.parse(savedKurum));
+        } else {
+          // Eğer local storage'da kurum yoksa default kurumu seç ve kaydet
           const defaultKurum = result.data.InstitutionList.find(
             (kurum) => kurum.isDefault
           );
           setSelectedKurum(defaultKurum);
+          localStorage.setItem("selectedKurum", JSON.stringify(defaultKurum));
         }
       })
       .catch((error) => {
@@ -145,16 +158,11 @@ export default function KomisyonPortalDashboard() {
     axios(GET_USER_DETAILS(token))
       .then((result) => {
         setUser(result.data.user);
-        setError(false);
-        setErrorMessage("");
       })
       .catch((error) => {
         // delete cookie if user not found
         cookies.remove("TOKEN");
         window.location.href = "/login";
-        const message = error.response.data.message || "Hata!";
-        setError(true);
-        setErrorMessage(message);
       });
   }
 
@@ -171,13 +179,12 @@ export default function KomisyonPortalDashboard() {
   };
 
   const showPersonelDetay = (person, result = null, tableType = null) => {
-    changePage(3);
-    setSelectedPersonelID(person.sicil);
-
-    if (result) {
-      setTableResults(result);
-      setTableType(tableType);
-      setGoBackButtonVisible(true);
+    if (person && person.sicil) {
+      if (result) {
+        setTableResults(result);
+        setTableType(tableType);
+      }
+      navigate(`personel-detay/${person.sicil}`);
     }
   };
 
@@ -186,179 +193,8 @@ export default function KomisyonPortalDashboard() {
     setSelectedBirimID(birim._id);
   };
 
-  function onClick_listGroupItem(rank) {
-    window.scrollTo(0, 0);
-    changePage(rank);
-  }
-
-  function renderScreen() {
-    switch (selected) {
-      default:
-        return (
-          <KomisyonPortalWelcome
-            user={user}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-            showBirimPersonelListe={showBirimPersonelListe}
-            selectedKurum={selectedKurum}
-          />
-        );
-      case 1:
-        return <Birimler selectedKurum={selectedKurum} token={token} />;
-      case 2:
-        return (
-          <PersonelListeByBirim
-            selectedKurum={selectedKurum}
-            unvanlar={unvanlar}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-            selectedBirimID={selectedBirimID}
-          />
-        );
-      case 4:
-        return (
-          <Unvanlar
-            unvanlar={unvanlar}
-            updateUnvanlar={getUnvanlar}
-            token={token}
-          />
-        );
-      case 3:
-        return (
-          <PersonelDetay
-            kurumlar={kurumlar}
-            selectedPersonelID={selectedPersonelID}
-            selectedKurum={selectedKurum}
-            token={token}
-            unvanlar={unvanlar}
-            goBackButtonVisible={goBackButtonVisible}
-            goBack={goBack}
-          />
-        );
-      case 5:
-        return (
-          <Kurum
-            kurumlar={kurumlar}
-            selectedKurum={selectedKurum}
-            setSelectedKurum={changeKurum}
-          />
-        );
-      case 6:
-        return (
-          <PersonelOnLeave
-            selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-      case 7:
-        return <UnitMissingClerk token={token} selectedKurum={selectedKurum} />;
-      case 8:
-        return (
-          <KullaniciAyarlari user={user} token={token} getUser={getUser} />
-        );
-      case 9:
-        return (
-          <TumPersonelListe
-            selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-            unvanlar={unvanlar}
-          />
-        );
-      case 10:
-        return (
-          <PersonelSayi
-            selectedKurum={selectedKurum}
-            unvanlar={unvanlar}
-            token={token}
-          />
-        );
-      case 11:
-        return (
-          <TumPersonelTablo
-            selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-            tableResults={tableResults}
-            tableType={tableType}
-          />
-        );
-      case 12:
-        return (
-          <PersonelAktar
-            selectedKurum={selectedKurum}
-            token={token}
-            unvanlar={unvanlar}
-          />
-        );
-
-      case 13:
-        return <KomisyonPortalKullaniciYonetim user={user} token={token} />;
-
-      case 14:
-        return (
-          <PasifPersonel
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-
-      case 15:
-        return <OzellikAktar selectedKurum={selectedKurum} token={token} />;
-
-      case 16:
-        return (
-          <GeciciPersonel
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-
-      case 17:
-        return (
-          <PersonelHareketleri
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-            user={user}
-            showBirimPersonelListe={showBirimPersonelListe}
-            selectedKurum={selectedKurum}
-          />
-        );
-
-      case 18:
-        return (
-          <UzaklastirilmisPersonel
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-
-      case 19:
-        return (
-          <SehitGaziYakiniPersonel
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-
-      case 20:
-        return (
-          <EngelliPersonel
-            // selectedKurum={selectedKurum}
-            token={token}
-            showPersonelDetay={showPersonelDetay}
-          />
-        );
-    }
-  }
-
   function logout() {
+    localStorage.removeItem("selectedKurum"); // Çıkış yaparken kurum bilgisini temizle
     cookies.remove("TOKEN");
     window.location.href = "/login";
   }
@@ -367,14 +203,22 @@ export default function KomisyonPortalDashboard() {
     window.location.href = "/";
   }
 
+  // Link'in active olup olmadığını kontrol eden yardımcı fonksiyon
+  const isActivePath = (path) => {
+    const currentPath = location.pathname.split("/").pop(); // URL'in son kısmını al
+    const itemPath = path || "";
+    return currentPath === itemPath.toLowerCase().replace(/\s+/g, "-");
+  };
+
   const listGroupItems = [
-    { id: 0, label: "Ana Sayfa", type: "item" },
-    { id: 8, label: "Hesap Ayarları", type: "item" },
+    { id: 0, label: "Ana Sayfa", type: "item", path: "ana-sayfa" },
+    { id: 8, label: "Hesap Ayarları", type: "item", path: "hesap-ayarlari" },
     {
       id: 13,
       label: "Portal Kullanıcı Yönetim",
       type: "item",
       visibleRoles: ["admin"],
+      path: "portal-kullanici-yonetim",
     },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
     {
@@ -383,26 +227,95 @@ export default function KomisyonPortalDashboard() {
       type: "heading",
       detail: selectedKurum ? selectedKurum.name : "",
     },
-    { id: 5, label: "Kurum", type: "item" },
-    { id: 4, label: "Ünvanlar", type: "item", hiddenRoles: ["komisyonbaskan"] },
-    { id: 1, label: "Birimler", type: "item" },
-    { id: 9, label: "Tüm Personel Listesi", type: "item" },
-    { id: 2, label: "Birim Personel Listele", type: "item" },
-    { id: 3, label: "Personel Detay", type: "item" },
+    { id: 5, label: "Kurum", type: "item", path: "kurum" },
+    {
+      id: 4,
+      label: "Ünvanlar",
+      type: "item",
+      hiddenRoles: ["komisyonbaskan"],
+      path: "unvanlar",
+    },
+    { id: 1, label: "Birimler", type: "item", path: "birimler" },
+    {
+      id: 9,
+      label: "Tüm Personel Listesi",
+      type: "item",
+      path: "tum-personel-listesi",
+    },
+    {
+      id: 2,
+      label: "Birim Personel Listele",
+      type: "item",
+      path: "birim-personel-listele",
+    },
+    { id: 3, label: "Personel Detay", type: "item", path: "personel-detay" },
     { id: 1002, label: "Raporlar", type: "heading" },
-    { id: 6, label: "İzinde Olan Personel", type: "item" },
-    { id: 7, label: "Eksik Katibi Olan Birimler", type: "item" },
-    { id: 10, label: "Personel Sayısı", type: "item" },
-    { id: 11, label: "Personel Tablosu", type: "item" },
-    { id: 14, label: "Devren Gidenler", type: "item" },
-    { id: 16, label: "Geçici Personel", type: "item" },
-    { id: 18, label: "Uzaklaştırılmış Personel", type: "item" },
-    { id: 19, label: "Şehit/Gazi Yakını Personel", type: "item" },
-    { id: 20, label: "Engelli Personel", type: "item" },
-    { id: 17, label: "Personel Hareketleri", type: "item" },
-    { id: 1003, label: "Aktarım", type: "heading", visibleRoles: ["admin"] },
-    { id: 12, label: "Personel Aktar", type: "item", visibleRoles: ["admin"] },
-    { id: 15, label: "Özellik Aktar", type: "item", visibleRoles: ["admin"] },
+    {
+      id: 6,
+      label: "İzinde Olan Personel",
+      type: "item",
+      path: "izinde-olan-personel",
+    },
+    {
+      id: 7,
+      label: "Eksik Katibi Olan Birimler",
+      type: "item",
+      path: "eksik-katibi-olan-birimler",
+    },
+    { id: 10, label: "Personel Sayısı", type: "item", path: "personel-sayisi" },
+    {
+      id: 11,
+      label: "Personel Tablosu",
+      type: "item",
+      path: "personel-tablosu",
+    },
+    { id: 14, label: "Devren Gidenler", type: "item", path: "devren-gidenler" },
+    { id: 16, label: "Geçici Personel", type: "item", path: "gecici-personel" },
+    {
+      id: 18,
+      label: "Uzaklaştırılmış Personel",
+      type: "item",
+      path: "uzaklastirilmis-personel",
+    },
+    {
+      id: 19,
+      label: "Şehit/Gazi Yakını Personel",
+      type: "item",
+      path: "sehit-gazi-yakini-personel",
+    },
+    {
+      id: 20,
+      label: "Engelli Personel",
+      type: "item",
+      path: "engelli-personel",
+    },
+    {
+      id: 17,
+      label: "Personel Hareketleri",
+      type: "item",
+      path: "personel-hareketleri",
+    },
+    {
+      id: 1003,
+      label: "Aktarım",
+      type: "heading",
+      visibleRoles: ["admin"],
+      path: "aktarim",
+    },
+    {
+      id: 12,
+      label: "Personel Aktar",
+      type: "item",
+      visibleRoles: ["admin"],
+      path: "personel-aktar",
+    },
+    {
+      id: 15,
+      label: "Özellik Aktar",
+      type: "item",
+      visibleRoles: ["admin"],
+      path: "ozellik-aktar",
+    },
   ];
 
   const imgStyle = {
@@ -494,40 +407,251 @@ export default function KomisyonPortalDashboard() {
                   </ListGroupItemHeading>
                 );
               } else {
+                const path =
+                  item.path || item.label.toLowerCase().replace(/\s+/g, "-");
                 return (
-                  <ListGroupItem
+                  <Link
+                    to={path}
                     key={item.id}
-                    onClick={() => onClick_listGroupItem(item.id)}
-                    active={selected === item.id}
-                    hidden={!isVisibleForRole}
-                    className={
-                      selected === item.id ? "bg-danger text-white" : ""
-                    }
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = "#f8d7da";
-                      // text bold
-                      e.target.style.fontWeight = "bold";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "";
-                      // text normal
-                      e.target.style.fontWeight = "normal";
-                    }}
+                    style={{ textDecoration: "none" }}
+                    onClick={() => window.scrollTo(0, 0)}
                   >
-                    {item.label}
-                  </ListGroupItem>
+                    <ListGroupItem
+                      active={isActivePath(
+                        item.path ||
+                          item.label.toLowerCase().replace(/\s+/g, "-")
+                      )}
+                      hidden={!isVisibleForRole}
+                      className={
+                        isActivePath(item.path || item.label)
+                          ? "bg-danger text-white"
+                          : ""
+                      }
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#f8d7da";
+                        // text bold
+                        e.target.style.fontWeight = "bold";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "";
+                        // text normal
+                        e.target.style.fontWeight = "normal";
+                      }}
+                    >
+                      {item.label}
+                    </ListGroupItem>
+                  </Link>
                 );
               }
             })}
           </ListGroup>
         </Col>
         <Col xs="12" lg="9">
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {errorMessage}
-            </div>
-          )}
-          {renderScreen()}
+          <Routes>
+            <Route
+              path="/ana-sayfa"
+              element={
+                <KomisyonPortalWelcome
+                  user={user}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  showBirimPersonelListe={showBirimPersonelListe}
+                  selectedKurum={selectedKurum}
+                />
+              }
+            />
+            <Route
+              path="birimler"
+              element={<Birimler selectedKurum={selectedKurum} token={token} />}
+            />
+            <Route
+              path="personel-tablosu"
+              element={
+                <TumPersonelTablo
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  tableResults={tableResults}
+                  tableType={tableType}
+                />
+              }
+            />
+            <Route
+              path="personel-detay"
+              element={
+                <PersonelDetay
+                  kurumlar={kurumlar}
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  unvanlar={unvanlar}
+                />
+              }
+            />
+            <Route
+              path="personel-detay/:sicil"
+              element={
+                <PersonelDetay
+                  kurumlar={kurumlar}
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  unvanlar={unvanlar}
+                />
+              }
+            />
+            {/* Diğer componentler için route'lar */}
+            <Route
+              path="hesap-ayarlari"
+              element={<KullaniciAyarlari token={token} getUser={getUser} />}
+            />
+            <Route
+              path="unvanlar"
+              element={
+                <Unvanlar
+                  unvanlar={unvanlar}
+                  updateUnvanlar={getUnvanlar}
+                  token={token}
+                />
+              }
+            />
+            <Route
+              path="kurum"
+              element={
+                <Kurum
+                  kurumlar={kurumlar}
+                  selectedKurum={selectedKurum}
+                  setSelectedKurum={changeKurum}
+                />
+              }
+            />
+            <Route
+              path="tum-personel-listesi"
+              element={
+                <TumPersonelListe
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  unvanlar={unvanlar}
+                />
+              }
+            />
+            <Route
+              path="birim-personel-listele"
+              element={
+                <PersonelListeByBirim
+                  selectedKurum={selectedKurum}
+                  unvanlar={unvanlar}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  selectedBirimID={selectedBirimID}
+                />
+              }
+            />
+            <Route
+              path="izinde-olan-personel"
+              element={
+                <PersonelOnLeave
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="eksik-katibi-olan-birimler"
+              element={
+                <UnitMissingClerk token={token} selectedKurum={selectedKurum} />
+              }
+            />
+            <Route
+              path="personel-sayisi"
+              element={
+                <PersonelSayi
+                  selectedKurum={selectedKurum}
+                  unvanlar={unvanlar}
+                  token={token}
+                />
+              }
+            />
+            <Route
+              path="portal-kullanici-yonetim"
+              element={
+                <KomisyonPortalKullaniciYonetim user={user} token={token} />
+              }
+            />
+            <Route
+              path="devren-gidenler"
+              element={
+                <PasifPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="ozellik-aktar"
+              element={
+                <OzellikAktar selectedKurum={selectedKurum} token={token} />
+              }
+            />
+            <Route
+              path="gecici-personel"
+              element={
+                <GeciciPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="personel-hareketleri"
+              element={
+                <PersonelHareketleri
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  user={user}
+                  showBirimPersonelListe={showBirimPersonelListe}
+                  selectedKurum={selectedKurum}
+                />
+              }
+            />
+            <Route
+              path="uzaklastirilmis-personel"
+              element={
+                <UzaklastirilmisPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="sehit-gazi-yakini-personel"
+              element={
+                <SehitGaziYakiniPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="engelli-personel"
+              element={
+                <EngelliPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+            <Route
+              path="personel-aktar"
+              element={
+                <PersonelAktar
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  unvanlar={unvanlar}
+                />
+              }
+            />
+          </Routes>
         </Col>
       </Row>
     </Container>

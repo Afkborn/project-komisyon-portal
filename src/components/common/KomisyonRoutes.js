@@ -1,62 +1,39 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 
-function KomisyonRoutes({ component: Component, ...rest }) {
+function KomisyonRoutes() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+  const location = useLocation();
 
   let decodedToken;
   if (token) {
     try {
-      decodedToken = jwtDecode(token); // Decode the token
+      decodedToken = jwtDecode(token);
     } catch (error) {
       console.error("Invalid token", error);
     }
   }
 
-  return (
-    <Route
-      {...rest}
-      render={(props) => {
-        if (token && decodedToken) {
-          // Check if the role is "komisyonkatibi"
-          if (
-            decodedToken.role === "komisyonkatibi" ||
-            decodedToken.role === "komisyonbaskan" ||
-            decodedToken.role === "admin"
-          ) {
-            return <Component {...props} />;
-          } else {
-            // eğer rol komisyonkatibi veya admin değilse
-            return (
-              <Redirect
-                to={{
-                  pathname: "/unauthorized",
-                  state: {
-                    from: props.location,
-                  },
-                }}
-              />
-            );
-          }
-        } else {
-          // token yoksa
-          return (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: {
-                  from: props.location,
-                },
-              }}
-            />
-          );
-        }
-      }}
-    />
+  // Token yoksa login sayfasına yönlendir
+  if (!token || !decodedToken) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Rol kontrolü
+  const isAuthorizedRole = ["komisyonkatibi", "komisyonbaskan", "admin"].includes(
+    decodedToken.role
   );
+
+  // Yetkisiz kullanıcıyı unauthorized sayfasına yönlendir
+  if (!isAuthorizedRole) {
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  }
+
+  // Yetkili kullanıcı için içeriği göster
+  return <Outlet />;
 }
 
 export default KomisyonRoutes;

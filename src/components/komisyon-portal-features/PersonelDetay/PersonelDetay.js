@@ -25,21 +25,22 @@ import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
 import PersonelSilModal from "./PersonelSilModal";
 
 import { getIzinType } from "../../actions/IzinActions";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function PersonelDetay({
   kurumlar,
   selectedKurum,
   token,
-  selectedPersonelID,
   unvanlar,
-  goBackButtonVisible,
-  goBack,
 }) {
+  const { sicil: urlSicil } = useParams(); // URL'den gelen sicil parametresi
+  const navigate = useNavigate();
+
   const [personel, setPersonel] = useState(null);
   const [personelKurum, setPersonelKurum] = useState(null);
   const [personeller, setPersoneller] = useState([]);
   const [updatedPersonel, setUpdatedPersonel] = useState({ ...personel });
-  const [sicil, setSicil] = useState(null);
+  const [sicil, setSicil] = useState(urlSicil || ""); // sicil state'ini ekle
   const [ad, setAd] = useState(null);
   const [soyad, setSoyad] = useState(null);
   const [searchBy, setSearchBy] = useState("adSoyad");
@@ -48,11 +49,12 @@ export default function PersonelDetay({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (selectedPersonelID) {
-      getPersonelBySicil(selectedPersonelID);
+    // URL'de sicil varsa personeli getir
+    if (urlSicil) {
+      getPersonelBySicil(urlSicil);
+      setSicil(urlSicil); // sicil state'ini güncelle
     }
-    // eslint-disable-next-line
-  }, [selectedPersonelID]);
+  }, [urlSicil]);
 
   const [showCalistigiKisiGuncelleModal, setShowCalistigiKisiGuncelleModal] =
     useState(false);
@@ -181,7 +183,7 @@ export default function PersonelDetay({
     } else {
       const configuration = {
         method: "GET",
-        url: "api/persons/bySicil/" + personel.sicil,
+        url: `/api/persons/bySicil/${personel.sicil}`, // URL'den komisyon-portal kısmını kaldırdık
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -212,7 +214,7 @@ export default function PersonelDetay({
       () => {
         const configuration = {
           method: "DELETE",
-          url: "api/leaves/" + izin._id,
+          url: `/api/leaves/${izin._id}`, // URL'den komisyon-portal kısmını kaldırdık
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -242,7 +244,7 @@ export default function PersonelDetay({
       () => {
         const configuration = {
           method: "DELETE",
-          url: "api/personunits/" + birim._id,
+          url: `/api/personunits/${birim._id}`, // URL'den komisyon-portal kısmını kaldırdık
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -268,7 +270,7 @@ export default function PersonelDetay({
 
     const configuration = {
       method: "PUT",
-      url: "api/persons/" + personel._id,
+      url: `/api/persons/${personel._id}`, // URL'den komisyon-portal kısmını kaldırdık
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -293,7 +295,7 @@ export default function PersonelDetay({
     setLoadSpinner(true);
     const configuration = {
       method: "GET",
-      url: "api/persons/bySicil/" + sicil,
+      url: `/api/persons/bySicil/${sicil}`, // URL'den komisyon-portal kısmını kaldırdık
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -339,7 +341,7 @@ export default function PersonelDetay({
 
     const configuration = {
       method: "GET",
-      url: "api/persons/byAdSoyad/",
+      url: `/api/persons/byAdSoyad/`, // URL'den komisyon-portal kısmını kaldırdık
       params: {
         ad: ad,
         soyad: soyad,
@@ -398,6 +400,7 @@ export default function PersonelDetay({
     setPersoneller([]);
     if (searchBy === "sicil") {
       if (sicil) {
+        navigate(`/komisyon-portal/personel-detay/${sicil}`);
         getPersonelBySicil(sicil);
       } else {
         setError(true);
@@ -427,6 +430,7 @@ export default function PersonelDetay({
       </span>
       <hr />
       <div>
+        {/* Arama formunu her zaman göster - urlSicil kontrolünü kaldırdık */}
         <div hidden={!selectedKurum}>
           <Form onSubmit={(e) => handleFormSubmit(e)}>
             {/* aramanın  ad veya soyad kullanılarak yapılacağını seçtiğimiz row */}
@@ -511,7 +515,11 @@ export default function PersonelDetay({
                     placeholder="Sicil (123456)"
                     type="number"
                     value={sicil}
-                    onChange={(e) => setSicil(e.target.value)}
+                    onChange={(e) =>
+                      navigate(
+                        `/komisyon-portal/personel-detay/${e.target.value}`
+                      )
+                    }
                   />
                 </Col>
                 <Col>
@@ -571,14 +579,19 @@ export default function PersonelDetay({
                         color="info"
                         size="sm"
                         onClick={(e) => {
-                          setPersonel(person);
-                          let kurum = kurumlar.find(
-                            (kurum) => kurum.id === person.birimID.institutionID
-                          );
-                          setPersonelKurum(kurum);
-                          setUpdatedPersonel(updatedPersonelAttributes(person));
                           setPersoneller([]);
                           window.scrollTo(0, 0);
+                          navigate(
+                            `/komisyon-portal/personel-detay/${person.sicil}`
+                          );
+                          // setPersonel(person);
+                          // let kurum = kurumlar.find(
+                          //   (kurum) => kurum.id === person.birimID.institutionID
+                          // );
+                          // setPersonelKurum(kurum);
+                          // setUpdatedPersonel(updatedPersonelAttributes(person));
+                          // setPersoneller([]);
+                          // window.scrollTo(0, 0);
                         }}
                       >
                         DETAY
@@ -595,11 +608,6 @@ export default function PersonelDetay({
           <div className="mt-5">
             <h4>Özlük</h4>
             <hr />
-            {goBackButtonVisible && (
-              <Button color="danger" onClick={goBack}>
-                Geri Dön
-              </Button>
-            )}
 
             <Row className="mt-2">
               <Col>
@@ -1074,7 +1082,10 @@ export default function PersonelDetay({
                       <td>
                         {renderDate_GGAAYYYY(izin.startDate.split("T")[0])}
                       </td>
-                      <td> {renderDate_GGAAYYYY(izin.endDate.split("T")[0])}</td>
+                      <td>
+                        {" "}
+                        {renderDate_GGAAYYYY(izin.endDate.split("T")[0])}
+                      </td>
                       <td>{izin.comment}</td>
                       <td>
                         <Button

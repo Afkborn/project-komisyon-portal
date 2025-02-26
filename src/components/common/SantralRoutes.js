@@ -1,11 +1,12 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 
-function SantralRoutes({ component: Component, ...rest }) {
+function SantralRoutes() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+  const location = useLocation();
 
   let decodedToken;
   if (token) {
@@ -16,44 +17,21 @@ function SantralRoutes({ component: Component, ...rest }) {
     }
   }
 
-  return (
-    <Route
-      {...rest}
-      render={(props) => {
-        if (token && decodedToken) {
-          if (
-            decodedToken.role === "santralmemuru" ||
-            decodedToken.role === "admin"
-          ) {
-            return <Component {...props} />;
-          } else {
-            return (
-              <Redirect
-                to={{
-                  pathname: "/unauthorized",
-                  state: {
-                    from: props.location,
-                  },
-                }}
-              />
-            );
-          }
-        } else {
-          // token yoksa
-          return (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: {
-                  from: props.location,
-                },
-              }}
-            />
-          );
-        }
-      }}
-    />
-  );
+  // Token yoksa login sayfasına yönlendir
+  if (!token || !decodedToken) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Rol kontrolü
+  const isAuthorizedRole = ["santralmemuru", "admin"].includes(decodedToken.role);
+
+  // Yetkisiz kullanıcıyı unauthorized sayfasına yönlendir
+  if (!isAuthorizedRole) {
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  }
+
+  // Yetkili kullanıcı için içeriği göster
+  return <Outlet />;
 }
 
 export default SantralRoutes;

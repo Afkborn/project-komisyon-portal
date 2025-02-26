@@ -1,46 +1,37 @@
 import { MDBContainer } from "mdb-react-ui-kit";
-import { Switch, Route } from "react-router-dom"; // useLocation
+import { Routes, Route } from "react-router-dom"; // Switch yerine Routes
 import NotFound from "../common/NotFound";
 import Unauthorized from "../common/Unauthorized";
-
 import KomisyonRoutes from "../common/KomisyonRoutes";
 import SantralRoutes from "../common/SantralRoutes";
-
 import Home from "./Home";
 import Login from "../login/Login";
-
 import KomisyonPortalDashboard from "../dashboards/KomisyonPortalDashboard";
 import SantralPortalDashboard from "../dashboards/SantralPortalDashboard";
-
 import "../../styles/App.css"
 
 function App() {
-  // const location = useLocation();
-  // const validPaths = ["/"]; // navigation ve footer olacak  yolları tanımlayalım
-  // const isPathValid = validPaths.includes(location.pathname);
-
   return (
     <MDBContainer fluid className="p-0 m-0">
-      {/* {isPathValid && <Navigation />} */}
       <MDBContainer fluid>
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <KomisyonRoutes
-            path="/komisyon-portal"
-            exact
-            component={KomisyonPortalDashboard}
-          />
-          <SantralRoutes
-            path="/santral-portal"
-            exact
-            component={SantralPortalDashboard}
-          />
-          <Route path="/login" component={Login} />
-          <Route path="/unauthorized" component={Unauthorized} />
-          <Route component={NotFound} />
-        </Switch>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          
+          {/* Protected Routes */}
+          <Route element={<KomisyonRoutes />}>
+            <Route path="/komisyon-portal/*" element={<KomisyonPortalDashboard />} />
+          </Route>
+          
+          <Route element={<SantralRoutes />}>
+            <Route path="/santral-portal/*" element={<SantralPortalDashboard />} />
+          </Route>
+
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </MDBContainer>
-      {/* {isPathValid && <Footer />} */}
     </MDBContainer>
   );
 }
