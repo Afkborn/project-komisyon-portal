@@ -21,10 +21,7 @@ import BirimGuncelleModal from "./BirimGuncelleModal";
 import axios from "axios";
 import updateSvg from "../../../assets/edit.svg";
 import copSepeti from "../../../assets/delete.svg";
-import {
-  GET_UNITS_BY_INSTITUTİON,
-  GET_institutions,
-} from "../../constants/AxiosConfiguration";
+import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
 
 export default function Birimler({ selectedKurum, token }) {
   const [selectedFilterOption, setSelectedFilterOption] = useState("Ceza");
@@ -389,22 +386,15 @@ export default function Birimler({ selectedKurum, token }) {
 
   useEffect(() => {
     if (!selectedKurum) {
-      // Kurum seçili değilse kurumları getir ve default kurumu seç
-      axios(GET_institutions)
-        .then((result) => {
-          const defaultKurum = result.data.InstitutionList.find(
-            (kurum) => kurum.isDefault
-          );
-          setKurum(defaultKurum);
-          getBirimler(defaultKurum);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      // Kurum seçili değilse local storage'dan default kurumu çek
+      localStorage.getItem("selectedKurum") &&
+        setKurum(JSON.parse(localStorage.getItem("selectedKurum")));
+      getBirimler(JSON.parse(localStorage.getItem("selectedKurum")));
     } else {
       setKurum(selectedKurum);
       getBirimler(selectedKurum);
     }
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   return (

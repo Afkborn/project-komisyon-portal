@@ -514,12 +514,9 @@ export default function PersonelDetay({
                     name="sicil"
                     placeholder="Sicil (123456)"
                     type="number"
+                    min = "0"
                     value={sicil}
-                    onChange={(e) =>
-                      navigate(
-                        `/komisyon-portal/personel-detay/${e.target.value}`
-                      )
-                    }
+                    onChange={(e) => setSicil(e.target.value)}
                   />
                 </Col>
                 <Col>
@@ -584,14 +581,6 @@ export default function PersonelDetay({
                           navigate(
                             `/komisyon-portal/personel-detay/${person.sicil}`
                           );
-                          // setPersonel(person);
-                          // let kurum = kurumlar.find(
-                          //   (kurum) => kurum.id === person.birimID.institutionID
-                          // );
-                          // setPersonelKurum(kurum);
-                          // setUpdatedPersonel(updatedPersonelAttributes(person));
-                          // setPersoneller([]);
-                          // window.scrollTo(0, 0);
                         }}
                       >
                         DETAY

@@ -78,11 +78,15 @@ export default function Home() {
   }
 
   function handleKomisyonPortal() {
-    window.location.href = "/komisyon-portal";
+    window.location.href = "/komisyon-portal/ana-sayfa";
   }
 
   function handleSantralPortal() {
     window.location.href = "/santral-portal";
+  }
+
+  function handleSegbisRehber() {
+    window.location.href = "/segbis-rehber";
   }
 
   function handleEskisehirAdliyesiWebPage() {
@@ -134,6 +138,7 @@ export default function Home() {
       visibleRoles: ["komisyonbaskan", "komisyonkatibi", "admin"],
       image: epsisLogo,
       onClick: handleKomisyonPortal,
+      visible: true,
     },
     {
       id: 2,
@@ -143,6 +148,7 @@ export default function Home() {
       type: "item",
       image: guide_red,
       onClick: handleSantralPortal,
+      visible: false,
     },
     {
       id: 3,
@@ -151,6 +157,7 @@ export default function Home() {
       type: "item",
       image: courthouse_red,
       onClick: handleEskisehirAdliyesiWebPage,
+      visible: true,
     },
     {
       id: 4,
@@ -160,6 +167,16 @@ export default function Home() {
       type: "item",
       image: email_red,
       onClick: handleUyapMail,
+      visible: true,
+    },
+    {
+      id: 5,
+      label: "SEGBİS Rehber",
+      detail: "SEGBİS rehberine ulaşmak için tıklayınız.",
+      type: "item",
+      onClick: handleSegbisRehber,
+      image: guide_red,
+      visible: true,
     },
   ];
 
@@ -194,7 +211,8 @@ export default function Home() {
                   (user && item.visibleRoles.includes(user.role))) &&
                 (!item.hiddenRoles ||
                   item.hiddenRoles.length === 0 ||
-                  (user && !item.hiddenRoles.includes(user.role)));
+                  (user && !item.hiddenRoles.includes(user.role))) &&
+                item.visible;
 
               const isHovered = hoveredIndex === index;
 

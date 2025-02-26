@@ -9,6 +9,11 @@ import {
   ListGroupItemHeading,
   Badge,
   Tooltip,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
 } from "reactstrap";
 
 import logo from "../../assets/epsis-logo.png";
@@ -68,19 +73,20 @@ export default function KomisyonPortalDashboard() {
   const token = cookies.get("TOKEN");
   const navigate = useNavigate();
   const location = useLocation();
+  const [showKurumChangeModal, setShowKurumChangeModal] = useState(false);
+  const [selectedNewKurum, setSelectedNewKurum] = useState(null);
 
   function changeKurum(kurum) {
-    alertify.confirm(
-      "Kurum Değiştirme",
-      "Kurumu değiştirmek istediğinize emin misiniz?",
-      () => {
-        alertify.success("Kurum değiştirildi.");
-        setSelectedKurum(kurum);
-        localStorage.setItem("selectedKurum", JSON.stringify(kurum)); // Kurum bilgisini sakla
-        navigate("/komisyon-portal/ana-sayfa"); // Ana sayfaya yönlendir
-      },
-      () => {}
-    );
+    setSelectedNewKurum(kurum);
+    setShowKurumChangeModal(true);
+  }
+
+  function handleKurumChangeConfirm() {
+    setSelectedKurum(selectedNewKurum);
+    localStorage.setItem("selectedKurum", JSON.stringify(selectedNewKurum));
+    setShowKurumChangeModal(false);
+    alertify.success("Kurum değiştirildi.");
+    navigate("/komisyon-portal/ana-sayfa");
   }
 
   function changePage(rank) {
@@ -113,6 +119,7 @@ export default function KomisyonPortalDashboard() {
     if (savedKurum && !selectedKurum) {
       setSelectedKurum(JSON.parse(savedKurum));
     }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {}, [tableResults]);
@@ -332,328 +339,364 @@ export default function KomisyonPortalDashboard() {
   const toolTipToogle = () => setTooltipOpen(!tooltipOpen);
 
   return (
-    <Container className="mt-5" fluid>
-      <Row>
-        <Col xs="12" lg="2">
-          <div
-            style={centerImage}
-            onClick={(e) => handleHome()}
-            onMouseOver={(e) =>
-              (e.currentTarget.querySelector("img").style.transform =
-                "rotateY(360deg)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.querySelector("img").style.transform =
-                "rotateY(0deg)")
-            }
-          >
-            <img
-              id="logo"
-              src={logo}
-              style={{
-                width: "150px",
-                transition: "transform 0.5s ease-in-out",
-              }}
-              alt="logo"
-            />
-          </div>
+    <>
+      <Container className="mt-5" fluid>
+        <Row>
+          <Col xs="12" lg="2">
+            <div
+              style={centerImage}
+              onClick={(e) => handleHome()}
+              onMouseOver={(e) =>
+                (e.currentTarget.querySelector("img").style.transform =
+                  "rotateY(360deg)")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.querySelector("img").style.transform =
+                  "rotateY(0deg)")
+              }
+            >
+              <img
+                id="logo"
+                src={logo}
+                style={{
+                  width: "150px",
+                  transition: "transform 0.5s ease-in-out",
+                }}
+                alt="logo"
+              />
+            </div>
 
-          <div className="mt-2">
-            {user && (
-              <div>
-                <Alert className="bg-danger text-white">
-                  Hoşgeldin <b>{user.name}</b>{" "}
-                  <img
-                    id="logout"
-                    src={logoutSvg}
-                    style={imgStyle}
-                    alt="logout"
-                    onClick={() => {
-                      logout();
-                    }}
-                  />
-                  <Tooltip
-                    placement="right"
-                    isOpen={tooltipOpen}
-                    target="logout"
-                    toggle={toolTipToogle}
-                  >
-                    Çıkış Yap
-                  </Tooltip>
-                </Alert>
-              </div>
-            )}
-          </div>
-
-          <ListGroup className="mt-2" style={listGroupStyle}>
-            {listGroupItems.map((item) => {
-              const isVisibleForRole =
-                (!item.visibleRoles ||
-                  item.visibleRoles.length === 0 ||
-                  (user && item.visibleRoles.includes(user.role))) &&
-                (!item.hiddenRoles ||
-                  item.hiddenRoles.length === 0 ||
-                  (user && !item.hiddenRoles.includes(user.role)));
-
-              if (item.type === "heading") {
-                return (
-                  <ListGroupItemHeading
-                    key={item.id}
-                    hidden={!isVisibleForRole}
-                    className="mt-3 text-center font-weight-bold"
-                  >
-                    {item.label}{" "}
-                    {item.detail && <Badge color="danger">{item.detail}</Badge>}
-                  </ListGroupItemHeading>
-                );
-              } else {
-                const path =
-                  item.path || item.label.toLowerCase().replace(/\s+/g, "-");
-                return (
-                  <Link
-                    to={path}
-                    key={item.id}
-                    style={{ textDecoration: "none" }}
-                    onClick={() => window.scrollTo(0, 0)}
-                  >
-                    <ListGroupItem
-                      active={isActivePath(
-                        item.path ||
-                          item.label.toLowerCase().replace(/\s+/g, "-")
-                      )}
-                      hidden={!isVisibleForRole}
-                      className={
-                        isActivePath(item.path || item.label)
-                          ? "bg-danger text-white"
-                          : ""
-                      }
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#f8d7da";
-                        // text bold
-                        e.target.style.fontWeight = "bold";
+            <div className="mt-2">
+              {user && (
+                <div>
+                  <Alert className="bg-danger text-white">
+                    Hoşgeldin <b>{user.name}</b>{" "}
+                    <img
+                      id="logout"
+                      src={logoutSvg}
+                      style={imgStyle}
+                      alt="logout"
+                      onClick={() => {
+                        logout();
                       }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "";
-                        // text normal
-                        e.target.style.fontWeight = "normal";
-                      }}
+                    />
+                    <Tooltip
+                      placement="right"
+                      isOpen={tooltipOpen}
+                      target="logout"
+                      toggle={toolTipToogle}
                     >
-                      {item.label}
-                    </ListGroupItem>
-                  </Link>
-                );
-              }
-            })}
-          </ListGroup>
-        </Col>
-        <Col xs="12" lg="9">
-          <Routes>
-            <Route
-              path="/ana-sayfa"
-              element={
-                <KomisyonPortalWelcome
-                  user={user}
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                  showBirimPersonelListe={showBirimPersonelListe}
-                  selectedKurum={selectedKurum}
-                />
-              }
-            />
-            <Route
-              path="birimler"
-              element={<Birimler selectedKurum={selectedKurum} token={token} />}
-            />
-            <Route
-              path="personel-tablosu"
-              element={
-                <TumPersonelTablo
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                  tableResults={tableResults}
-                  tableType={tableType}
-                />
-              }
-            />
-            <Route
-              path="personel-detay"
-              element={
-                <PersonelDetay
-                  kurumlar={kurumlar}
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  unvanlar={unvanlar}
-                />
-              }
-            />
-            <Route
-              path="personel-detay/:sicil"
-              element={
-                <PersonelDetay
-                  kurumlar={kurumlar}
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  unvanlar={unvanlar}
-                />
-              }
-            />
-            {/* Diğer componentler için route'lar */}
-            <Route
-              path="hesap-ayarlari"
-              element={<KullaniciAyarlari token={token} getUser={getUser} />}
-            />
-            <Route
-              path="unvanlar"
-              element={
-                <Unvanlar
-                  unvanlar={unvanlar}
-                  updateUnvanlar={getUnvanlar}
-                  token={token}
-                />
-              }
-            />
-            <Route
-              path="kurum"
-              element={
-                <Kurum
-                  kurumlar={kurumlar}
-                  selectedKurum={selectedKurum}
-                  setSelectedKurum={changeKurum}
-                />
-              }
-            />
-            <Route
-              path="tum-personel-listesi"
-              element={
-                <TumPersonelListe
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                  unvanlar={unvanlar}
-                />
-              }
-            />
-            <Route
-              path="birim-personel-listele"
-              element={
-                <PersonelListeByBirim
-                  selectedKurum={selectedKurum}
-                  unvanlar={unvanlar}
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                  selectedBirimID={selectedBirimID}
-                />
-              }
-            />
-            <Route
-              path="izinde-olan-personel"
-              element={
-                <PersonelOnLeave
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="eksik-katibi-olan-birimler"
-              element={
-                <UnitMissingClerk token={token} selectedKurum={selectedKurum} />
-              }
-            />
-            <Route
-              path="personel-sayisi"
-              element={
-                <PersonelSayi
-                  selectedKurum={selectedKurum}
-                  unvanlar={unvanlar}
-                  token={token}
-                />
-              }
-            />
-            <Route
-              path="portal-kullanici-yonetim"
-              element={
-                <KomisyonPortalKullaniciYonetim user={user} token={token} />
-              }
-            />
-            <Route
-              path="devren-gidenler"
-              element={
-                <PasifPersonel
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="ozellik-aktar"
-              element={
-                <OzellikAktar selectedKurum={selectedKurum} token={token} />
-              }
-            />
-            <Route
-              path="gecici-personel"
-              element={
-                <GeciciPersonel
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="personel-hareketleri"
-              element={
-                <PersonelHareketleri
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                  user={user}
-                  showBirimPersonelListe={showBirimPersonelListe}
-                  selectedKurum={selectedKurum}
-                />
-              }
-            />
-            <Route
-              path="uzaklastirilmis-personel"
-              element={
-                <UzaklastirilmisPersonel
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="sehit-gazi-yakini-personel"
-              element={
-                <SehitGaziYakiniPersonel
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="engelli-personel"
-              element={
-                <EngelliPersonel
-                  token={token}
-                  showPersonelDetay={showPersonelDetay}
-                />
-              }
-            />
-            <Route
-              path="personel-aktar"
-              element={
-                <PersonelAktar
-                  selectedKurum={selectedKurum}
-                  token={token}
-                  unvanlar={unvanlar}
-                />
-              }
-            />
-          </Routes>
-        </Col>
-      </Row>
-    </Container>
+                      Çıkış Yap
+                    </Tooltip>
+                  </Alert>
+                </div>
+              )}
+            </div>
+
+            <ListGroup className="mt-2" style={listGroupStyle}>
+              {listGroupItems.map((item) => {
+                const isVisibleForRole =
+                  (!item.visibleRoles ||
+                    item.visibleRoles.length === 0 ||
+                    (user && item.visibleRoles.includes(user.role))) &&
+                  (!item.hiddenRoles ||
+                    item.hiddenRoles.length === 0 ||
+                    (user && !item.hiddenRoles.includes(user.role)));
+
+                if (item.type === "heading") {
+                  return (
+                    <ListGroupItemHeading
+                      key={item.id}
+                      hidden={!isVisibleForRole}
+                      className="mt-3 text-center font-weight-bold"
+                    >
+                      {item.label}{" "}
+                      {item.detail && (
+                        <Badge color="danger">{item.detail}</Badge>
+                      )}
+                    </ListGroupItemHeading>
+                  );
+                } else {
+                  const path =
+                    item.path || item.label.toLowerCase().replace(/\s+/g, "-");
+                  return (
+                    <Link
+                      to={path}
+                      key={item.id}
+                      style={{ textDecoration: "none" }}
+                      onClick={() => window.scrollTo(0, 0)}
+                    >
+                      <ListGroupItem
+                        active={isActivePath(
+                          item.path ||
+                            item.label.toLowerCase().replace(/\s+/g, "-")
+                        )}
+                        hidden={!isVisibleForRole}
+                        className={
+                          isActivePath(item.path || item.label)
+                            ? "bg-danger text-white"
+                            : ""
+                        }
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#f8d7da";
+                          // text bold
+                          e.target.style.fontWeight = "bold";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "";
+                          // text normal
+                          e.target.style.fontWeight = "normal";
+                        }}
+                      >
+                        {item.label}
+                      </ListGroupItem>
+                    </Link>
+                  );
+                }
+              })}
+            </ListGroup>
+          </Col>
+          <Col xs="12" lg="9">
+            <Routes>
+              <Route
+                path="/ana-sayfa"
+                element={
+                  <KomisyonPortalWelcome
+                    user={user}
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                    showBirimPersonelListe={showBirimPersonelListe}
+                    selectedKurum={selectedKurum}
+                  />
+                }
+              />
+              <Route
+                path="birimler"
+                element={
+                  <Birimler selectedKurum={selectedKurum} token={token} />
+                }
+              />
+              <Route
+                path="personel-tablosu"
+                element={
+                  <TumPersonelTablo
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                    tableResults={tableResults}
+                    tableType={tableType}
+                  />
+                }
+              />
+              <Route
+                path="personel-detay"
+                element={
+                  <PersonelDetay
+                    kurumlar={kurumlar}
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    unvanlar={unvanlar}
+                  />
+                }
+              />
+              <Route
+                path="personel-detay/:sicil"
+                element={
+                  <PersonelDetay
+                    kurumlar={kurumlar}
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    unvanlar={unvanlar}
+                  />
+                }
+              />
+              {/* Diğer componentler için route'lar */}
+              <Route
+                path="hesap-ayarlari"
+                element={<KullaniciAyarlari token={token} getUser={getUser} />}
+              />
+              <Route
+                path="unvanlar"
+                element={
+                  <Unvanlar
+                    unvanlar={unvanlar}
+                    updateUnvanlar={getUnvanlar}
+                    token={token}
+                  />
+                }
+              />
+              <Route
+                path="kurum"
+                element={
+                  <Kurum
+                    kurumlar={kurumlar}
+                    selectedKurum={selectedKurum}
+                    setSelectedKurum={changeKurum}
+                  />
+                }
+              />
+              <Route
+                path="tum-personel-listesi"
+                element={
+                  <TumPersonelListe
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                    unvanlar={unvanlar}
+                  />
+                }
+              />
+              <Route
+                path="birim-personel-listele"
+                element={
+                  <PersonelListeByBirim
+                    selectedKurum={selectedKurum}
+                    unvanlar={unvanlar}
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                    selectedBirimID={selectedBirimID}
+                  />
+                }
+              />
+              <Route
+                path="izinde-olan-personel"
+                element={
+                  <PersonelOnLeave
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="eksik-katibi-olan-birimler"
+                element={
+                  <UnitMissingClerk
+                    token={token}
+                    selectedKurum={selectedKurum}
+                  />
+                }
+              />
+              <Route
+                path="personel-sayisi"
+                element={
+                  <PersonelSayi
+                    selectedKurum={selectedKurum}
+                    unvanlar={unvanlar}
+                    token={token}
+                  />
+                }
+              />
+              <Route
+                path="portal-kullanici-yonetim"
+                element={
+                  <KomisyonPortalKullaniciYonetim user={user} token={token} />
+                }
+              />
+              <Route
+                path="devren-gidenler"
+                element={
+                  <PasifPersonel
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="ozellik-aktar"
+                element={
+                  <OzellikAktar selectedKurum={selectedKurum} token={token} />
+                }
+              />
+              <Route
+                path="gecici-personel"
+                element={
+                  <GeciciPersonel
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="personel-hareketleri"
+                element={
+                  <PersonelHareketleri
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                    user={user}
+                    showBirimPersonelListe={showBirimPersonelListe}
+                    selectedKurum={selectedKurum}
+                  />
+                }
+              />
+              <Route
+                path="uzaklastirilmis-personel"
+                element={
+                  <UzaklastirilmisPersonel
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="sehit-gazi-yakini-personel"
+                element={
+                  <SehitGaziYakiniPersonel
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="engelli-personel"
+                element={
+                  <EngelliPersonel
+                    token={token}
+                    showPersonelDetay={showPersonelDetay}
+                  />
+                }
+              />
+              <Route
+                path="personel-aktar"
+                element={
+                  <PersonelAktar
+                    selectedKurum={selectedKurum}
+                    token={token}
+                    unvanlar={unvanlar}
+                  />
+                }
+              />
+            </Routes>
+          </Col>
+        </Row>
+      </Container>
+
+      <Modal
+        isOpen={showKurumChangeModal}
+        toggle={() => setShowKurumChangeModal(false)}
+        centered
+      >
+        <ModalHeader toggle={() => setShowKurumChangeModal(false)}>
+          Kurum Değiştirme
+        </ModalHeader>
+        <ModalBody>
+          <p>Kurumu değiştirmek istediğinize emin misiniz?</p>
+          <p>
+            <strong>Seçilen Kurum:</strong> {selectedNewKurum?.name}
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={handleKurumChangeConfirm}>
+            Evet
+          </Button>
+          <Button
+            color="secondary"
+            onClick={() => setShowKurumChangeModal(false)}
+          >
+            Hayır
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }

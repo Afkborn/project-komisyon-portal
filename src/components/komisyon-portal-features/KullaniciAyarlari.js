@@ -18,6 +18,7 @@ export default function KullaniciAyarlari({ token, getUser }) {
 
   useEffect(() => {
     getUserDetails();
+    // eslint-disable-next-line
   }, []);
 
   const getUserDetails = () => {
