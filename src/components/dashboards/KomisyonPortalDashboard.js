@@ -224,7 +224,7 @@ export default function KomisyonPortalDashboard() {
       id: 13,
       label: "Portal Kullanıcı Yönetim",
       type: "item",
-      visibleRoles: ["admin"],
+      visibleRoles: [""],
       path: "portal-kullanici-yonetim",
     },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
@@ -515,6 +515,7 @@ export default function KomisyonPortalDashboard() {
                 path="hesap-ayarlari"
                 element={<KullaniciAyarlari token={token} getUser={getUser} />}
               />
+
               <Route
                 path="unvanlar"
                 element={

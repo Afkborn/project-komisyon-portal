@@ -54,6 +54,7 @@ export default function PersonelDetay({
       getPersonelBySicil(urlSicil);
       setSicil(urlSicil); // sicil state'ini güncelle
     }
+    // eslint-disable-next-line
   }, [urlSicil]);
 
   const [showCalistigiKisiGuncelleModal, setShowCalistigiKisiGuncelleModal] =

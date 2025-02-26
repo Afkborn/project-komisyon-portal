@@ -21,6 +21,7 @@ import logo from "../../assets/logo300.png";
 import guide_red from "../../assets/guide-red.svg";
 import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
+import admin_user from "../../assets/admin-user.svg";
 // import humanresources_red from "../../assets/humanresources-red.svg";
 import epsisLogo from "../../assets/epsis-logo.png";
 
@@ -95,6 +96,10 @@ export default function Home() {
 
   function handleUyapMail() {
     window.open("https://eposta.uyap.gov.tr/", "_blank");
+  }
+
+  function handleAysKullaniciYonetimSistemi(){
+    window.location.href="/ays-kys";
   }
 
   const cardImgStyle = {
@@ -178,6 +183,17 @@ export default function Home() {
       image: guide_red,
       visible: true,
     },
+    {
+      id:6,
+      label:"AYS Kullanıcı Yönetim Sistemi",
+      detail:"Adliye Yönetim Sistemi kullanıcı yönetim paneline gitmek için tıklayınız.",
+      type:"item",
+      visibleRoles:["admin"],
+      image:admin_user,
+      onClick:handleAysKullaniciYonetimSistemi,
+      visible:true
+
+    }
   ];
 
   return (

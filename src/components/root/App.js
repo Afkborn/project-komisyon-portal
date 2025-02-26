@@ -4,11 +4,13 @@ import NotFound from "../common/NotFound";
 import Unauthorized from "../common/Unauthorized";
 import KomisyonRoutes from "../common/KomisyonRoutes";
 import SantralRoutes from "../common/SantralRoutes";
+import KullaniciYonetimSistemRoutes from "../common/KullaniciYonetimSistemRoutes";
 import Home from "./Home";
 import Login from "../login/Login";
 import KomisyonPortalDashboard from "../dashboards/KomisyonPortalDashboard";
 import SantralPortalDashboard from "../dashboards/SantralPortalDashboard";
-import "../../styles/App.css"
+import KullaniciYonetimSistemDashboard from "../dashboards/KullaniciYonetimSistemDashboard";
+import "../../styles/App.css";
 
 function App() {
   return (
@@ -16,14 +18,27 @@ function App() {
       <MDBContainer fluid>
         <Routes>
           <Route path="/" element={<Home />} />
-          
+
           {/* Protected Routes */}
           <Route element={<KomisyonRoutes />}>
-            <Route path="/komisyon-portal/*" element={<KomisyonPortalDashboard />} />
+            <Route
+              path="/komisyon-portal/*"
+              element={<KomisyonPortalDashboard />}
+            />
           </Route>
-          
+
           <Route element={<SantralRoutes />}>
-            <Route path="/santral-portal/*" element={<SantralPortalDashboard />} />
+            <Route
+              path="/santral-portal/*"
+              element={<SantralPortalDashboard />}
+            />
+          </Route>
+
+          <Route element={<KullaniciYonetimSistemRoutes />}>
+            <Route
+              path="/ays-kys/*"
+              element={<KullaniciYonetimSistemDashboard />}
+            />
           </Route>
 
           {/* Public Routes */}
