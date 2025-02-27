@@ -301,7 +301,8 @@ export default function Aktiviteler({
               <tr key={activity._id}>
                 <th scope="row">{(currentPage - 1) * pageSize + index + 1}</th>
                 <td>
-                  {activity.userID.name} {activity.userID.surname}
+                  {activity.userID && activity.userID.name}{" "}
+                  {activity.userID && activity.userID.surname}
                 </td>
                 <td>{activity.type.name}</td>
                 {renderHedef(activity)}

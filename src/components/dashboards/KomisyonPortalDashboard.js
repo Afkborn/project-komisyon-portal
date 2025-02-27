@@ -33,7 +33,7 @@ import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
 import OzellikAktar from "../komisyon-portal-features/Aktarim/OzellikAktar";
-import KomisyonPortalKullaniciYonetim from "../komisyon-portal-features/KomisyonPortalKullaniciYonetim";
+
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
 import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHareketleri";
@@ -220,13 +220,6 @@ export default function KomisyonPortalDashboard() {
   const listGroupItems = [
     { id: 0, label: "Ana Sayfa", type: "item", path: "ana-sayfa" },
     { id: 8, label: "Hesap Ayarları", type: "item", path: "hesap-ayarlari" },
-    {
-      id: 13,
-      label: "Portal Kullanıcı Yönetim",
-      type: "item",
-      visibleRoles: ["admin"],
-      path: "portal-kullanici-yonetim",
-    },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
     {
       id: 1004,
@@ -594,12 +587,7 @@ export default function KomisyonPortalDashboard() {
                   />
                 }
               />
-              <Route
-                path="portal-kullanici-yonetim"
-                element={
-                  <KomisyonPortalKullaniciYonetim user={user} token={token} />
-                }
-              />
+
               <Route
                 path="devren-gidenler"
                 element={

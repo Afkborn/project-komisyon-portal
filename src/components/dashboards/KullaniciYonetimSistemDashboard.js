@@ -23,8 +23,10 @@ import axios from "axios";
 import alertify from "alertifyjs";
 import Cookies from "universal-cookie"; // Cookie yönetimi için import ekleyelim
 import AYSNavbar from "../root/AYSNavbar";
+import { useNavigate } from 'react-router-dom';
 
 export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
+  const navigate = useNavigate();
   const cookies = new Cookies();
   const [token] = useState(propToken || cookies.get("TOKEN")); // Props'dan gelen token yoksa cookie'den al
 
@@ -349,9 +351,17 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                     <Button
                       color="danger"
                       size="sm"
+                      className="me-2"
                       onClick={() => handleDelete(user)}
                     >
                       Sil
+                    </Button>
+                    <Button
+                      color="info"
+                      size="sm"
+                      onClick={() => navigate(`/ays-kys/aktiviteler/${user._id}`)}
+                    >
+                      Log
                     </Button>
                   </td>
                 </tr>

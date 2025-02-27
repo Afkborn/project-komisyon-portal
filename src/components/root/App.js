@@ -14,6 +14,7 @@ import KullaniciYonetimSistemRoutes from "../Routes/KullaniciYonetimSistemRoutes
 import KullaniciYonetimSistemDashboard from "../dashboards/KullaniciYonetimSistemDashboard";
 import SegbisRoutes from "../Routes/SegbisRoutes";
 import SegbisRehberDashboard from "../dashboards/SegbisRehberDashboard";
+import KullaniciAktiviteleri from "../dashboards/KullaniciAktiviteleri";
 
 import "../../styles/App.css";
 
@@ -43,6 +44,10 @@ function App() {
             <Route
               path="/ays-kys/*"
               element={<KullaniciYonetimSistemDashboard />}
+            />
+            <Route
+              path="/ays-kys/aktiviteler/:userId"
+              element={<KullaniciAktiviteleri />}
             />
           </Route>
 
