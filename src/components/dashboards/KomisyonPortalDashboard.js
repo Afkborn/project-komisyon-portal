@@ -224,7 +224,7 @@ export default function KomisyonPortalDashboard() {
       id: 13,
       label: "Portal Kullanıcı Yönetim",
       type: "item",
-      visibleRoles: [""],
+      visibleRoles: ["admin"],
       path: "portal-kullanici-yonetim",
     },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
@@ -398,10 +398,16 @@ export default function KomisyonPortalDashboard() {
                 const isVisibleForRole =
                   (!item.visibleRoles ||
                     item.visibleRoles.length === 0 ||
-                    (user && item.visibleRoles.includes(user.role))) &&
+                    (user &&
+                      user.roles.some((role) =>
+                        item.visibleRoles.includes(role)
+                      ))) && // Array.some() ile kontrol
                   (!item.hiddenRoles ||
                     item.hiddenRoles.length === 0 ||
-                    (user && !item.hiddenRoles.includes(user.role)));
+                    (user &&
+                      !user.roles.some((role) =>
+                        item.hiddenRoles.includes(role)
+                      ))); // Array.some() ile kontrol
 
                 if (item.type === "heading") {
                   return (

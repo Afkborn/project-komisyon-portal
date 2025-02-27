@@ -2,8 +2,9 @@ import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+import { hasRequiredRole } from "../common/authUtils"; // Ortak fonksiyonu içe aktar
 
-function KullaniciYonetimSistemRoutes() {
+function SegbisRoutes() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
   const location = useLocation();
@@ -23,10 +24,9 @@ function KullaniciYonetimSistemRoutes() {
   }
 
   // Rol kontrolü
-  const isAuthorizedRole = ["admin"].includes(decodedToken.role);
+  const requiredRoles = ["segbis-uzman", "segbis-kullanici", "admin", ""];
 
-  // Yetkisiz kullanıcıyı unauthorized sayfasına yönlendir
-  if (!isAuthorizedRole) {
+  if (!hasRequiredRole(decodedToken, requiredRoles)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
 
@@ -34,4 +34,4 @@ function KullaniciYonetimSistemRoutes() {
   return <Outlet />;
 }
 
-export default KullaniciYonetimSistemRoutes;
+export default SegbisRoutes;

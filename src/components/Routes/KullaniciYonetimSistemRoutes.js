@@ -2,8 +2,9 @@ import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+import { hasRequiredRole } from "../common/authUtils"; // Ortak fonksiyonu içe aktar
 
-function SantralRoutes() {
+function KullaniciYonetimSistemRoutes() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
   const location = useLocation();
@@ -22,11 +23,10 @@ function SantralRoutes() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Rol kontrolü
-  const isAuthorizedRole = ["santralmemuru", "admin"].includes(decodedToken.role);
-
-  // Yetkisiz kullanıcıyı unauthorized sayfasına yönlendir
-  if (!isAuthorizedRole) {
+  // Yetki kontrolü
+  const requiredRoles = ["admin"];
+  console.log(decodedToken);
+  if (!hasRequiredRole(decodedToken, requiredRoles)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
 
@@ -34,4 +34,4 @@ function SantralRoutes() {
   return <Outlet />;
 }
 
-export default SantralRoutes;
+export default KullaniciYonetimSistemRoutes;

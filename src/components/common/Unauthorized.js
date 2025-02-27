@@ -1,13 +1,17 @@
 import React from "react";
-import Cookies from "universal-cookie";
-import logo from "../../assets/logo300.png"; 
+// import Cookies from "universal-cookie";
+import logo from "../../assets/logo300.png";
 
 export default function Unauthorized() {
-  const cookies = new Cookies();
+  // const cookies = new Cookies();
 
-  function logout() {
-    cookies.remove("TOKEN");
-    window.location.href = "/login";
+  // function logout() {
+  //   cookies.remove("TOKEN");
+  //   window.location.href = "/login";
+  // }
+
+  function goHome() {
+    window.location.href = "/";
   }
 
   return (
@@ -15,8 +19,8 @@ export default function Unauthorized() {
       <img src={logo} alt="Logo" style={styles.logo} />
       <h1 style={styles.message}>Bu sayfayı görüntülemek için yetkiniz yok!</h1>
       <h6>
-        Hesap değiştirmek için{" "}
-        <button onClick={logout} style={styles.linkButton}>
+        Ana ekrana gitmek için{" "}
+        <button onClick={goHome} style={styles.linkButton}>
           buraya tıklayın
         </button>
       </h6>

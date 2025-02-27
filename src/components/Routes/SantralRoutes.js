@@ -2,8 +2,9 @@ import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+import { hasRequiredRole } from "../common/authUtils"; // Ortak fonksiyonu içe aktar
 
-function KomisyonRoutes() {
+function SantralRoutes() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
   const location = useLocation();
@@ -23,12 +24,9 @@ function KomisyonRoutes() {
   }
 
   // Rol kontrolü
-  const isAuthorizedRole = ["komisyonkatibi", "komisyonbaskan", "admin"].includes(
-    decodedToken.role
-  );
-
-  // Yetkisiz kullanıcıyı unauthorized sayfasına yönlendir
-  if (!isAuthorizedRole) {
+  // santralmemur, admin rolleri için yetkilendirme
+  const requiredRoles = ["santral-memur", "admin"];
+  if (!hasRequiredRole(decodedToken, requiredRoles)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
 
@@ -36,4 +34,4 @@ function KomisyonRoutes() {
   return <Outlet />;
 }
 
-export default KomisyonRoutes;
+export default SantralRoutes;

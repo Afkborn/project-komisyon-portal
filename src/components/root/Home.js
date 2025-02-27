@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import {
   Container,
-  Navbar,
-  NavbarBrand,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
   Card,
   CardGroup,
   CardImg,
@@ -17,13 +11,13 @@ import {
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
-import logo from "../../assets/logo300.png";
 import guide_red from "../../assets/guide-red.svg";
 import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
 import admin_user from "../../assets/admin-user.svg";
 // import humanresources_red from "../../assets/humanresources-red.svg";
 import epsisLogo from "../../assets/epsis-logo.png";
+import AYSNavbar from "./AYSNavbar";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -46,38 +40,6 @@ export default function Home() {
     }
   }, []);
 
-  function logout() {
-    cookies.remove("TOKEN");
-    setUser(null);
-  }
-
-  function handleLogin() {
-    window.location.href = "/login";
-  }
-
-  function renderDropdown() {
-    if (user) {
-      return (
-        <UncontrolledDropdown>
-          <DropdownToggle color="danger">
-            {user.name} {user.surname}{" "}
-          </DropdownToggle>
-          <DropdownMenu right>
-            <DropdownItem onClick={(e) => logout()}>Çıkış Yap</DropdownItem>
-          </DropdownMenu>
-        </UncontrolledDropdown>
-      );
-    } else {
-      return (
-        <UncontrolledDropdown>
-          <DropdownToggle onClick={(e) => handleLogin()} color="danger">
-            Giriş Yap
-          </DropdownToggle>
-        </UncontrolledDropdown>
-      );
-    }
-  }
-
   function handleKomisyonPortal() {
     window.location.href = "/komisyon-portal/ana-sayfa";
   }
@@ -98,8 +60,8 @@ export default function Home() {
     window.open("https://eposta.uyap.gov.tr/", "_blank");
   }
 
-  function handleAysKullaniciYonetimSistemi(){
-    window.location.href="/ays-kys";
+  function handleAysKullaniciYonetimSistemi() {
+    window.location.href = "/ays-kys";
   }
 
   const cardImgStyle = {
@@ -140,7 +102,7 @@ export default function Home() {
       detail:
         "Eskişehir Personel Sistemi ile adliye personellerinin bilgilerini görüntüleyebilirsiniz.",
       type: "item",
-      visibleRoles: ["komisyonbaskan", "komisyonkatibi", "admin"],
+      visibleRoles: ["komisyonbaskan", "komisyonuye", "komisyonkatip", "admin"],
       image: epsisLogo,
       onClick: handleKomisyonPortal,
       visible: true,
@@ -184,34 +146,21 @@ export default function Home() {
       visible: true,
     },
     {
-      id:6,
-      label:"AYS Kullanıcı Yönetim Sistemi",
-      detail:"Adliye Yönetim Sistemi kullanıcı yönetim paneline gitmek için tıklayınız.",
-      type:"item",
-      visibleRoles:["admin"],
-      image:admin_user,
-      onClick:handleAysKullaniciYonetimSistemi,
-      visible:true
-
-    }
+      id: 6,
+      label: "AYS Kullanıcı Yönetim Sistemi",
+      detail:
+        "Adliye Yönetim Sistemi kullanıcı yönetim paneline gitmek için tıklayınız.",
+      type: "item",
+      visibleRoles: ["admin"],
+      image: admin_user,
+      onClick: handleAysKullaniciYonetimSistemi,
+      visible: true,
+    },
   ];
 
   return (
     <div>
-      <Navbar className="my-2">
-        <NavbarBrand href="/">
-          <img
-            alt="logo"
-            src={logo}
-            style={{
-              height: 80,
-              width: 80,
-            }}
-          />
-          <span>Adliye Yönetim Sistemi</span>
-        </NavbarBrand>
-        {renderDropdown()}
-      </Navbar>
+      <AYSNavbar />
 
       <Container>
         <div className="mt-5">
@@ -224,10 +173,16 @@ export default function Home() {
               const isVisibleForRole =
                 (!item.visibleRoles ||
                   item.visibleRoles.length === 0 ||
-                  (user && item.visibleRoles.includes(user.role))) &&
+                  (user &&
+                    user.roles.some((role) =>
+                      item.visibleRoles.includes(role)
+                    ))) &&
                 (!item.hiddenRoles ||
                   item.hiddenRoles.length === 0 ||
-                  (user && !item.hiddenRoles.includes(user.role))) &&
+                  (user &&
+                    !user.roles.some((role) =>
+                      item.hiddenRoles.includes(role)
+                    ))) &&
                 item.visible;
 
               const isHovered = hoveredIndex === index;

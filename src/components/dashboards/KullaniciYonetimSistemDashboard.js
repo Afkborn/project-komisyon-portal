@@ -16,10 +16,13 @@ import {
   Form,
   FormGroup,
   Label,
+  ListGroup,
+  ListGroupItem,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import Cookies from "universal-cookie"; // Cookie yönetimi için import ekleyelim
+import AYSNavbar from "../root/AYSNavbar";
 
 export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
   const cookies = new Cookies();
@@ -30,6 +33,8 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
+  const [availableRoles, setAvailableRoles] = useState([]); // Sabit array yerine state
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -37,8 +42,41 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
     surname: "",
     email: "",
     phoneNumber: "",
-    role: "user",
+    roles: [], // role yerine roles array olarak
   });
+
+  // Sürükle-Bırak işlemleri için state'ler
+  const [draggingRole, setDraggingRole] = useState(null);
+
+  // Sürükle-Bırak event handlers
+  const handleDragStart = (role) => {
+    setDraggingRole(role);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, targetArea) => {
+    e.preventDefault();
+    if (!draggingRole) return;
+
+    if (targetArea === "selected") {
+      // Zaten seçili değilse ekle
+      if (!formData.roles.find((r) => r.id === draggingRole.id)) {
+        setFormData((prev) => ({
+          ...prev,
+          roles: [...prev.roles, draggingRole],
+        }));
+      }
+    } else {
+      // Seçili listeden kaldır
+      setFormData((prev) => ({
+        ...prev,
+        roles: prev.roles.filter((r) => r.id !== draggingRole.id),
+      }));
+    }
+  };
 
   useEffect(() => {
     if (!token) {
@@ -47,6 +85,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       return;
     }
     getUsers();
+    getRoles(); // Yeni fonksiyon çağrısı
     // eslint-disable-next-line
   }, [token]);
 
@@ -74,6 +113,31 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       });
   };
 
+  // Yeni fonksiyon: Rolleri API'den çek
+  const getRoles = () => {
+    axios({
+      method: "GET",
+      url: "/api/roles",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => {
+        // API'den gelen rolleri state'e kaydet
+        const roles = response.data.RoleList.map((role, index) => ({
+          id: index + 1,
+          name: role.name,
+          label: role.label || role.name, // label yoksa name'i kullan
+        }));
+        console.log("Roller yüklendi:", roles);
+        setAvailableRoles(roles);
+      })
+      .catch((error) => {
+        console.error("Roller yüklenirken hata:", error);
+        alertify.error("Roller yüklenemedi");
+      });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -87,10 +151,16 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
     const url = editUser ? `/api/users/${editUser._id}` : "/api/users/register";
     const method = editUser ? "PUT" : "POST";
 
-    // eğer formData'da password boşsa sil
-    if (!formData.password) {
-      delete formData.password;
+    // FormData'yı kopyala
+    const apiData = { ...formData };
+
+    // Password boşsa sil
+    if (!apiData.password) {
+      delete apiData.password;
     }
+
+    // Roles array'ini sadece role name'lerden oluşan array'e dönüştür
+    apiData.roles = formData.roles.map((role) => role.name);
 
     axios({
       method,
@@ -98,7 +168,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      data: formData,
+      data: apiData,
     })
       .then(() => {
         alertify.success(
@@ -113,16 +183,21 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       });
   };
 
+  // handleEdit fonksiyonunu güncelle
   const handleEdit = (user) => {
     setEditUser(user);
     setFormData({
-      username: user.username,
+      ...user,
       password: "",
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
+      // Mevcut rolleri availableRoles ile eşleştir
+      roles: user.roles.map(
+        (roleName) =>
+          availableRoles.find((r) => r.name === roleName) || {
+            id: Math.random(),
+            name: roleName,
+            label: roleName,
+          }
+      ),
     });
     setShowAddModal(true);
   };
@@ -161,7 +236,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       surname: "",
       email: "",
       phoneNumber: "",
-      role: "user",
+      roles: [],
     });
     setEditUser(null);
   };
@@ -173,216 +248,281 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phoneNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
+  const getRoleBadgeColor = (roleName) => {
+    switch (roleName) {
       case "admin":
         return "danger";
-      case "user":
-        return "primary";
+      case "komisyonuye":
+        return "success";
+      case "komisyonbaskan":
+        return "success";
+      case "komisyonkatip":
+        return "success";
       default:
         return "secondary";
     }
   };
 
+  // Tablo içinde rollerin gösterimi için yeni helper fonksiyon
+  const renderRoleBadges = (userRoles) => {
+    return userRoles.map((roleName, index) => (
+      <Badge key={index} color={getRoleBadgeColor(roleName)} className="me-1">
+        {availableRoles.find((r) => r.name === roleName)?.label || roleName}
+      </Badge>
+    ));
+  };
+
   return (
-    <Container fluid>
-      <Row className="mb-4 align-items-center">
-        <Col>
-          <h2>Adliye Yönetim Sistemi - Kullanıcı Yönetim</h2>
-        </Col>
-        <Col xs="auto">
-          <Button color="success" onClick={() => setShowAddModal(true)}>
-            + Kullanıcı Ekle
-          </Button>
-        </Col>
-      </Row>
+    <div>
+      <AYSNavbar />
+      <Container fluid>
+        <Row className="mb-4 align-items-center">
+          <Col>
+            <h3>Kullanıcı Yönetim Paneli</h3>
+            <span>
+              Sistemdeki kullanıcıları görüntüleyebilir, düzenleyebilir ve
+              silebilirsiniz.
+            </span>
+          </Col>
+          <Col xs="auto">
+            <Button color="success" onClick={() => setShowAddModal(true)}>
+              + Kullanıcı Ekle
+            </Button>
+          </Col>
+        </Row>
 
-      <Row className="mb-4">
-        <Col md="4">
-          <InputGroup>
-            <Input
-              placeholder="Ad, kullanıcı adı veya email ile ara..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </InputGroup>
-        </Col>
-      </Row>
-
-      {loading ? (
-        <div className="text-center p-5">
-          <Spinner color="primary" />
-        </div>
-      ) : (
-        <Table hover responsive>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Kullanıcı Adı</th>
-              <th>Ad Soyad</th>
-              <th>Email</th>
-              <th>Telefon</th>
-              <th>Yetki</th>
-              <th>İşlemler</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user, index) => (
-              <tr key={user._id}>
-                <td>{index + 1}</td>
-                <td>{user.username}</td>
-                <td>
-                  {user.name} {user.surname}
-                </td>
-                <td>{user.email}</td>
-                <td>{user.phoneNumber || "-"}</td>
-                <td>
-                  <Badge color={getRoleBadgeColor(user.role)}>
-                    {user.role}
-                  </Badge>
-                </td>
-                <td>
-                  <Button
-                    color="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(user)}
-                  >
-                    Düzenle
-                  </Button>
-                  <Button
-                    color="danger"
-                    size="sm"
-                    onClick={() => handleDelete(user)}
-                  >
-                    Sil
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      <Modal isOpen={showAddModal} toggle={handleModalClose} size="lg">
-        <Form onSubmit={handleSubmit}>
-          <ModalHeader toggle={handleModalClose}>
-            {editUser ? "Kullanıcı Düzenle" : "Yeni Kullanıcı Ekle"}
-          </ModalHeader>
-          <ModalBody>
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="username">Kullanıcı Adı*</Label>
-                  <Input
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                    disabled={editUser}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="password">Şifre{!editUser && "*"}</Label>
-                  <Input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required={!editUser}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="name">Ad*</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="surname">Soyad*</Label>
-                  <Input
-                    id="surname"
-                    name="surname"
-                    value={formData.surname}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="email">Email*</Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="phoneNumber">Telefon</Label>
-                  <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-
-            <FormGroup>
-              <Label for="role">Yetki*</Label>
+        <Row className="mb-4">
+          <Col md="4">
+            <InputGroup>
               <Input
-                type="select"
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="user">Kullanıcı</option>
-                <option value="admin">Yönetici</option>
-              </Input>
-            </FormGroup>
-          </ModalBody>
-          <ModalFooter>
-            <Button type="submit" color="primary">
-              {editUser ? "Güncelle" : "Kaydet"}
-            </Button>
-            <Button color="secondary" onClick={handleModalClose}>
-              İptal
-            </Button>
-          </ModalFooter>
-        </Form>
-      </Modal>
-    </Container>
+                placeholder="Ad, kullanıcı adı, cep telefonu veya email ile ara..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+
+        {loading ? (
+          <div className="text-center p-5">
+            <Spinner color="primary" />
+          </div>
+        ) : (
+          <Table hover responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Kullanıcı Adı</th>
+                <th>Ad Soyad</th>
+                <th>Email</th>
+                <th>Telefon</th>
+                <th>Yetkiler</th> {/* Çoğul olarak güncellendi */}
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user, index) => (
+                <tr key={user._id}>
+                  <td>{index + 1}</td>
+                  <td>{user.username}</td>
+                  <td>
+                    {user.name} {user.surname}
+                  </td>
+                  <td>{user.email}</td>
+                  <td>{user.phoneNumber || "-"}</td>
+                  <td>{renderRoleBadges(user.roles)}</td>
+                  <td>
+                    <Button
+                      color="warning"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleEdit(user)}
+                    >
+                      Düzenle
+                    </Button>
+                    <Button
+                      color="danger"
+                      size="sm"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Sil
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+
+        <Modal isOpen={showAddModal} toggle={handleModalClose} size="lg">
+          <Form onSubmit={handleSubmit}>
+            <ModalHeader toggle={handleModalClose}>
+              {editUser ? "Kullanıcı Düzenle" : "Yeni Kullanıcı Ekle"}
+            </ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="username">Kullanıcı Adı*</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required
+                      disabled={editUser}
+                    />
+                  </FormGroup>
+                </Col>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="password">Şifre{!editUser && "*"}</Label>
+                    <Input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required={!editUser}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="name">Ad*</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </FormGroup>
+                </Col>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="surname">Soyad*</Label>
+                    <Input
+                      id="surname"
+                      name="surname"
+                      value={formData.surname}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="email">Email</Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                    />
+                  </FormGroup>
+                </Col>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="phoneNumber">Telefon</Label>
+                    <Input
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+
+              <Row className="mt-4">
+                <Col md={6}>
+                  <h5>Mevcut Yetkiler</h5>
+                  <div
+                    className="role-drop-zone p-3 border rounded"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, "available")}
+                    style={{ minHeight: "200px" }}
+                  >
+                    <ListGroup>
+                      {availableRoles
+                        .filter(
+                          (role) =>
+                            !formData.roles.find((r) => r.id === role.id)
+                        )
+                        .map((role) => (
+                          <ListGroupItem
+                            key={role.id}
+                            draggable
+                            onDragStart={() => handleDragStart(role)}
+                            className="my-1"
+                            style={{ cursor: "move" }}
+                          >
+                            <Badge
+                              color={getRoleBadgeColor(role.name)}
+                              // className="me-2"
+                            >
+                              {role.label}
+                            </Badge>
+                          </ListGroupItem>
+                        ))}
+                    </ListGroup>
+                  </div>
+                </Col>
+                <Col md={6}>
+                  <h5>Seçili Yetkiler</h5>
+                  <div
+                    className="role-drop-zone p-3 border rounded"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, "selected")}
+                    style={{ minHeight: "200px" }}
+                  >
+                    <ListGroup>
+                      {formData.roles.map((role) => (
+                        <ListGroupItem
+                          key={role.id}
+                          draggable
+                          onDragStart={() => handleDragStart(role)}
+                          className="my-1"
+                          style={{ cursor: "move" }}
+                        >
+                          <Badge
+                            color={getRoleBadgeColor(role.name)}
+                            className="me-2"
+                          >
+                            {role.label}
+                          </Badge>
+                        </ListGroupItem>
+                      ))}
+                    </ListGroup>
+                  </div>
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button type="submit" color="primary">
+                {editUser ? "Güncelle" : "Kaydet"}
+              </Button>
+              <Button color="secondary" onClick={handleModalClose}>
+                İptal
+              </Button>
+            </ModalFooter>
+          </Form>
+        </Modal>
+      </Container>
+    </div>
   );
 }
