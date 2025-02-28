@@ -45,7 +45,6 @@ export default function PersonelListeByBirim({
   const [showPersonelEkleModal, setShowPersonelEkleModal] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [currentTypeId, setCurrentTypeId] = useState(null);
   const [birimTypes, setBirimTypes] = useState([]);
 
   // Modal toggle fonksiyonu
@@ -69,11 +68,12 @@ export default function PersonelListeByBirim({
       setKurum(selectedKurum);
       getBirimler(selectedKurum.id);
     }
+     // eslint-disable-next-line 
   }, [selectedKurum]);
 
   // Birim tipi değişikliği
   const handleTypeChange = (typeId) => {
-    setCurrentTypeId(typeId);
+    
     setActiveTab(typeId);
 
     // Tab "all" (tümü) seçilmiş ise, tüm birimleri göster

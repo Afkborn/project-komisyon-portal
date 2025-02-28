@@ -13,7 +13,6 @@ import {
   Row,
   Col,
   Badge,
-  Tooltip,
   Card,
   CardHeader,
   CardBody,
@@ -27,9 +26,6 @@ import BirimEkleModal from "./BirimEkleModal";
 import BirimSilModal from "./BirimSilModal";
 import BirimGuncelleModal from "./BirimGuncelleModal";
 import axios from "axios";
-import updateSvg from "../../../assets/edit.svg";
-import copSepeti from "../../../assets/delete.svg";
-import { GET_UNITS_BY_INSTITUTİON } from "../../constants/AxiosConfiguration";
 
 export default function Birimler({ selectedKurum, token }) {
   const [selectedFilterOption, setSelectedFilterOption] = useState("Ceza");

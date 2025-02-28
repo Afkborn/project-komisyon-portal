@@ -14,8 +14,6 @@ import {
   Card,
   CardBody,
   Badge,
-  InputGroup,
-  InputGroupText,
   Alert,
   UncontrolledTooltip,
 } from "reactstrap";
@@ -42,7 +40,7 @@ export default function Aktiviteler({
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [filtreVarMi, setFiltreVarMi] = useState(false);
-  const [totalItems, setTotalItems] = useState(0);
+
   const [showFilters, setShowFilters] = useState(false);
 
   const handleFilterTypeChange = (e) => {
@@ -252,7 +250,7 @@ export default function Aktiviteler({
       .then((response) => {
         setLastActivityList(response.data.activityList);
         setPageCount(response.data.pageCount);
-        setTotalItems(response.data.totalItems || 0);
+   
         setIsLoading(false);
       })
       .catch((error) => {

@@ -41,7 +41,7 @@ export default function Home() {
     {
       id: 1,
       title: "Adliye Haftalık Bülten - 15 Mayıs 2023",
-      image: "https://source.unsplash.com/random/800x400/?courthouse,1",
+      image: "#",
       shortDescription: "Bu haftaki adliye etkinlikleri ve duyuruları",
       date: "15 Mayıs 2023",
       link: "#",
@@ -49,7 +49,7 @@ export default function Home() {
     {
       id: 2,
       title: "Yeni Görevlendirme Duyurusu - 8 Mayıs 2023",
-      image: "https://source.unsplash.com/random/800x400/?courthouse,2",
+      image: "#",
       shortDescription: "Önemli görevlendirmeler ve personel değişiklikleri",
       date: "8 Mayıs 2023",
       link: "#",
@@ -57,7 +57,7 @@ export default function Home() {
     {
       id: 3,
       title: "Adalet Bakanlığı Genelgesi - 1 Mayıs 2023",
-      image: "https://source.unsplash.com/random/800x400/?courthouse,3",
+      image: "#",
       shortDescription: "Yeni genelge ve uygulamalar hakkında bilgilendirme",
       date: "1 Mayıs 2023",
       link: "#",
@@ -71,8 +71,9 @@ export default function Home() {
 
     // API'den bülten verilerini çek
     // Şimdilik dummy veri kullanıyoruz
-    
+
     setBulletins(dummyBulletins);
+    // eslint-disable-next-line
   }, []);
 
   function getUser() {

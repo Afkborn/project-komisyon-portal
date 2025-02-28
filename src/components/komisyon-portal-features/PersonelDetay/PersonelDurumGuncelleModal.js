@@ -56,6 +56,7 @@ export default function PersonelDurumGuncelleModal({
       setNewDeactivationDate(new Date().toISOString().split("T")[0]);
       setErrors({});
     }
+    // eslint-disable-next-line
   }, [modal, personel]);
 
   // Form değişikliklerinde validasyon kontrolü yap
@@ -105,6 +106,7 @@ export default function PersonelDurumGuncelleModal({
   // Form alanları değişince validasyon yap
   useEffect(() => {
     if (personel) validateForm();
+     // eslint-disable-next-line 
   }, [newDeactivationReason, suspensionEndDate, suspensionReason]);
 
   const handleCancel = () => {

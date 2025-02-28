@@ -68,6 +68,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
         setBirimSira("birinciBirim");
       }
     }
+     // eslint-disable-next-line 
   }, [modal, selectedKurum]);
 
   // Form sıfırlama fonksiyonu
@@ -381,16 +382,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
       });
   };
 
-  // Radio buton değişimlerini yönet
-  const handleRadioChange = (e) => {
-    setBirimler([]);
-    setNewCalistigiBirim(null);
-    setUpdateButtonDisabled(true);
-    setShowKurumDisiBirim(false);
-    setKurumDisiBirimID(null);
-    setSelectValue("");
-    setBirimSira(e.target.value);
-  };
+
 
   // Personelin belirli bir birim tipine sahip olup olmadığını kontrol et
   const hasPersonelBirimType = (type) => {

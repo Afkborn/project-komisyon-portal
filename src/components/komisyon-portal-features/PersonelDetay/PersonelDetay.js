@@ -21,7 +21,6 @@ import {
   TabContent,
   TabPane,
   Alert,
-  Tooltip,
   Dropdown,
   DropdownToggle,
   DropdownMenu,
@@ -53,7 +52,7 @@ export default function PersonelDetay({
   const navigate = useNavigate();
 
   const [personel, setPersonel] = useState(null);
-  const [personelKurum, setPersonelKurum] = useState(null);
+
   const [personeller, setPersoneller] = useState([]);
   const [updatedPersonel, setUpdatedPersonel] = useState({ ...personel });
   const [sicil, setSicil] = useState(urlSicil || "");
@@ -64,7 +63,7 @@ export default function PersonelDetay({
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [activeTab, setActiveTab] = useState("1");
-  const [tooltips, setTooltips] = useState({});
+  
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
@@ -96,13 +95,7 @@ export default function PersonelDetay({
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-  // Tooltip toggle
-  const toggleTooltip = (id) => {
-    setTooltips((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  };
+
 
   useEffect(() => {
     // URL'de sicil varsa personeli getir
@@ -219,11 +212,7 @@ export default function PersonelDetay({
         .then((response) => {
           setPersonel(response.data.person);
 
-          // response.data.person.birimID.institutionID değerini kurumlar içinde ara ve bul
-          let kurum = kurumlar.find(
-            (kurum) => kurum.id === response.data.person.birimID.institutionID
-          );
-          setPersonelKurum(kurum);
+
 
           setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         })
@@ -343,11 +332,6 @@ export default function PersonelDetay({
           return;
         }
 
-        let kurum = kurumlar.find(
-          (kurum) => kurum.id === response.data.person.birimID.institutionID
-        );
-
-        setPersonelKurum(kurum);
         setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         setLoadSpinner(false);
       })
@@ -404,11 +388,8 @@ export default function PersonelDetay({
             return;
           }
 
-          let kurum = kurumlar.find(
-            (kurum) => kurum.id === person.birimID.institutionID
-          );
+   
 
-          setPersonelKurum(kurum);
           setUpdatedPersonel(updatedPersonelAttributes(person));
         }
       })
