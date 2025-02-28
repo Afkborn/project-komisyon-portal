@@ -68,12 +68,11 @@ export default function PersonelListeByBirim({
       setKurum(selectedKurum);
       getBirimler(selectedKurum.id);
     }
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, [selectedKurum]);
 
   // Birim tipi değişikliği
   const handleTypeChange = (typeId) => {
-    
     setActiveTab(typeId);
 
     // Tab "all" (tümü) seçilmiş ise, tüm birimleri göster
@@ -268,10 +267,10 @@ export default function PersonelListeByBirim({
                   Seçilen kuruma ait birimler listelenir ve birime göre
                   filtreleme yapabilirsiniz.
                 </p>
-                <p className="mb-0">
+                {/* <p className="mb-0">
                   <strong>Kurumunuz:</strong>{" "}
                   {selectedKurum?.name || "Kurum Seçilmedi"}
-                </p>
+                </p> */}
               </div>
             </div>
           </Alert>

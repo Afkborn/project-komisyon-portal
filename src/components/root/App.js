@@ -26,7 +26,8 @@ function App() {
           <Route path="/" element={<Home />} />
 
           {/* Protected Routes */}
-          <Route element={<KomisyonRoutes />}>
+          <Route element={<KomisyonRoutes />}>+
+          
             <Route
               path="/komisyon-portal/*"
               element={<KomisyonPortalDashboard />}

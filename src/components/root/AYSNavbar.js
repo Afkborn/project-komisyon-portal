@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -6,12 +6,14 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Container,
 } from "reactstrap";
 
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import logo from "../../assets/logo300.png";
+import "./AYSNavbar.css"; // Yeni CSS dosyası için import eklendi
 
 export default function AYSNavbar() {
   const [user, setUser] = useState(null);
@@ -28,11 +30,13 @@ export default function AYSNavbar() {
       });
   }
 
-  useState(() => {
+  // useState yerine useEffect kullanarak düzeltildi
+  useEffect(() => {
     if (user === null) {
       getUser();
     }
-  }, []);
+    // eslint-disable-next-line
+  }, [user]);
 
   function logout() {
     cookies.remove("TOKEN");
@@ -48,19 +52,26 @@ export default function AYSNavbar() {
     if (user) {
       return (
         <UncontrolledDropdown>
-          <DropdownToggle color="danger">
-            {user.name} {user.surname}{" "}
+          <DropdownToggle className="user-dropdown" color="light">
+            <i className="fas fa-user-circle mr-2"></i>
+            {user.name} {user.surname}
           </DropdownToggle>
-          <DropdownMenu right>
-            <DropdownItem onClick={(e) => logout()}>Çıkış Yap</DropdownItem>
+          <DropdownMenu right className="dropdown-menu-custom">
+            <DropdownItem onClick={(e) => logout()}>
+              <i className="fas fa-sign-out-alt mr-2"></i>Çıkış Yap
+            </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>
       );
     } else {
       return (
         <UncontrolledDropdown>
-          <DropdownToggle onClick={(e) => handleLogin()} color="danger">
-            Giriş Yap
+          <DropdownToggle
+            onClick={(e) => handleLogin()}
+            className="login-btn"
+            color="light"
+          >
+            <i className="fas fa-sign-in-alt mr-2"></i>Giriş Yap
           </DropdownToggle>
         </UncontrolledDropdown>
       );
@@ -68,19 +79,16 @@ export default function AYSNavbar() {
   }
 
   return (
-    <Navbar className="my-2">
-      <NavbarBrand href="/">
-        <img
-          alt="logo"
-          src={logo}
-          style={{
-            height: 80,
-            width: 80,
-          }}
-        />
-        <span>Adliye Yönetim Sistemi</span>
-      </NavbarBrand>
-      {renderDropdown()}
+    <Navbar className="ays-navbar" expand="md" dark color="dark">
+      <Container className="d-flex justify-content-between align-items-center">
+        <NavbarBrand href="/" className="d-flex align-items-center">
+          <img alt="logo" src={logo} className="navbar-logo mr-3" />
+          <span className="navbar-title">Adliye Yönetim Sistemi</span>
+        </NavbarBrand>
+        <div className="navbar-dropdown-container">
+          {renderDropdown()}
+        </div>
+      </Container>
     </Navbar>
   );
 }

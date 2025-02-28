@@ -9,6 +9,10 @@ import {
   CardBody,
   CardTitle,
   CardText,
+  Badge,
+  Container,
+  CardHeader,
+  Progress,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -18,6 +22,16 @@ import {
   renderDate_GGAAYYYY,
   calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
+
+// İkonlar için
+import {
+  FaExclamationCircle,
+  FaChartPie,
+  FaUser,
+  FaClock,
+  FaCalendarAlt,
+} from "react-icons/fa";
+
 export default function KomisyonPortalWelcome({
   user,
   token,
@@ -46,6 +60,13 @@ export default function KomisyonPortalWelcome({
   // urgent jobs
   const [urgentJobs, setUrgentJobs] = useState([]);
   const [urgentJobsLoading, setUrgentJobsLoading] = useState(false);
+
+  // Bugünün tarihi
+  const today = new Date().toLocaleDateString("tr-TR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   const katipChartData = katipChart.map((entry, i) => {
     if (katipHovered === i) {
@@ -162,15 +183,34 @@ export default function KomisyonPortalWelcome({
   };
 
   const timeStyle = {
-    float: "right",
-    color: "#d91d0f",
+    color: "#3f51b5",
     fontSize: "20px",
     fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  };
+
+  const cardStyle = {
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+    borderRadius: "10px",
+    border: "none",
+    marginBottom: "20px",
+  };
+
+  const headerStyle = {
+    backgroundColor: "#f8f9fa",
+    borderBottom: "1px solid #eaeaea",
+    borderTopLeftRadius: "10px",
+    borderTopRightRadius: "10px",
+    padding: "15px 20px",
   };
 
   const clickableTdStyle = {
     cursor: "pointer",
-    textDecoration: "underline",
+    textDecoration: "none",
+    color: "#3f51b5",
+    fontWeight: "500",
   };
 
   const handleTdOnClickPersonel = (personel) => {
@@ -182,300 +222,579 @@ export default function KomisyonPortalWelcome({
     return new Date(date) < new Date();
   };
 
+  // Acil işlerin önceliğine göre badge rengi
+  const getUrgencyBadge = (endDate) => {
+    const days = calculateKalanGorevSuresi(endDate).split(" ")[0];
+
+    if (isDatePassed(endDate)) {
+      return (
+        <Badge color="danger" pill>
+          Süresi Geçmiş
+        </Badge>
+      );
+    } else if (parseInt(days) <= 3) {
+      return (
+        <Badge color="warning" pill>
+          Kritik
+        </Badge>
+      );
+    } else if (parseInt(days) <= 7) {
+      return (
+        <Badge color="info" pill>
+          Yaklaşan
+        </Badge>
+      );
+    }
+    return (
+      <Badge color="success" pill>
+        Planlanmış
+      </Badge>
+    );
+  };
+
   return (
-    <div>
-      <div>
-        <Card>
+    <Container fluid className="p-0">
+      <Card className="mb-4" style={cardStyle}>
+        <CardHeader style={headerStyle}>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 className="m-0 font-weight-bold">
+                EPSİS - Elektronik Personel Sistemi
+                {user && user.roles.includes("komisyonbaskan") && (
+                  <Badge color="danger" className="ml-2 p-2">
+                    REİS
+                  </Badge>
+                )}
+              </h3>
+              <p className="text-muted small mb-0">{today}</p>
+            </div>
+            <div style={timeStyle}>
+              <FaClock />
+              {saat}
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="py-4">
+          <Row className="align-items-center">
+            <Col md="2" className="text-center mb-3 mb-md-0">
+              <div
+                style={{
+                  background: "#f0f4ff",
+                  borderRadius: "50%",
+                  width: "80px",
+                  height: "80px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto",
+                }}
+              >
+                <FaUser size={40} color="#3f51b5" />
+              </div>
+            </Col>
+            <Col md="10">
+              <CardTitle tag="h4" className="font-weight-bold mb-1">
+                Hoşgeldiniz,{" "}
+                {user && (
+                  <span style={{ color: "#3f51b5" }}>
+                    {user.roles.includes("komisyonbaskan")
+                      ? "Sayın Reis"
+                      : user.name}
+                  </span>
+                )}
+              </CardTitle>
+              <CardText className="lead mb-0">
+                EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere ulaşabilir,
+                işlemlerinizi kolayca gerçekleştirebilirsiniz.
+              </CardText>
+              {selectedKurum && (
+                <div className="mt-2">
+                  <Badge color="secondary" style={{ fontSize: "0.8rem" }}>
+                    {selectedKurum.name}
+                  </Badge>
+                </div>
+              )}
+            </Col>
+          </Row>
+        </CardBody>
+      </Card>
+
+      {/* Acele İşler Bölümü */}
+      <div className="mt-3" hidden={urgentJobsLoading}>
+        <Card style={cardStyle}>
+          <CardHeader style={headerStyle} className="d-flex align-items-center">
+            <FaExclamationCircle size={18} className="mr-2" color="#dc3545" />
+            <h5 className="mb-0 font-weight-bold">Acele İşler</h5>
+          </CardHeader>
           <CardBody>
-            <CardTitle tag="h3" className="font-weight-bold">
-              Hoşgeldin{" "}
-              {user && (
-                <span style={{ color: "red" }}>
-                  {user.roles.includes("komisyonbaskan") ? "REİS" : ""}
-                </span>
-              )}
-              {user && (
-                <span
-                  hidden={user.roles.includes("komisyonbaskan")}
-                  style={{ color: "red" }}
+            {urgentJobs && urgentJobs.length === 0 && (
+              <Alert color="success" className="d-flex align-items-center mb-0">
+                <div className="mr-3">
+                  <span
+                    role="img"
+                    aria-label="success"
+                    style={{ fontSize: "24px" }}
+                  >
+                    😊
+                  </span>
+                </div>
+                <div>
+                  <p className="font-weight-bold mb-0">
+                    Acele bir iş yok gibi görünüyor
+                  </p>
+                  <p className="small mb-0">Hayırlı işler dileriz</p>
+                </div>
+              </Alert>
+            )}
+
+            {urgentJobs && urgentJobs.length > 0 && (
+              <div className="table-responsive">
+                <Table
+                  hover
+                  className="border-bottom"
+                  style={{ borderRadius: "8px", overflow: "hidden" }}
                 >
-                  {user.name}
-                </span>
-              )}
-              <span style={timeStyle}>{saat}</span>
-            </CardTitle>
-            <CardText className="lead">
-              EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere ulaşabilir,
-              işlemlerinizi gerçekleştirebilirsiniz.
-            </CardText>
+                  <thead className="bg-light">
+                    <tr>
+                      <th>#</th>
+                      <th>İş Tipi</th>
+                      <th>Durum</th>
+                      <th>Hedef</th>
+                      <th>Bitiş Tarihi</th>
+                      <th>Kalan Süre</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {urgentJobs.map((job, index) => (
+                      <tr
+                        id={job.personID}
+                        className="align-middle"
+                        key={job.personID}
+                        style={{ transition: "all 0.2s" }}
+                      >
+                        <th scope="row">{index + 1}</th>
+                        <td>
+                          <span className="font-weight-medium">
+                            {job.urgentJobType}
+                          </span>
+                        </td>
+                        <td>{getUrgencyBadge(job.urgentJobEndDate)}</td>
+                        <td
+                          style={clickableTdStyle}
+                          onClick={() => handleTdOnClickPersonel(job)}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                background: "#e9ecef",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginRight: "8px",
+                              }}
+                            >
+                              <span>
+                                {job.ad[0]}
+                                {job.soyad[0]}
+                              </span>
+                            </div>
+                            {job.ad} {job.soyad}
+                            <small className="text-muted ml-2">
+                              ({job.sicil} - {job.title})
+                            </small>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <FaCalendarAlt
+                              size={14}
+                              className="mr-2"
+                              color="#6c757d"
+                            />
+                            {renderDate_GGAAYYYY(job.urgentJobEndDate)}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            color: isDatePassed(job.urgentJobEndDate)
+                              ? "#dc3545"
+                              : "inherit",
+                            fontWeight: isDatePassed(job.urgentJobEndDate)
+                              ? "bold"
+                              : "normal",
+                          }}
+                        >
+                          {calculateKalanGorevSuresi(job.urgentJobEndDate)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
           </CardBody>
         </Card>
       </div>
 
-      <div className="mt-3" hidden={urgentJobsLoading}>
-        {urgentJobs && urgentJobs.length === 0 && (
-          <Alert color="success">
-            Acele bir iş yok gibi görünüyor, hayırlı işler dilerim 😊
-          </Alert>
-        )}
-        {urgentJobs && urgentJobs.length > 0 && (
-          <div className="mt-2">
-            {/* <div>
-              <h5>Acele İşler</h5>
-            </div> */}
-
-            <Table size="sm">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Acele İş Tanımı</th>
-                  <th>Hedef</th>
-                  <th>İşin Bitiş Tarihi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {urgentJobs.map((job, index) => (
-                  <tr
-                    id={job.personID}
-                    // mouse geldiğinde renk değiştirme
-                    onMouseEnter={() => {
-                      document.getElementById(
-                        job.personID
-                      ).style.backgroundColor = "lightgray";
-                    }}
-                    onMouseLeave={() => {
-                      document.getElementById(
-                        job.personID
-                      ).style.backgroundColor = "white";
-                    }}
-                    key={job.personID}
-                  >
-                    <th scope="row">{index + 1}</th>
-                    <td>{job.urgentJobType}</td>
-                    <td
-                      style={clickableTdStyle}
-                      onClick={() => handleTdOnClickPersonel(job)}
-                    >
-                      {job.ad} {job.soyad} ({job.sicil} - {job.title})
-                    </td>
-                    <td
-                      style={{
-                        color: isDatePassed(job.urgentJobEndDate)
-                          ? "#dc3545"
-                          : "inherit",
-                      }}
-                    >
-                      {renderDate_GGAAYYYY(job.urgentJobEndDate)} (
-                      {calculateKalanGorevSuresi(job.urgentJobEndDate)})
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
-      </div>
-
-      <hr></hr>
-      {/* PIE CHARTS */}
+      {/* İstatistikler */}
       <div hidden={!katipTitleChartVisible}>
-        <Row>
-          {katipChartLoading && (
-            <Col xs="12" className="text-center">
-              <Spinner color="primary">
-                <span className="sr-only">Yükleniyor...</span>
-              </Spinner>
-            </Col>
-          )}
-
-          <Col xs="6" className="text-center">
-            <h4>Zabıt Katibi İstatistikleri</h4>
-            <div>
-              <div
-                className="legend"
-                style={{
-                  display: "flex",
-                  justifyContent: "start",
-                  flexDirection: "column",
-                  alignItems: "start",
-                }}
-              >
-                {katipChartData.map((entry, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: entry.color,
-                        marginRight: "8px",
-                      }}
-                    ></div>
-                    <span>
-                      {entry.title} ({entry.value} kişi){" "}
-                    </span>
-                  </div>
-                ))}
+        <Card style={cardStyle}>
+          <CardHeader style={headerStyle} className="d-flex align-items-center">
+            <FaChartPie size={18} className="mr-2" color="#3f51b5" />
+            <h5 className="mb-0 font-weight-bold">Personel İstatistikleri</h5>
+          </CardHeader>
+          <CardBody>
+            {katipChartLoading && (
+              <div className="text-center py-5">
+                <Spinner color="primary" size="lg">
+                  <span className="sr-only">Yükleniyor...</span>
+                </Spinner>
+                <p className="mt-2 text-muted">İstatistikler yükleniyor...</p>
               </div>
-            </div>
-            <PieChart
-              style={{
-                fontFamily:
-                  '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
-                fontSize: "8px",
-                height: "300px",
-              }}
-              data={katipChartData}
-              radius={pieChartDefaultProps.radius - 6}
-              lineWidth={60}
-              segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
-              segmentsShift={(index) => (index === katipChartSelected ? 6 : 1)}
-              animate
-              label={({ dataEntry }) => {
-                if (dataEntry.percentage < 5) return "";
-                return Math.round(dataEntry.percentage) + "%";
-              }}
-              labelPosition={100 - widthOfLine / 2}
-              labelStyle={{
-                fill: "#fff",
-                opacity: 0.75,
-                pointerEvents: "none",
-              }}
-              onClick={(_, index) => {
-                setKatipChartSelected(
-                  index === katipChartSelected ? undefined : index
-                );
-              }}
-              onMouseOver={(_, index) => {
-                setKatipHovered(index);
-              }}
-              onMouseOut={() => {
-                setKatipHovered(undefined);
-              }}
-            />
-          </Col>
+            )}
 
-          <Col xs="6" className="text-center">
-            <h4>Ünvan İstatistikleri</h4>
-            <div>
-              <div
-                className="legend"
-                style={{
-                  display: "flex",
-                  justifyContent: "start",
-                  flexDirection: "column",
-                  alignItems: "start",
-                }}
-              >
-                {unvanChartData.map((entry, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: entry.color,
-                        marginRight: "8px",
-                      }}
-                    ></div>
-                    <span>
-                      {entry.title} ({entry.value} kişi){" "}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <PieChart
-              style={{
-                fontFamily:
-                  '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
-                fontSize: "8px",
-                height: "300px",
-              }}
-              data={unvanChartData}
-              radius={pieChartDefaultProps.radius - 6}
-              lineWidth={60}
-              segmentsStyle={{ transition: "stroke .3s", cursor: "pointer" }}
-              segmentsShift={(index) => (index === unvanChartSelected ? 6 : 1)}
-              animate
-              label={({ dataEntry }) => {
-                if (dataEntry.percentage < 5) return "";
-                return Math.round(dataEntry.percentage) + "%";
-              }}
-              labelPosition={100 - widthOfLine / 2}
-              labelStyle={{
-                fill: "#fff",
-                opacity: 0.75,
-                pointerEvents: "none",
-              }}
-              onClick={(_, index) => {
-                setUnvanChartSelected(
-                  index === unvanChartSelected ? undefined : index
-                );
-              }}
-              onMouseOver={(_, index) => {
-                setUnvanHovered(index);
-              }}
-              onMouseOut={() => {
-                setUnvanHovered(undefined);
-              }}
-            />
-          </Col>
-        </Row>
+            <Row className="mt-4">
+              <Col lg="6" className="text-center mb-4 mb-lg-0">
+                <Card
+                  className="bg-light h-100"
+                  style={{ border: "none", borderRadius: "8px" }}
+                >
+                  <CardHeader style={{ background: "#f8f9fa", border: "none" }}>
+                    <h5 className="mb-0 font-weight-bold">
+                      Zabıt Katibi Dağılımı
+                    </h5>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="d-flex flex-column flex-md-row">
+                      <div
+                        className="order-2 order-md-1"
+                        style={{ flex: 1, minHeight: "250px" }}
+                      >
+                        <PieChart
+                          style={{
+                            fontFamily:
+                              '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
+                            fontSize: "8px",
+                            height: "100%",
+                          }}
+                          data={katipChartData}
+                          radius={pieChartDefaultProps.radius - 6}
+                          lineWidth={60}
+                          segmentsStyle={{
+                            transition: "stroke .3s",
+                            cursor: "pointer",
+                          }}
+                          segmentsShift={(index) =>
+                            index === katipChartSelected ? 6 : 1
+                          }
+                          animate
+                          label={({ dataEntry }) => {
+                            if (dataEntry.percentage < 5) return "";
+                            return Math.round(dataEntry.percentage) + "%";
+                          }}
+                          labelPosition={100 - widthOfLine / 2}
+                          labelStyle={{
+                            fill: "#fff",
+                            opacity: 0.85,
+                            fontWeight: "bold",
+                            pointerEvents: "none",
+                          }}
+                          onClick={(_, index) => {
+                            setKatipChartSelected(
+                              index === katipChartSelected ? undefined : index
+                            );
+                          }}
+                          onMouseOver={(_, index) => {
+                            setKatipHovered(index);
+                          }}
+                          onMouseOut={() => {
+                            setKatipHovered(undefined);
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="order-1 order-md-2 mb-3 mb-md-0"
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          className="legend"
+                          style={{
+                            display: "flex",
+                            justifyContent: "start",
+                            flexDirection: "column",
+                            alignItems: "start",
+                          }}
+                        >
+                          {katipChartData.map((entry, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: "12px",
+                                padding: "6px 10px",
+                                borderRadius: "4px",
+                                background:
+                                  index === katipChartSelected
+                                    ? "#f0f4ff"
+                                    : "transparent",
+                                cursor: "pointer",
+                                transition: "all 0.2s",
+                              }}
+                              onClick={() =>
+                                setKatipChartSelected(
+                                  index === katipChartSelected
+                                    ? undefined
+                                    : index
+                                )
+                              }
+                            >
+                              <div
+                                style={{
+                                  width: "16px",
+                                  height: "16px",
+                                  backgroundColor: entry.color,
+                                  marginRight: "12px",
+                                  borderRadius: "3px",
+                                }}
+                              ></div>
+                              <div>
+                                <span style={{ fontWeight: "500" }}>
+                                  {entry.title}
+                                </span>
+                                <div className="d-flex align-items-center mt-1">
+                                  <Progress
+                                    value={entry.value}
+                                    max={katipChartData.reduce(
+                                      (acc, curr) => acc + curr.value,
+                                      0
+                                    )}
+                                    style={{ height: "4px", width: "100px" }}
+                                    color={entry.color.replace("#", "")}
+                                  />
+                                  <span className="ml-2 small">
+                                    {entry.value} kişi
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+
+              <Col lg="6" className="text-center">
+                <Card
+                  className="bg-light h-100"
+                  style={{ border: "none", borderRadius: "8px" }}
+                >
+                  <CardHeader style={{ background: "#f8f9fa", border: "none" }}>
+                    <h5 className="mb-0 font-weight-bold">Ünvan Dağılımı</h5>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="d-flex flex-column flex-md-row">
+                      <div
+                        className="order-2 order-md-1"
+                        style={{ flex: 1, minHeight: "250px" }}
+                      >
+                        <PieChart
+                          style={{
+                            fontFamily:
+                              '"Nunito Sans", -apple-system, Helvetica, Arial, sans-serif',
+                            fontSize: "8px",
+                            height: "100%",
+                          }}
+                          data={unvanChartData}
+                          radius={pieChartDefaultProps.radius - 6}
+                          lineWidth={60}
+                          segmentsStyle={{
+                            transition: "stroke .3s",
+                            cursor: "pointer",
+                          }}
+                          segmentsShift={(index) =>
+                            index === unvanChartSelected ? 6 : 1
+                          }
+                          animate
+                          label={({ dataEntry }) => {
+                            if (dataEntry.percentage < 5) return "";
+                            return Math.round(dataEntry.percentage) + "%";
+                          }}
+                          labelPosition={100 - widthOfLine / 2}
+                          labelStyle={{
+                            fill: "#fff",
+                            opacity: 0.85,
+                            fontWeight: "bold",
+                            pointerEvents: "none",
+                          }}
+                          onClick={(_, index) => {
+                            setUnvanChartSelected(
+                              index === unvanChartSelected ? undefined : index
+                            );
+                          }}
+                          onMouseOver={(_, index) => {
+                            setUnvanHovered(index);
+                          }}
+                          onMouseOut={() => {
+                            setUnvanHovered(undefined);
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="order-1 order-md-2 mb-3 mb-md-0"
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          className="legend"
+                          style={{
+                            display: "flex",
+                            justifyContent: "start",
+                            flexDirection: "column",
+                            alignItems: "start",
+                          }}
+                        >
+                          {unvanChartData.map((entry, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: "12px",
+                                padding: "6px 10px",
+                                borderRadius: "4px",
+                                background:
+                                  index === unvanChartSelected
+                                    ? "#f0f4ff"
+                                    : "transparent",
+                                cursor: "pointer",
+                                transition: "all 0.2s",
+                              }}
+                              onClick={() =>
+                                setUnvanChartSelected(
+                                  index === unvanChartSelected
+                                    ? undefined
+                                    : index
+                                )
+                              }
+                            >
+                              <div
+                                style={{
+                                  width: "16px",
+                                  height: "16px",
+                                  backgroundColor: entry.color,
+                                  marginRight: "12px",
+                                  borderRadius: "3px",
+                                }}
+                              ></div>
+                              <div>
+                                <span style={{ fontWeight: "500" }}>
+                                  {entry.title}
+                                </span>
+                                <div className="d-flex align-items-center mt-1">
+                                  <Progress
+                                    value={entry.value}
+                                    max={unvanChartData.reduce(
+                                      (acc, curr) => acc + curr.value,
+                                      0
+                                    )}
+                                    style={{ height: "4px", width: "100px" }}
+                                    color={entry.color.replace("#", "")}
+                                  />
+                                  <span className="ml-2 small">
+                                    {entry.value} kişi
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
       </div>
 
       {/* İNFAZ KORUMA TABLE */}
       <div hidden={!infazKorumaTableVisible}>
-        <Table striped size="sm">
-          <thead>
-            <tr>
-              <th>Kurum Adı</th>
-              <th>Toplam İnfaz Koruma Memuru Sayısı </th>
-              <th>Toplam İnfaz Koruma Baş Memur Sayısı</th>
-            </tr>
-          </thead>
-          <tbody>
-            {infazKorumaTableData.map((entry, index) => (
-              <tr key={index}>
-                <td>{entry.institutionName}</td>
-                <td>{entry.infazKorumaMemurSayisi}</td>
-                <td>{entry.infazKorumaBasMemurSayisi}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <Card style={cardStyle}>
+          <CardHeader style={headerStyle} className="d-flex align-items-center">
+            <FaUser size={18} className="mr-2" color="#3f51b5" />
+            <h5 className="mb-0 font-weight-bold">
+              İnfaz Koruma Memur Sayıları
+            </h5>
+          </CardHeader>
+          <CardBody>
+            <div className="table-responsive">
+              <Table
+                hover
+                className="mb-0"
+                style={{ borderRadius: "8px", overflow: "hidden" }}
+              >
+                <thead className="bg-light">
+                  <tr>
+                    <th>Kurum Adı</th>
+                    <th>Toplam İnfaz Koruma Memuru Sayısı</th>
+                    <th>Toplam İnfaz Koruma Baş Memur Sayısı</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {infazKorumaTableData.map((entry, index) => (
+                    <tr key={index}>
+                      <td className="font-weight-medium">
+                        {entry.institutionName}
+                      </td>
+                      <td>
+                        <Badge color="info" pill className="px-3 py-2">
+                          {entry.infazKorumaMemurSayisi}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge color="primary" pill className="px-3 py-2">
+                          {entry.infazKorumaBasMemurSayisi}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </CardBody>
+        </Card>
       </div>
 
-      {/* ACELE İŞLER  */}
-      {/* {urgentJobsLoading && (
-        <Spinner color="primary">
-          <span className="sr-only">Yükleniyor...</span>
-        </Spinner>
-      )} */}
-
-      <hr></hr>
-      <div>
-        <h5>Aktiviteler</h5>
-        <Aktiviteler
-          token={token}
-          user={user}
-          showPersonelDetay={showPersonelDetay}
-          showBirimPersonelListe={showBirimPersonelListe}
-          personelHareketleri={false}
-        />
-      </div>
-    </div>
+      <Card style={cardStyle} className="mt-4">
+        <CardHeader style={headerStyle} className="d-flex align-items-center">
+          <h5 className="mb-0 font-weight-bold">Son Aktiviteler</h5>
+        </CardHeader>
+        <CardBody>
+          <Aktiviteler
+            token={token}
+            user={user}
+            showPersonelDetay={showPersonelDetay}
+            showBirimPersonelListe={showBirimPersonelListe}
+            personelHareketleri={false}
+          />
+        </CardBody>
+      </Card>
+    </Container>
   );
 }

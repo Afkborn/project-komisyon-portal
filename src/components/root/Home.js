@@ -41,7 +41,7 @@ export default function Home() {
     {
       id: 1,
       title: "Adliye Haftalık Bülten - 15 Mayıs 2023",
-      image: "#",
+      // image: "https://via.placeholder.com/800x400?text=Eskişehir+Adliyesi+Bülteni",
       shortDescription: "Bu haftaki adliye etkinlikleri ve duyuruları",
       date: "15 Mayıs 2023",
       link: "#",
@@ -49,7 +49,7 @@ export default function Home() {
     {
       id: 2,
       title: "Yeni Görevlendirme Duyurusu - 8 Mayıs 2023",
-      image: "#",
+      // image: "#",
       shortDescription: "Önemli görevlendirmeler ve personel değişiklikleri",
       date: "8 Mayıs 2023",
       link: "#",
@@ -57,7 +57,7 @@ export default function Home() {
     {
       id: 3,
       title: "Adalet Bakanlığı Genelgesi - 1 Mayıs 2023",
-      image: "#",
+      // image: "#",
       shortDescription: "Yeni genelge ve uygulamalar hakkında bilgilendirme",
       date: "1 Mayıs 2023",
       link: "#",
@@ -210,6 +210,11 @@ export default function Home() {
     },
   ];
 
+  // Login fonksiyonu (eksik olan)
+  function handleLogin() {
+    window.location.href = "/login";
+  }
+
   // Carousel öğeleri oluşturma fonksiyonu - güncellenmiş
   const renderSlides = () => {
     return bulletins.map((bulletin) => {
@@ -263,23 +268,45 @@ export default function Home() {
       <div className="hero-section">
         <Container>
           <div className="text-center py-5">
-            <h1 className="display-4">Eskişehir Adliyesi Yönetim Sistemi</h1>
-            <p className="lead">
-              Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş
-              yapmanız gerekmektedir.
+            <h1 className="display-4 hero-title">
+              Eskişehir Adliyesi Yönetim Sistemi
+            </h1>
+            <p className="lead hero-subtitle">
+              Adliye personelleri için tüm hizmetlere tek noktadan erişim
             </p>
+            {!user && (
+              <Button
+                color="danger"
+                size="lg"
+                className="mt-3 hero-button"
+                onClick={handleLogin}
+              >
+                <i className="fas fa-sign-in-alt mr-2"></i> Giriş Yapın
+              </Button>
+            )}
           </div>
         </Container>
       </div>
 
-      <Container className="main-content">
+      <Container className="main-content py-5">
+        <Row className="mb-4">
+          <Col>
+            <div className="section-header">
+              <h3 className="section-title">
+                <i className="fas fa-th-large me-2"></i>
+                Uygulamalar
+              </h3>
+              <p className="section-description">
+                Adliye personeli olarak erişebileceğiniz uygulamalar aşağıda
+                listelenmiştir
+              </p>
+            </div>
+          </Col>
+        </Row>
+
         <Row>
           {/* Sol taraftaki uygulamalar bölümü */}
           <Col lg="8">
-            <h3 className="section-title">
-              <i className="fas fa-th-large me-2"></i>
-              Uygulamalar
-            </h3>
             <div className="app-cards">
               <Row>
                 {listGroupItems.map((item, index) => {
@@ -322,6 +349,9 @@ export default function Home() {
                             {item.label}
                           </Badge>
                           <CardText>{item.detail}</CardText>
+                          <div className="app-card-action">
+                            <i className="fas fa-arrow-right"></i>
+                          </div>
                         </CardBody>
                       </Card>
                     </Col>
@@ -331,100 +361,108 @@ export default function Home() {
             </div>
           </Col>
 
-          {/* Sağ taraftaki bülten ve hızlı bilgi bölümü - Haftalık bülten kısmını düzeltiyorum */}
+          {/* Sağ taraftaki bölüm */}
           <Col lg="4">
-            <h3 className="section-title">
-              <i className="fas fa-newspaper me-2"></i>
-              Haftalık Bülten
-            </h3>
-            <Card className="bulletin-card mb-4">
-              <CardBody>
-                {bulletins.length > 0 ? (
-                  <div className="bulletin-carousel-wrapper">
-                    <Carousel
-                      activeIndex={activeIndex}
-                      next={next}
-                      previous={previous}
-                      interval={8000}
-                      className="bulletin-carousel"
-                      dark={false}
-                      ride="carousel"
-                      slide
-                    >
-                      <CarouselIndicators
-                        items={bulletins}
-                        activeIndex={activeIndex}
-                        onClickHandler={goToIndex}
-                        className="carousel-indicators"
-                      />
-                      {renderSlides()}
-                      <CarouselControl
-                        direction="prev"
-                        directionText="Önceki"
-                        onClickHandler={previous}
-                      />
-                      <CarouselControl
-                        direction="next"
-                        directionText="Sonraki"
-                        onClickHandler={next}
-                      />
-                    </Carousel>
-                  </div>
-                ) : (
-                  <div className="text-center py-5">
-                    <i className="fas fa-inbox fa-3x mb-3 text-muted"></i>
-                    <p>Henüz bülten bulunmamaktadır.</p>
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+            <div className="side-content">
+              <div className="bulletin-section">
+                <h3 className="section-title">
+                  <i className="fas fa-newspaper me-2"></i>
+                  Haftalık Bülten
+                </h3>
+                <Card className="bulletin-card mb-4">
+                  <CardBody>
+                    {bulletins.length > 0 ? (
+                      <div className="bulletin-carousel-wrapper">
+                        <Carousel
+                          activeIndex={activeIndex}
+                          next={next}
+                          previous={previous}
+                          interval={8000}
+                          className="bulletin-carousel"
+                          dark={false}
+                          ride="carousel"
+                          slide
+                        >
+                          <CarouselIndicators
+                            items={bulletins}
+                            activeIndex={activeIndex}
+                            onClickHandler={goToIndex}
+                            className="carousel-indicators"
+                          />
+                          {renderSlides()}
+                          <CarouselControl
+                            direction="prev"
+                            directionText="Önceki"
+                            onClickHandler={previous}
+                          />
+                          <CarouselControl
+                            direction="next"
+                            directionText="Sonraki"
+                            onClickHandler={next}
+                          />
+                        </Carousel>
+                      </div>
+                    ) : (
+                      <div className="text-center py-5">
+                        <i className="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                        <p>Henüz bülten bulunmamaktadır.</p>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </div>
 
-            <h3 className="section-title">
-              <i className="fas fa-info-circle me-2"></i>
-              Hızlı Bilgiler
-            </h3>
-            <Card className="quick-info-card">
-              <CardBody>
-                <div className="quick-info-item">
-                  <div className="quick-info-icon bg-danger">
-                    <i className="fas fa-calendar-alt"></i>
-                  </div>
-                  <div className="quick-info-content">
-                    <h5>Çalışma Saatleri</h5>
-                    <p>Pazartesi-Cuma: 08:30-17:30</p>
-                  </div>
-                </div>
+              <div className="quick-info-section">
+                <h3 className="section-title">
+                  <i className="fas fa-info-circle me-2"></i>
+                  Hızlı Bilgiler
+                </h3>
+                <Card className="quick-info-card shadow-sm">
+                  <CardBody>
+                    <div className="quick-info-item">
+                      <div className="quick-info-icon bg-danger">
+                        <i className="fas fa-calendar-alt"></i>
+                      </div>
+                      <div className="quick-info-content">
+                        <h5>Çalışma Saatleri</h5>
+                        <p>Pazartesi-Cuma: 08:30-17:30</p>
+                      </div>
+                    </div>
 
-                <div className="quick-info-item">
-                  <div className="quick-info-icon bg-primary">
-                    <i className="fas fa-phone"></i>
-                  </div>
-                  <div className="quick-info-content">
-                    <h5>Santral</h5>
-                    <p>0222 123 45 67</p>
-                  </div>
-                </div>
+                    <div className="quick-info-item">
+                      <div className="quick-info-icon bg-primary">
+                        <i className="fas fa-phone"></i>
+                      </div>
+                      <div className="quick-info-content">
+                        <h5>Santral</h5>
+                        <p>0222 123 45 67</p>
+                      </div>
+                    </div>
 
-                <div className="quick-info-item">
-                  <div className="quick-info-icon bg-success">
-                    <i className="fas fa-envelope"></i>
-                  </div>
-                  <div className="quick-info-content">
-                    <h5>E-posta</h5>
-                    <p>iletisim@eskisehiradliyesi.gov.tr</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+                    <div className="quick-info-item">
+                      <div className="quick-info-icon bg-success">
+                        <i className="fas fa-envelope"></i>
+                      </div>
+                      <div className="quick-info-content">
+                        <h5>E-posta</h5>
+                        <p>iletisim@eskisehiradliyesi.gov.tr</p>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
           </Col>
         </Row>
       </Container>
 
-      <footer className="footer mt-5">
+      <footer className="footer">
         <Container>
           <div className="text-center py-4">
-            <p>© 2023 Eskişehir Adliyesi - Tüm hakları saklıdır</p>
-            <p className="developer-info">Developed by Bilgehan Kalay</p>
+            <p className="mb-1">
+              © 2023 Eskişehir Adliyesi - Tüm hakları saklıdır
+            </p>
+            <p className="developer-info mb-0">Developed by Bilgehan Kalay</p>
           </div>
         </Container>
       </footer>

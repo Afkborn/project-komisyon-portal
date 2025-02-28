@@ -598,10 +598,10 @@ export default function Birimler({ selectedKurum, token }) {
                 ekleyebilir, mevcut birimleri düzenleyebilir veya
                 silebilirsiniz.
               </p>
-              <p className="mb-1">
+              {/* <p className="mb-1">
                 <strong>Seçili Kurum:</strong>{" "}
                 {kurum?.name || "Kurum Seçilmedi"}
-              </p>
+              </p> */}
             </div>
           </Alert>
 

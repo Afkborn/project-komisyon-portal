@@ -21,7 +21,6 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-
 import logo from "../../assets/epsis-logo.png";
 import KomisyonPortalWelcome from "../komisyon-portal-features/Welcome/KomisyonPortalWelcome";
 import Birimler from "../komisyon-portal-features/Birimler/Birimler";
@@ -157,7 +156,7 @@ export default function KomisyonPortalDashboard() {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, []);
 
   // Load saved kurum from localStorage
@@ -166,7 +165,7 @@ export default function KomisyonPortalDashboard() {
     if (savedKurum && !selectedKurum) {
       setSelectedKurum(JSON.parse(savedKurum));
     }
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, []);
 
   // Get user data
