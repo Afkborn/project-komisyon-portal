@@ -21,13 +21,14 @@ export default function KullaniciAktiviteleri() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
-  const [user, setUser] = useState(null);
+
   const cookies = new Cookies(); // Cookie yönetimi için ekleyelim
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
     getActivities(currentPage);
+    // eslint-disable-next-line
   }, [userId, currentPage]);
 
   const getActivities = (page) => {
@@ -132,16 +133,10 @@ export default function KullaniciAktiviteleri() {
       <Container fluid>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h3>Kullanıcı Aktiviteleri</h3>
-            {user && (
-              <p>
-                <strong>
-                  {user.name} {user.surname}
-                </strong>{" "}
-                ({user.username}) kullanıcısının sistem hareketleri
-                listelenmektedir.
-              </p>
-            )}
+            <h3>
+              {activities[0] && activities[0].userID.name}{" "}
+              {activities[0] && activities[0].userID.surname} Aktiviteleri
+            </h3>
           </div>
           <Button color="secondary" onClick={() => navigate("/ays-kys")}>
             Geri Dön
@@ -157,10 +152,10 @@ export default function KullaniciAktiviteleri() {
             <Table hover responsive>
               <thead>
                 <tr>
-                  <th style={{ width: "5%" }}>#</th>
-                  <th style={{ width: "15%" }}>Tarih</th>
-                  <th style={{ width: "20%" }}>Uygulama</th>
-                  <th style={{ width: "20%" }}>İşlem Tipi</th>
+                  <th style={{ width: "3%" }}>#</th>
+                  <th style={{ width: "8%" }}>Tarih</th>
+                  <th style={{ width: "10%" }}>Uygulama</th>
+                  <th style={{ width: "15%" }}>İşlem Tipi</th>
                   <th>Detay</th>
                 </tr>
               </thead>

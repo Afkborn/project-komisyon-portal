@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner, Table } from "reactstrap";
+import { Button, Spinner } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   renderDate_GGAAYYYY,
@@ -8,10 +8,61 @@ import {
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
+import DataTable from "../../common/DataTable";
 
 export default function GeciciPersonel({ token, showPersonelDetay }) {
   const [geciciPersonelList, setGeciciPersonelList] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
+
+  const renderText = (text1, text2) => {
+    if (text1 === text2) return text1;
+    return text1 + " (" + text2 + ")";
+  };
+
+  const columns = [
+    {
+      key: "sicil",
+      header: "Sicil No",
+    },
+    {
+      key: "fullName",
+      header: "Ad Soyad",
+      render: (item) => `${item.ad} ${item.soyad}`,
+    },
+    {
+      key: "unvan",
+      header: "Ünvan",
+      render: (item) => item.title.name,
+    },
+    {
+      key: "asilBirim",
+      header: "Asıl Kurum - Birim",
+      render: (item) =>
+        renderText(item.birimID.name, item.birimID.institution.name),
+    },
+    {
+      key: "geciciBirim",
+      header: "Geçici Birim - Kurum",
+      render: (item) =>
+        renderText(
+          item.temporaryBirimID.name,
+          item.temporaryBirimID.institution.name
+        ),
+    },
+    {
+      key: "gerekce",
+      header: "Gerekçe",
+      render: (item) => item.temporaryReason,
+    },
+    {
+      key: "bitisTarihi",
+      header: "Bitiş Tarihi",
+      render: (item) =>
+        `${renderDate_GGAAYYYY(
+          item.temporaryEndDate
+        )} (${calculateKalanGorevSuresi(item.temporaryEndDate)})`,
+    },
+  ];
 
   const getGeciciPersonel = (e) => {
     const configuration = {
@@ -37,143 +88,60 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
       });
   };
 
-  const renderText = (text1, text2) => {
-    if (text1 === text2) {
-      return text1;
-    }
-    return text1 + " (" + text2 + ")";
+  const handleExportPdf = () => {
+    generatePdf(
+      document,
+      "pasifPersonelTable",
+      "Geçici Personel Listesi",
+      "detayTD",
+      true
+    );
+  };
+
+  const handlePrint = () => {
+    printDocument(document, "pasifPersonelTable", "detayTD");
   };
 
   return (
     <div>
-      {" "}
-      <div>
-        <h3>Geçici Personel Listesi</h3>
-        <span>
-          Bu rapor ile tüm kurumlardaki geçici personellerin listesini
-          görüntüleyebilirsiniz.
-        </span>
-        <div>
-          <Button
-            color="danger"
-            className="m-3"
-            size="lg"
-            id="getGeciciPersonel"
-            onClick={(e) => getGeciciPersonel(e)}
-            style={{ width: "200px" }}
-          >
-            Rapor Getir
-          </Button>
+      <h3>Geçici Personel Listesi</h3>
+      <span>
+        Bu rapor ile tüm kurumlardaki geçici personellerin listesini
+        görüntüleyebilirsiniz.
+      </span>
 
-          <div>
-            {raporGetiriliyorMu && (
-              <div className="m-5">
-                <Spinner color="danger" />
-                <span className="m-2">
-                  Rapor yükleniyor, bu işlem biraz zaman alabilir.
-                </span>
-              </div>
-            )}
-          </div>
+      <Button
+        color="danger"
+        className="m-1"
+        size="sm"
+        onClick={getGeciciPersonel}
+        style={{ width: "200px" }}
+      >
+        Rapor Getir
+      </Button>
 
-          <div hidden={raporGetiriliyorMu || geciciPersonelList.length === 0}>
-            <Table striped id="pasifPersonelTable">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Sicil No</th>
-                  <th>Ad Soyad</th>
-                  <th>Unvan</th>
-                  <th>Asıl Kurum - Birim</th>
-                  {/* <th>Asıl Birim</th> */}
-                  <th>Geçici Birim - Kurum </th>
-                  {/* <th>Geçici Birim</th> */}
-                  <th>Gerekçe</th>
-                  <th>Bitiş Tarihi</th>
-                  <th id="detayTD">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {geciciPersonelList.map((personel, index) => (
-                  <tr key={personel._id}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{personel.sicil}</td>
-                    <td>
-                      {personel.ad} {personel.soyad}
-                    </td>
-                    <td>{personel.title.name}</td>
-                    <td>
-                      {renderText(
-                        personel.birimID.name,
-                        personel.birimID.institution.name
-                      )}
-                    </td>
-
-                    <td>
-                      {renderText(
-                        personel.temporaryBirimID.name,
-                        personel.temporaryBirimID.institution.name
-                      )}
-                    </td>
-
-                    <td>{personel.temporaryReason}</td>
-                    <td>
-                      {renderDate_GGAAYYYY(personel.temporaryEndDate)} (
-                      {calculateKalanGorevSuresi(personel.temporaryEndDate)})
-                    </td>
-                    <td id="detayTD">
-                      <Button
-                        color="info"
-                        onClick={(e) => showPersonelDetay(personel)}
-                      >
-                        Detay
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Button
-              disabled
-              color="danger"
-              className="m-3"
-              size="lg"
-              id="exportExcel"
-              type="submit"
-            >
-              Excel'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              color="danger"
-              id="exportPdf"
-              onClick={(e) => {
-                generatePdf(
-                  document,
-                  "pasifPersonelTable",
-                  "Geçici Personel Listesi",
-                  "detayTD",
-                  true
-                );
-              }}
-            >
-              Pdf'e Aktar
-            </Button>{" "}
-            <Button
-              className="m-3"
-              size="lg"
-              id="print"
-              color="danger"
-              onClick={(e) => {
-                printDocument(document, "pasifPersonelTable", "detayTD");
-              }}
-            >
-              Yazdır
-            </Button>
-          </div>
+      {raporGetiriliyorMu ? (
+        <div className="m-5">
+          <Spinner color="danger" />
+          <span className="m-2">
+            Rapor yükleniyor, bu işlem biraz zaman alabilir.
+          </span>
         </div>
-      </div>
+      ) : (
+        geciciPersonelList.length > 0 && (
+          <div className="mt-5">
+            <DataTable
+              data={geciciPersonelList}
+              columns={columns}
+              onDetailClick={showPersonelDetay}
+              tableName="pasifPersonelTable"
+              generatePdf={handleExportPdf}
+              printTable={handlePrint}
+              initialPageSize={15} // Başlangıç değeri 15
+            />
+          </div>
+        )
+      )}
     </div>
   );
 }

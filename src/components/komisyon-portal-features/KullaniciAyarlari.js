@@ -80,7 +80,7 @@ export default function KullaniciAyarlari({ token, getUser }) {
     }
     const configuration = {
       method: "PUT",
-      url: "api/users/password",
+      url: "/api/users/password",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -104,7 +104,7 @@ export default function KullaniciAyarlari({ token, getUser }) {
   const deleteUser = () => {
     const configuration = {
       method: "DELETE",
-      url: "api/users",
+      url: "/api/users",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -131,7 +131,7 @@ export default function KullaniciAyarlari({ token, getUser }) {
     e.preventDefault();
     const configuration = {
       method: "PUT",
-      url: "api/users",
+      url: "/api/users",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -181,17 +181,6 @@ export default function KullaniciAyarlari({ token, getUser }) {
               name="name"
               id="name"
               value={`${userData.name} ${userData.surname}`}
-              disabled
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="name">Yetki</Label>
-            <Input
-              type="text"
-              name="role"
-              id="role"
-              placeholder="Rol"
-              value={userData.role}
               disabled
             />
           </FormGroup>

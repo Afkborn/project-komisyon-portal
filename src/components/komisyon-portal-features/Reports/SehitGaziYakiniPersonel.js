@@ -1,14 +1,39 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner, Table } from "reactstrap";
+import { Button, Spinner } from "reactstrap";
 import alertify from "alertifyjs";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
+import DataTable from "../../common/DataTable";
 
 export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
   const [sehitGaziYakiniPersonelList, setSehirGaziYakiniPersonelList] =
     useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
+
+  const columns = [
+    { key: "sicil", header: "Sicil No" },
+    {
+      key: "fullName",
+      header: "Ad Soyad",
+      render: (item) => `${item.ad} ${item.soyad}`,
+    },
+    {
+      key: "kurum",
+      header: "Kurum",
+      render: (item) => item.birimID.institution.name,
+    },
+    {
+      key: "birim",
+      header: "Birim",
+      render: (item) => item.birimID.name,
+    },
+    {
+      key: "unvan",
+      header: "Ünvan",
+      render: (item) => item.title.name,
+    },
+  ];
 
   const getSehitGaziyakiniPersonel = (e) => {
     const configuration = {
@@ -37,118 +62,58 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
       });
   };
 
+  const handleExportPdf = () => {
+    generatePdf(
+      document,
+      "sehitGaziYakiniPersonelTable",
+      "Şehit/Gazi Yakını Personel Listesi",
+      "detayTD"
+    );
+  };
+
+  const handlePrint = () => {
+    printDocument(document, "sehitGaziYakiniPersonelTable", "detayTD");
+  };
+
   return (
     <div>
-      {" "}
-      <div>
-        <h3>Şehit/Gazi Yakını Personel Listesi</h3>
-        <span>
-          Bu rapor ile tüm kurumlardaki şehit/gazi yakını olan personellerin
-          listesini görüntüleyebilirsiniz.
-        </span>
-        <div>
-          <Button
-            className="m-3"
-            color="danger"
-            size="lg"
-            id="getGeciciPersonel"
-            onClick={(e) => getSehitGaziyakiniPersonel(e)}
-            style={{ width: "200px" }}
-          >
-            Rapor Getir
-          </Button>
+      <h3>Şehit/Gazi Yakını Personel Listesi</h3>
+      <span>
+        Bu rapor ile tüm kurumlardaki şehit/gazi yakını olan personellerin
+        listesini görüntüleyebilirsiniz.
+      </span>
 
-          <div>
-            {raporGetiriliyorMu && (
-              <div className="m-5">
-                <Spinner color="danger" />
-                <span className="m-2">
-                  Rapor yükleniyor, bu işlem biraz zaman alabilir.
-                </span>
-              </div>
-            )}
-          </div>
+      <Button
+        color="danger"
+        className="m-1"
+        size="sm"
+        onClick={getSehitGaziyakiniPersonel}
+        style={{ width: "200px" }}
+      >
+        Rapor Getir
+      </Button>
 
-          <div
-            hidden={
-              raporGetiriliyorMu || sehitGaziYakiniPersonelList.length === 0
-            }
-          >
-            <Table striped id="sehitGaziYakiniPersonelTable">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Sicil No</th>
-                  <th>Ad Soyad</th>
-                  <th>Kurum</th>
-                  <th>Birim</th>
-                  <th>Unvan</th>
-                  <th id="detayTD">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sehitGaziYakiniPersonelList.map((personel, index) => (
-                  <tr key={personel._id}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{personel.sicil}</td>
-                    <td>
-                      {personel.ad} {personel.soyad}
-                    </td>
-                    <td>{personel.birimID.institution.name}</td>
-                    <td>{personel.birimID.name}</td>
-                    <td>{personel.title.name}</td>
-                    <td id="detayTD">
-                      <Button
-                        color="info"
-                        onClick={(e) => showPersonelDetay(personel)}
-                      >
-                        Detay
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Button
-              disabled
-              color="danger"
-              className="m-3"
-              size="lg"
-              id="exportExcel"
-              type="submit"
-            >
-              Excel'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              id="exportPdf"
-              color="danger"
-              onClick={(e) => {
-                generatePdf(
-                  document,
-                  "sehitGaziYakiniPersonelTable",
-                  "Engelli Personel Listesi",
-                  "detayTD"
-                );
-              }}
-            >
-              Pdf'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              id="print"
-              color="danger"
-              onClick={(e) => {
-                printDocument(document, "sehitGaziYakiniPersonelTable", "detayTD");
-              }}
-            >
-              Yazdır
-            </Button>
-          </div>
+      {raporGetiriliyorMu ? (
+        <div className="m-5">
+          <Spinner color="danger" />
+          <span className="m-2">
+            Rapor yükleniyor, bu işlem biraz zaman alabilir.
+          </span>
         </div>
-      </div>
+      ) : (
+        sehitGaziYakiniPersonelList.length > 0 && (
+          <div className="mt-5">
+            <DataTable
+              data={sehitGaziYakiniPersonelList}
+              columns={columns}
+              onDetailClick={showPersonelDetay}
+              tableName="sehitGaziYakiniPersonelTable"
+              generatePdf={handleExportPdf}
+              printTable={handlePrint}
+            />
+          </div>
+        )
+      )}
     </div>
   );
 }

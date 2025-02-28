@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner, Table } from "reactstrap";
+import { Button, Spinner } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   calculateGorevSuresi,
@@ -8,20 +8,40 @@ import {
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
+import DataTable from "../../common/DataTable";
 
-
-export default function PasifPersonel({
-  // selectedKurum,
-  token,
-  showPersonelDetay,
-}) {
+export default function PasifPersonel({ token, showPersonelDetay }) {
   const [pasifPersonelList, setPasifPersonelList] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
+
+  const columns = [
+    { key: "sicil", header: "Sicil No" },
+    { key: "ad", header: "Adı" },
+    { key: "soyad", header: "Soyadı" },
+    {
+      key: "unvan",
+      header: "Ünvan",
+      render: (item) => item.title.name,
+    },
+    {
+      key: "gerekce",
+      header: "Gerekçe",
+      render: (item) => item.deactivationReason,
+    },
+    {
+      key: "tarih",
+      header: "Tarih",
+      render: (item) =>
+        `${renderDate_GGAAYYYY(item.deactivationDate)} (${calculateGorevSuresi(
+          item.deactivationDate
+        )})`,
+    },
+  ];
+
   const getPasifPersonel = (e) => {
     const configuration = {
       method: "GET",
       url: "/api/persons/deactivated",
-      // ?institutionId=" + selectedKurum.id
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -44,6 +64,20 @@ export default function PasifPersonel({
       });
   };
 
+  const handleExportPdf = () => {
+    generatePdf(
+      document,
+      "pasifPersonelTable",
+      "Devren Giden Personel Listesi",
+      "detayTD",
+      true
+    );
+  };
+
+  const handlePrint = () => {
+    printDocument(document, "pasifPersonelTable", "detayTD");
+  };
+
   return (
     <div>
       <h3>Devren Giden Personel Listesi</h3>
@@ -51,108 +85,38 @@ export default function PasifPersonel({
         Bu rapor ile tüm kurumlarda devren giden personellerin listesini
         görüntüleyebilirsiniz.
       </span>
-      <div>
-        <Button
-          className="m-3"
-          color="danger"
-          size="lg"
-          id="getPasifPersonel"
-          onClick={(e) => getPasifPersonel(e)}
-          style={{ width: "200px" }}
-        >
-          Rapor Getir
-        </Button>
 
-        <div>
-          {raporGetiriliyorMu && (
-            <div className="m-5">
-              <Spinner color="danger" />
-              <span className="m-2">
-                Rapor yükleniyor, bu işlem biraz zaman alabilir.
-              </span>
-            </div>
-          )}
-        </div>
+      <Button
+        color="danger"
+        className="m-1"
+        size="sm"
+        onClick={getPasifPersonel}
+        style={{ width: "200px" }}
+      >
+        Rapor Getir
+      </Button>
 
-        <div hidden={raporGetiriliyorMu || pasifPersonelList.length === 0}>
-          <Table striped id="pasifPersonelTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Sicil No</th>
-                <th>Adı</th>
-                <th>Soyadı</th>
-                <th>Gerekçe</th>
-                <th>Unvan</th>
-                <th>Tarih</th>
-                <th id="detayTD">İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pasifPersonelList.map((personel, index) => (
-                <tr key={personel._id}>
-                  <th scope="row">{index + 1}</th>
-                  <td>{personel.sicil}</td>
-                  <td>{personel.ad}</td>
-                  <td>{personel.soyad}</td>
-                  <td>{personel.deactivationReason}</td>
-                  <td>{personel.title.name}</td>
-                  <td>
-                    {renderDate_GGAAYYYY(personel.deactivationDate)} (
-                    {calculateGorevSuresi(personel.deactivationDate)})
-                  </td>
-                  <td id="detayTD">
-                    <Button
-                      color="info"
-                      onClick={(e) => showPersonelDetay(personel)}
-                    >
-                      Detay
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          <Button
-            disabled
-            className="m-3"
-            color="danger"
-            size="lg"
-            id="exportExcel"
-            type="submit"
-          >
-            Excel'e Aktar
-          </Button>
-          <Button
-            className="m-3"
-            size="lg"
-            id="exportPdf"
-            color="danger"
-            onClick={(e) => {
-              generatePdf(
-                document,
-                "pasifPersonelTable",
-                "Devren Giden Personel Listesi",
-                "detayTD",
-                true
-              );
-            }}
-          >
-            Pdf'e Aktar
-          </Button>
-          <Button
-              className="m-3"
-              size="lg"
-              id="print"
-              color="danger"
-              onClick={(e) => {
-                printDocument(document, "pasifPersonelTable", "detayTD");
-              }}
-            >
-              Yazdır
-            </Button>
+      {raporGetiriliyorMu ? (
+        <div className="m-5">
+          <Spinner color="danger" />
+          <span className="m-2">
+            Rapor yükleniyor, bu işlem biraz zaman alabilir.
+          </span>
         </div>
-      </div>
+      ) : (
+        pasifPersonelList.length > 0 && (
+          <div className="mt-5">
+            <DataTable
+              data={pasifPersonelList}
+              columns={columns}
+              onDetailClick={showPersonelDetay}
+              tableName="pasifPersonelTable"
+              generatePdf={handleExportPdf}
+              printTable={handlePrint}
+            />
+          </div>
+        )
+      )}
     </div>
   );
 }

@@ -45,11 +45,9 @@ export default function PersonelOnLeave({
     setPersonelList([]);
 
     let url = "/api/reports/izinliPersoneller";
-    
 
     if (searchBy === "byDate") {
       url += `?startDate=${startDate}&endDate=${endDate}`;
-      
     }
 
     if (reason) {

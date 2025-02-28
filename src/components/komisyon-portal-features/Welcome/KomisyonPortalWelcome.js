@@ -184,17 +184,22 @@ export default function KomisyonPortalWelcome({
               Hoşgeldin{" "}
               {user && (
                 <span style={{ color: "red" }}>
-                  {user.role === "komisyonbaskan" ? "REİS" : ""}
+                  {user.roles.includes("komisyonbaskan") ? "REİS" : ""}
                 </span>
               )}
-              {user && user.role !== "komisyonbaskan" && (
-                <span style={{ color: "red" }}>{user.name}</span>
+              {user && (
+                <span
+                  hidden={user.roles.includes("komisyonbaskan")}
+                  style={{ color: "red" }}
+                >
+                  {user.name}
+                </span>
               )}
               <span style={timeStyle}>{saat}</span>
             </CardTitle>
             <CardText className="lead">
-              EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere
-              ulaşabilir, işlemlerinizi gerçekleştirebilirsiniz.
+              EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere ulaşabilir,
+              işlemlerinizi gerçekleştirebilirsiniz.
             </CardText>
           </CardBody>
         </Card>

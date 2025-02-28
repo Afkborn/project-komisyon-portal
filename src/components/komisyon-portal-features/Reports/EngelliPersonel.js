@@ -1,12 +1,42 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner, Table } from "reactstrap";
+import { Button, Spinner } from "reactstrap";
 import alertify from "alertifyjs";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
+import DataTable from "../../common/DataTable";
+
 export default function EngelliPersonel({ token, showPersonelDetay }) {
   const [engelliPersonelList, setEngelliPersonelList] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
+
+  const columns = [
+    {
+      key: "sicil",
+      header: "Sicil No",
+      // Sicil numarası direkt erişilebilir olduğu için render gerekmiyor
+    },
+    {
+      key: "fullName",
+      header: "Ad Soyad",
+      render: (item) => `${item.ad} ${item.soyad}`,
+    },
+    {
+      key: "kurum",
+      header: "Kurum",
+      render: (item) => item.birimID.institution.name,
+    },
+    {
+      key: "birim",
+      header: "Birim",
+      render: (item) => item.birimID.name,
+    },
+    {
+      key: "unvan",
+      header: "Ünvan",
+      render: (item) => item.title.name,
+    },
+  ];
 
   const getEngelliPersonel = (e) => {
     const configuration = {
@@ -35,114 +65,58 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
       });
   };
 
+  const handleExportPdf = () => {
+    generatePdf(
+      document,
+      "engelliPersonelTable",
+      "Engelli Personel Listesi",
+      "detayTD"
+    );
+  };
+
+  const handlePrint = () => {
+    printDocument(document, "engelliPersonelTable", "detayTD");
+  };
+
   return (
     <div>
-      {" "}
-      <div>
-        <h3>Engelli Personel Listesi</h3>
-        <span>
-          Bu rapor ile tüm kurumlardaki engelli personellerin listesini
-          görüntüleyebilirsiniz.
-        </span>
-        <div>
-          <Button
-            className="m-3"
-            color="danger"
-            size="lg"
-            id="getGeciciPersonel"
-            onClick={(e) => getEngelliPersonel(e)}
-            style={{ width: "200px" }}
-          >
-            Rapor Getir
-          </Button>
+      <h3>Engelli Personel Listesi</h3>
+      <span>
+        Bu rapor ile tüm kurumlardaki engelli personellerin listesini
+        görüntüleyebilirsiniz.
+      </span>
 
-          <div>
-            {raporGetiriliyorMu && (
-              <div className="m-5">
-                <Spinner color="danger" />
-                <span className="m-2">
-                  Rapor yükleniyor, bu işlem biraz zaman alabilir.
-                </span>
-              </div>
-            )}
-          </div>
+      <Button
+        className="m-1"
+        color="danger"
+        onClick={getEngelliPersonel}
+        size="sm"
+        style={{ width: "200px" }}
+      >
+        Rapor Getir
+      </Button>
 
-          <div hidden={raporGetiriliyorMu || engelliPersonelList.length === 0}>
-            <Table striped id="engelliPersonelTable">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Sicil No</th>
-                  <th>Ad Soyad</th>
-                  <th>Kurum</th>
-                  <th>Birim</th>
-                  <th>Unvan</th>
-                  <th id="detayTD">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {engelliPersonelList.map((personel, index) => (
-                  <tr key={personel._id}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{personel.sicil}</td>
-                    <td>
-                      {personel.ad} {personel.soyad}
-                    </td>
-                    <td>{personel.birimID.institution.name}</td>
-                    <td>{personel.birimID.name}</td>
-                    <td>{personel.title.name}</td>
-                    <td id="detayTD">
-                      <Button
-                        color="info"
-                        onClick={(e) => showPersonelDetay(personel)}
-                      >
-                        Detay
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Button
-              disabled
-              color="danger"
-              className="m-3"
-              size="lg"
-              id="exportExcel"
-              type="submit"
-            >
-              Excel'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              id="exportPdf"
-              color="danger"
-              onClick={(e) => {
-                generatePdf(
-                  document,
-                  "engelliPersonelTable",
-                  "Engelli Personel Listesi",
-                  "detayTD"
-                );
-              }}
-            >
-              Pdf'e Aktar
-            </Button>{" "}
-            <Button
-              className="m-3"
-              size="lg"
-              id="print"
-              color="danger"
-              onClick={(e) => {
-                printDocument(document, "engelliPersonelTable", "detayTD");
-              }}
-            >
-              Yazdır
-            </Button>
-          </div>
+      {raporGetiriliyorMu ? (
+        <div className="m-5">
+          <Spinner color="danger" />
+          <span className="m-2">
+            Rapor yükleniyor, bu işlem biraz zaman alabilir.
+          </span>
         </div>
-      </div>
+      ) : (
+        engelliPersonelList.length > 0 && (
+          <div className="mt-5">
+            <DataTable
+              data={engelliPersonelList}
+              columns={columns}
+              onDetailClick={showPersonelDetay}
+              tableName="engelliPersonelTable"
+              generatePdf={handleExportPdf}
+              printTable={handlePrint}
+            />
+          </div>
+        )
+      )}
     </div>
   );
 }
