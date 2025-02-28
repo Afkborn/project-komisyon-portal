@@ -140,16 +140,6 @@ export default function TumPersonelTablo({
     borderRadius: "5px",
   };
 
-  const divBirimNameStyle = {
-    fontWeight: "bold",
-    color: colors.dark,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "8px 0",
-    borderBottom: `1px solid ${colors.borderGray}`,
-  };
-
   const cardStyle = {
     height: "100%",
     boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
@@ -361,15 +351,10 @@ export default function TumPersonelTablo({
     });
   }
 
-  const borderDivStyle = {
-    border: "1px solid black",
-    padding: "5px",
-  };
-
   return (
     <div className="personel-tablo-container">
       <Card className="mb-4 shadow-sm">
-        <CardHeader className="bg-primary text-white">
+        <CardHeader className="bg-danger text-white">
           <h3 className="mb-0">Personel Tablosu</h3>
         </CardHeader>
         <CardBody>

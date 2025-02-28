@@ -1,5 +1,18 @@
 import React, { useState } from "react";
-import { Input, Label, Button, Form, Row, Col, Spinner } from "reactstrap";
+import {
+  Input,
+  Label,
+  Button,
+  Form,
+  Row,
+  Col,
+  Spinner,
+  Card,
+  CardHeader,
+  CardBody,
+  Alert,
+  FormGroup,
+} from "reactstrap";
 import axios from "axios";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
 import { getIzinType } from "../../actions/IzinActions";
@@ -57,7 +70,6 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
     },
   ];
 
-
   const handleReasonChange = (e) => {
     if (e.target.value === "Tüm İzin Türleri") {
       setReason("");
@@ -114,116 +126,151 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
   };
 
   return (
-    <div>
-      <h3>Rapor - İzinde Olan Personel</h3>
-      <span>
-        Bu rapor sayesinde <b>tüm kurumlarda</b> tarih bazlı veya güncel olarak
-        izinde olan personelleri listeyebilirsiniz.
-      </span>
-      <hr />
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">İzinde Olan Personel</h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            Bu rapor sayesinde <b>tüm kurumlarda</b> tarih bazlı veya güncel
+            olarak izinde olan personelleri listeyebilirsiniz.
+          </Alert>
 
-      <Form className="mb-4">
-        <Row className="row-cols-lg-auto g-3 align-items-center">
-          <Col>
-            <Label check>
-              <Input
-                type="radio"
-                name="searchBy"
-                value="current"
-                checked={searchBy === "current"}
-                onChange={(e) => setSearchBy(e.target.value)}
-              />{" "}
-              Şuan İzinde Olanlar
-            </Label>
-          </Col>
-          <Col>
-            <Label check>
-              <Input
-                type="radio"
-                name="searchBy"
-                value="byDate"
-                checked={searchBy === "byDate"}
-                onChange={(e) => setSearchBy(e.target.value)}
-              />{" "}
-              Tarih Aralığında İzinde Olanlar
-            </Label>
-          </Col>
-        </Row>
+          <Card className="mb-4 border-light">
+            <CardBody>
+              <Form>
+                <Row className="row-cols-lg-auto g-3 align-items-center mb-3">
+                  <Col>
+                    <FormGroup check inline>
+                      <Input
+                        type="radio"
+                        name="searchBy"
+                        value="current"
+                        checked={searchBy === "current"}
+                        onChange={(e) => setSearchBy(e.target.value)}
+                      />
+                      <Label check>Şuan İzinde Olanlar</Label>
+                    </FormGroup>
+                  </Col>
+                  <Col>
+                    <FormGroup check inline>
+                      <Input
+                        type="radio"
+                        name="searchBy"
+                        value="byDate"
+                        checked={searchBy === "byDate"}
+                        onChange={(e) => setSearchBy(e.target.value)}
+                      />
+                      <Label check>Tarih Aralığında İzinde Olanlar</Label>
+                    </FormGroup>
+                  </Col>
+                </Row>
 
-        {searchBy === "byDate" && (
-          <Row className="mt-3">
-            <Col md={3}>
-              <Label for="startDate">Başlangıç Tarihi</Label>
-              <Input
-                type="date"
-                name="startDate"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                {searchBy === "byDate" && (
+                  <Row className="mb-3">
+                    <Col md={3}>
+                      <FormGroup>
+                        <Label for="startDate">Başlangıç Tarihi</Label>
+                        <Input
+                          type="date"
+                          name="startDate"
+                          id="startDate"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className="form-control-sm"
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col md={3}>
+                      <FormGroup>
+                        <Label for="endDate">Bitiş Tarihi</Label>
+                        <Input
+                          type="date"
+                          name="endDate"
+                          id="endDate"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          className="form-control-sm"
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                )}
+
+                <Row className="mb-3">
+                  <Col md={4}>
+                    <FormGroup>
+                      <Label for="reason">İzin Tipi</Label>
+                      <Input
+                        type="select"
+                        id="reason"
+                        onChange={handleReasonChange}
+                        className="form-control-sm"
+                      >
+                        <option>Tüm İzin Türleri</option>
+                        <option value="YILLIK_IZIN">Yıllık İzin</option>
+                        <option value="RAPOR_IZIN">Raporlu İzin</option>
+                        <option value="UCRETSIZ_IZIN">Ücretsiz İzin</option>
+                        <option value="MAZERET_IZIN">Mazeret İzin</option>
+                        <option value="DOGUM_IZIN">Doğum İzni</option>
+                        <option value="OLUM_IZIN">Ölüm İzni</option>
+                        <option value="EVLENME_IZIN">Evlenme İzni</option>
+                        <option value="REFAKAT_IZIN">Refakat İzni</option>
+                        <option value="DIGER_IZIN">Diğer</option>
+                      </Input>
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                <Button
+                  color="danger"
+                  size="lg"
+                  onClick={handleFormSubmit}
+                  style={{ width: "200px" }}
+                >
+                  <i className="fas fa-file-alt me-2"></i> Rapor Getir
+                </Button>
+              </Form>
+            </CardBody>
+          </Card>
+
+          {loading ? (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
               />
-            </Col>
-            <Col md={3}>
-              <Label for="endDate">Bitiş Tarihi</Label>
-              <Input
-                type="date"
-                name="endDate"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </Col>
-          </Row>
-        )}
-
-        <Row className="mt-3">
-          <Col md={4}>
-            <Label for="reason">İzin Tipi</Label>
-            <Input type="select" onChange={handleReasonChange}>
-              <option>Tüm İzin Türleri</option>
-              <option value="YILLIK_IZIN">Yıllık İzin</option>
-              <option value="RAPOR_IZIN">Raporlu İzin</option>
-              <option value="UCRETSIZ_IZIN">Ücretsiz İzin</option>
-              <option value="MAZERET_IZIN">Mazeret İzin</option>
-              <option value="DOGUM_IZIN">Doğum İzni</option>
-              <option value="OLUM_IZIN">Ölüm İzni</option>
-              <option value="EVLENME_IZIN">Evlenme İzni</option>
-              <option value="REFAKAT_IZIN">Refakat İzni</option>
-              <option value="DIGER_IZIN">Diğer</option>
-            </Input>
-          </Col>
-        </Row>
-
-        <Button
-          color="danger"
-          className="mt-3"
-          size="lg"
-          onClick={handleFormSubmit}
-        >
-          Rapor Getir
-        </Button>
-      </Form>
-
-      {loading ? (
-        <div className="text-center">
-          <Spinner color="primary" />
-          <p>Rapor yükleniyor, lütfen bekleyiniz...</p>
-        </div>
-      ) : aramaYapildiMi && personelList.length === 0 ? (
-        <div className="alert alert-info">Sonuç bulunamadı.</div>
-      ) : (
-        personelList.length > 0 && (
-          <div className="mt-4">
-            <h5>İzinde Olan Personeller ({personelList.length} kişi)</h5>
-            <DataTable
-              data={personelList}
-              columns={columns}
-              onDetailClick={showPersonelDetay}
-              tableName="personelOnLeaveTable"
-              generatePdf={handleExportPdf}
-              printTable={handlePrint}
-              initialPageSize={30}
-            />
-          </div>
-        )
-      )}
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, lütfen bekleyiniz...
+              </p>
+            </div>
+          ) : aramaYapildiMi && personelList.length === 0 ? (
+            <Alert color="warning">
+              <i className="fas fa-exclamation-triangle me-2"></i>
+              Arama kriterlerinize uygun sonuç bulunamadı.
+            </Alert>
+          ) : (
+            personelList.length > 0 && (
+              <div className="mt-4">
+                <h5 className="mb-3">
+                  <i className="fas fa-users me-2"></i>
+                  İzinde Olan Personeller ({personelList.length} kişi)
+                </h5>
+                <DataTable
+                  data={personelList}
+                  columns={columns}
+                  onDetailClick={showPersonelDetay}
+                  tableName="personelOnLeaveTable"
+                  generatePdf={handleExportPdf}
+                  printTable={handlePrint}
+                  initialPageSize={30}
+                />
+              </div>
+            )
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner } from "reactstrap";
+import { Button, Spinner, Card, CardHeader, CardBody, Alert } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   renderDate_GGAAYYYY,
@@ -90,44 +90,66 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
   };
 
   return (
-    <div>
-      <h3>Uzaklaştırılmış Personel Listesi</h3>
-      <span>
-        Bu rapor ile tüm kurumlardaki uzaklaştırılmış personellerin listesini
-        görüntüleyebilirsiniz.
-      </span>
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">
+            <i className="fas fa-user-slash me-2"></i>
+            Uzaklaştırılmış Personel Listesi
+          </h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            <i className="fas fa-info-circle me-2"></i>
+            Bu rapor ile tüm kurumlardaki uzaklaştırılmış personellerin
+            listesini görüntüleyebilirsiniz.
+          </Alert>
 
-      <Button
-        color="danger"
-        className="m-1"
-        size="sm"
-        onClick={getGeciciPersonel}
-        style={{ width: "200px" }}
-      >
-        Rapor Getir
-      </Button>
+          <Button
+            color="danger"
+            className="mb-4"
+            onClick={getGeciciPersonel}
+            size="lg"
+            style={{ width: "200px" }}
+          >
+            <i className="fas fa-file-alt me-2"></i> Rapor Getir
+          </Button>
 
-      {raporGetiriliyorMu ? (
-        <div className="m-5">
-          <Spinner color="danger" />
-          <span className="m-2">
-            Rapor yükleniyor, bu işlem biraz zaman alabilir.
-          </span>
-        </div>
-      ) : (
-        uzaklastirilmisPersonelList.length > 0 && (
-          <div className="mt-5">
-            <DataTable
-              data={uzaklastirilmisPersonelList}
-              columns={columns}
-              onDetailClick={showPersonelDetay}
-              tableName="uzaklastirilmisPersonelTable"
-              generatePdf={handleExportPdf}
-              printTable={handlePrint}
-            />
-          </div>
-        )
-      )}
+          {raporGetiriliyorMu ? (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, bu işlem biraz zaman alabilir...
+              </p>
+            </div>
+          ) : (
+            uzaklastirilmisPersonelList.length > 0 && (
+              <div className="mt-4">
+                <Card className="border-0 shadow-sm">
+                  <CardBody>
+                    <h5 className="mb-3 text-danger">
+                      <i className="fas fa-list me-2"></i>
+                      Uzaklaştırılmış Personeller (
+                      {uzaklastirilmisPersonelList.length} kişi)
+                    </h5>
+                    <DataTable
+                      data={uzaklastirilmisPersonelList}
+                      columns={columns}
+                      onDetailClick={showPersonelDetay}
+                      tableName="uzaklastirilmisPersonelTable"
+                      generatePdf={handleExportPdf}
+                      printTable={handlePrint}
+                    />
+                  </CardBody>
+                </Card>
+              </div>
+            )
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

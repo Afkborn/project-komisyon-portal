@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner } from "reactstrap";
+import { Button, Spinner, Card, CardHeader, CardBody, Alert } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   calculateGorevSuresi,
@@ -79,44 +79,53 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
   };
 
   return (
-    <div>
-      <h3>Devren Giden Personel Listesi</h3>
-      <span>
-        Bu rapor ile tüm kurumlarda devren giden personellerin listesini
-        görüntüleyebilirsiniz.
-      </span>
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">Devren Giden Personel Listesi</h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            Bu rapor ile tüm kurumlarda devren giden personellerin listesini
+            görüntüleyebilirsiniz.
+          </Alert>
 
-      <Button
-        color="danger"
-        className="m-1"
-        size="sm"
-        onClick={getPasifPersonel}
-        style={{ width: "200px" }}
-      >
-        Rapor Getir
-      </Button>
+          <Button
+            color="danger"
+            className="mb-4"
+            onClick={getPasifPersonel}
+            size="lg"
+            style={{ width: "200px" }}
+          >
+            <i className="fas fa-file-alt me-2"></i> Rapor Getir
+          </Button>
 
-      {raporGetiriliyorMu ? (
-        <div className="m-5">
-          <Spinner color="danger" />
-          <span className="m-2">
-            Rapor yükleniyor, bu işlem biraz zaman alabilir.
-          </span>
-        </div>
-      ) : (
-        pasifPersonelList.length > 0 && (
-          <div className="mt-5">
-            <DataTable
-              data={pasifPersonelList}
-              columns={columns}
-              onDetailClick={showPersonelDetay}
-              tableName="pasifPersonelTable"
-              generatePdf={handleExportPdf}
-              printTable={handlePrint}
-            />
-          </div>
-        )
-      )}
+          {raporGetiriliyorMu ? (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, bu işlem biraz zaman alabilir...
+              </p>
+            </div>
+          ) : (
+            pasifPersonelList.length > 0 && (
+              <div className="mt-4">
+                <DataTable
+                  data={pasifPersonelList}
+                  columns={columns}
+                  onDetailClick={showPersonelDetay}
+                  tableName="pasifPersonelTable"
+                  generatePdf={handleExportPdf}
+                  printTable={handlePrint}
+                />
+              </div>
+            )
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

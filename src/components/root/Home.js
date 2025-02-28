@@ -1,12 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Card,
-  CardGroup,
   CardImg,
   CardBody,
-  CardTitle,
   CardText,
+  Row,
+  Col,
+  Badge,
+  Button,
+  Carousel,
+  CarouselItem,
+  CarouselControl,
+  CarouselIndicators,
+  CarouselCaption,
 } from "reactstrap";
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
@@ -15,14 +22,58 @@ import guide_red from "../../assets/guide-red.svg";
 import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
 import admin_user from "../../assets/admin-user.svg";
-// import humanresources_red from "../../assets/humanresources-red.svg";
 import epsisLogo from "../../assets/epsis-logo.png";
 import AYSNavbar from "./AYSNavbar";
+import "../../styles/Home.css";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+
+  // Bültenler ve haberler için state
+  const [bulletins, setBulletins] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  // Örnek bültenler (API'den gelecek)
+  const dummyBulletins = [
+    {
+      id: 1,
+      title: "Adliye Haftalık Bülten - 15 Mayıs 2023",
+      image: "https://source.unsplash.com/random/800x400/?courthouse,1",
+      shortDescription: "Bu haftaki adliye etkinlikleri ve duyuruları",
+      date: "15 Mayıs 2023",
+      link: "#",
+    },
+    {
+      id: 2,
+      title: "Yeni Görevlendirme Duyurusu - 8 Mayıs 2023",
+      image: "https://source.unsplash.com/random/800x400/?courthouse,2",
+      shortDescription: "Önemli görevlendirmeler ve personel değişiklikleri",
+      date: "8 Mayıs 2023",
+      link: "#",
+    },
+    {
+      id: 3,
+      title: "Adalet Bakanlığı Genelgesi - 1 Mayıs 2023",
+      image: "https://source.unsplash.com/random/800x400/?courthouse,3",
+      shortDescription: "Yeni genelge ve uygulamalar hakkında bilgilendirme",
+      date: "1 Mayıs 2023",
+      link: "#",
+    },
+  ];
+
+  useEffect(() => {
+    if (user === null) {
+      getUser();
+    }
+
+    // API'den bülten verilerini çek
+    // Şimdilik dummy veri kullanıyoruz
+    
+    setBulletins(dummyBulletins);
+  }, []);
 
   function getUser() {
     axios(GET_USER_DETAILS(token))
@@ -34,12 +85,27 @@ export default function Home() {
       });
   }
 
-  useState(() => {
-    if (user === null) {
-      getUser();
-    }
-  }, []);
+  // Carousel fonksiyonları
+  const next = () => {
+    if (animating) return;
+    const nextIndex =
+      activeIndex === bulletins.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(nextIndex);
+  };
 
+  const previous = () => {
+    if (animating) return;
+    const nextIndex =
+      activeIndex === 0 ? bulletins.length - 1 : activeIndex - 1;
+    setActiveIndex(nextIndex);
+  };
+
+  const goToIndex = (newIndex) => {
+    if (animating) return;
+    setActiveIndex(newIndex);
+  };
+
+  // Uygulama yönlendirme fonksiyonları
   function handleKomisyonPortal() {
     window.location.href = "/komisyon-portal/ana-sayfa";
   }
@@ -64,26 +130,6 @@ export default function Home() {
     window.location.href = "/ays-kys";
   }
 
-  const cardImgStyle = {
-    width: "100%",
-    display: "block",
-    marginLeft: "auto",
-    marginRight: "auto",
-    borderRadius: "8px",
-  };
-
-  const cardStyle = {
-    cursor: "pointer",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    transition: "transform 0.2s, box-shadow 0.2s",
-  };
-
-  const cardHoverStyle = {
-    transform: "scale(1.05)",
-    boxShadow: "0 6px 12px rgba(0, 0, 0, 0.3)",
-  };
-
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const handleMouseEnter = (index) => {
@@ -95,7 +141,6 @@ export default function Home() {
   };
 
   const listGroupItems = [
-    // hiddenRoles, visibleRoles
     {
       id: 1,
       label: "EPSİS",
@@ -106,6 +151,7 @@ export default function Home() {
       image: epsisLogo,
       onClick: handleKomisyonPortal,
       visible: true,
+      color: "danger",
     },
     {
       id: 2,
@@ -116,6 +162,7 @@ export default function Home() {
       image: guide_red,
       onClick: handleSantralPortal,
       visible: false,
+      color: "primary",
     },
     {
       id: 3,
@@ -125,6 +172,7 @@ export default function Home() {
       image: courthouse_red,
       onClick: handleEskisehirAdliyesiWebPage,
       visible: true,
+      color: "success",
     },
     {
       id: 4,
@@ -135,6 +183,7 @@ export default function Home() {
       image: email_red,
       onClick: handleUyapMail,
       visible: true,
+      color: "warning",
     },
     {
       id: 5,
@@ -144,6 +193,7 @@ export default function Home() {
       onClick: handleSegbisRehber,
       image: guide_red,
       visible: true,
+      color: "info",
     },
     {
       id: 6,
@@ -155,69 +205,228 @@ export default function Home() {
       image: admin_user,
       onClick: handleAysKullaniciYonetimSistemi,
       visible: true,
+      color: "dark",
     },
   ];
 
+  // Carousel öğeleri oluşturma fonksiyonu - güncellenmiş
+  const renderSlides = () => {
+    return bulletins.map((bulletin) => {
+      return (
+        <CarouselItem
+          onExiting={() => setAnimating(true)}
+          onExited={() => setAnimating(false)}
+          key={bulletin.id}
+          className="bulletin-carousel-item"
+        >
+          <div className="carousel-image-container">
+            <img
+              src={bulletin.image}
+              alt={bulletin.title}
+              className="carousel-image"
+              onError={(e) => {
+                // Resim yüklenemezse varsayılan resim kullan
+                e.target.onerror = null;
+                e.target.src =
+                  "https://via.placeholder.com/800x400?text=Eskişehir+Adliyesi+Bülteni";
+              }}
+            />
+          </div>
+          <CarouselCaption
+            captionHeader={bulletin.title}
+            captionText={
+              <>
+                <p className="carousel-date">{bulletin.date}</p>
+                <p>{bulletin.shortDescription}</p>
+                <Button
+                  color="light"
+                  outline
+                  size="sm"
+                  className="mt-2"
+                  href={bulletin.link}
+                >
+                  Detaylar <i className="fas fa-arrow-right ms-1"></i>
+                </Button>
+              </>
+            }
+          />
+        </CarouselItem>
+      );
+    });
+  };
+
   return (
-    <div>
+    <div className="home-page">
       <AYSNavbar />
 
-      <Container>
-        <div className="mt-5">
-          <h5 className="text-center">
-            Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş yapmanız
-            gerekmektedir.
-          </h5>
-          <CardGroup>
-            {listGroupItems.map((item, index) => {
-              const isVisibleForRole =
-                (!item.visibleRoles ||
-                  item.visibleRoles.length === 0 ||
-                  (user &&
-                    user.roles.some((role) =>
-                      item.visibleRoles.includes(role)
-                    ))) &&
-                (!item.hiddenRoles ||
-                  item.hiddenRoles.length === 0 ||
-                  (user &&
-                    !user.roles.some((role) =>
-                      item.hiddenRoles.includes(role)
-                    ))) &&
-                item.visible;
+      <div className="hero-section">
+        <Container>
+          <div className="text-center py-5">
+            <h1 className="display-4">Eskişehir Adliyesi Yönetim Sistemi</h1>
+            <p className="lead">
+              Hoşgeldiniz, yetkiniz olan uygulamalara erişmek için giriş
+              yapmanız gerekmektedir.
+            </p>
+          </div>
+        </Container>
+      </div>
 
-              const isHovered = hoveredIndex === index;
+      <Container className="main-content">
+        <Row>
+          {/* Sol taraftaki uygulamalar bölümü */}
+          <Col lg="8">
+            <h3 className="section-title">
+              <i className="fas fa-th-large me-2"></i>
+              Uygulamalar
+            </h3>
+            <div className="app-cards">
+              <Row>
+                {listGroupItems.map((item, index) => {
+                  const isVisibleForRole =
+                    (!item.visibleRoles ||
+                      item.visibleRoles.length === 0 ||
+                      (user &&
+                        user.roles.some((role) =>
+                          item.visibleRoles.includes(role)
+                        ))) &&
+                    (!item.hiddenRoles ||
+                      item.hiddenRoles.length === 0 ||
+                      (user &&
+                        !user.roles.some((role) =>
+                          item.hiddenRoles.includes(role)
+                        ))) &&
+                    item.visible;
 
-              return (
-                <Card
-                  key={index}
-                  className="m-3"
-                  style={{
-                    ...cardStyle,
-                    ...(isHovered ? cardHoverStyle : {}),
-                  }}
-                  onClick={() => item.onClick()}
-                  hidden={!isVisibleForRole}
-                  onMouseEnter={() => handleMouseEnter(index)}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <CardImg
-                    alt="Komisyon Portal Logo"
-                    src={item.image}
-                    top
-                    style={cardImgStyle}
-                  />
-                  <CardBody>
-                    <CardTitle tag="h5" className="text-center">
-                      {item.label}
-                    </CardTitle>
-                    <CardText className="text-center">{item.detail}</CardText>
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </CardGroup>
-        </div>
+                  const isHovered = hoveredIndex === index;
+
+                  if (!isVisibleForRole) return null;
+
+                  return (
+                    <Col key={index} md="6" lg="4" className="mb-4">
+                      <Card
+                        className={`app-card ${isHovered ? "hover" : ""}`}
+                        onClick={() => item.onClick()}
+                        onMouseEnter={() => handleMouseEnter(index)}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        <div className={`app-card-header bg-${item.color}`}>
+                          <CardImg
+                            alt={`${item.label} Logo`}
+                            src={item.image}
+                            className="app-card-image"
+                          />
+                        </div>
+                        <CardBody>
+                          <Badge color={item.color} pill className="mb-2">
+                            {item.label}
+                          </Badge>
+                          <CardText>{item.detail}</CardText>
+                        </CardBody>
+                      </Card>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </div>
+          </Col>
+
+          {/* Sağ taraftaki bülten ve hızlı bilgi bölümü - Haftalık bülten kısmını düzeltiyorum */}
+          <Col lg="4">
+            <h3 className="section-title">
+              <i className="fas fa-newspaper me-2"></i>
+              Haftalık Bülten
+            </h3>
+            <Card className="bulletin-card mb-4">
+              <CardBody>
+                {bulletins.length > 0 ? (
+                  <div className="bulletin-carousel-wrapper">
+                    <Carousel
+                      activeIndex={activeIndex}
+                      next={next}
+                      previous={previous}
+                      interval={8000}
+                      className="bulletin-carousel"
+                      dark={false}
+                      ride="carousel"
+                      slide
+                    >
+                      <CarouselIndicators
+                        items={bulletins}
+                        activeIndex={activeIndex}
+                        onClickHandler={goToIndex}
+                        className="carousel-indicators"
+                      />
+                      {renderSlides()}
+                      <CarouselControl
+                        direction="prev"
+                        directionText="Önceki"
+                        onClickHandler={previous}
+                      />
+                      <CarouselControl
+                        direction="next"
+                        directionText="Sonraki"
+                        onClickHandler={next}
+                      />
+                    </Carousel>
+                  </div>
+                ) : (
+                  <div className="text-center py-5">
+                    <i className="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                    <p>Henüz bülten bulunmamaktadır.</p>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+
+            <h3 className="section-title">
+              <i className="fas fa-info-circle me-2"></i>
+              Hızlı Bilgiler
+            </h3>
+            <Card className="quick-info-card">
+              <CardBody>
+                <div className="quick-info-item">
+                  <div className="quick-info-icon bg-danger">
+                    <i className="fas fa-calendar-alt"></i>
+                  </div>
+                  <div className="quick-info-content">
+                    <h5>Çalışma Saatleri</h5>
+                    <p>Pazartesi-Cuma: 08:30-17:30</p>
+                  </div>
+                </div>
+
+                <div className="quick-info-item">
+                  <div className="quick-info-icon bg-primary">
+                    <i className="fas fa-phone"></i>
+                  </div>
+                  <div className="quick-info-content">
+                    <h5>Santral</h5>
+                    <p>0222 123 45 67</p>
+                  </div>
+                </div>
+
+                <div className="quick-info-item">
+                  <div className="quick-info-icon bg-success">
+                    <i className="fas fa-envelope"></i>
+                  </div>
+                  <div className="quick-info-content">
+                    <h5>E-posta</h5>
+                    <p>iletisim@eskisehiradliyesi.gov.tr</p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
       </Container>
+
+      <footer className="footer mt-5">
+        <Container>
+          <div className="text-center py-4">
+            <p>© 2023 Eskişehir Adliyesi - Tüm hakları saklıdır</p>
+            <p className="developer-info">Developed by Bilgehan Kalay</p>
+          </div>
+        </Container>
+      </footer>
     </div>
   );
 }

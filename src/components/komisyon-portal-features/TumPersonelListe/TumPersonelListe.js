@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { FormGroup, Input, Label, Badge, Spinner } from "reactstrap";
+import {
+  FormGroup,
+  Input,
+  Label,
+  Badge,
+  Spinner,
+  Card,
+  CardHeader,
+  CardBody,
+  Alert,
+  Button,
+  Row,
+  Col,
+  InputGroup,
+  InputGroupText,
+} from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import DataTable from "../../common/DataTable";
@@ -14,21 +29,57 @@ export default function TumPersonelListe({
   const [loadSpinner, setLoadSpinner] = useState(false);
   const [selectedUnvan, setSelectedUnvan] = useState(undefined);
   const [isDurusmaKatibiChecked, setIsDurusmaKatibiChecked] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const columns = [
-    { key: "sicil", header: "Sicil No" },
+    {
+      key: "sicil",
+      header: "Sicil No",
+      render: (item) => (
+        <span className="fw-bold text-secondary">{item.sicil}</span>
+      ),
+    },
     {
       key: "fullName",
       header: "Ad Soyad",
-      render: (item) => `${item.ad} ${item.soyad}`,
+      render: (item) => (
+        <div className="d-flex align-items-center">
+          <div
+            className="avatar-circle me-2"
+            style={{
+              backgroundColor: stringToColor(item.ad + item.soyad),
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              color: "white",
+              fontWeight: "bold",
+            }}
+          >
+            {item.ad.charAt(0)}
+            {item.soyad.charAt(0)}
+          </div>
+          <span className="fw-bold">
+            {item.ad} {item.soyad}
+          </span>
+        </div>
+      ),
     },
     {
       key: "unvan",
       header: "Ünvan",
       render: (item) => (
         <div>
-          <Badge color="danger">{item.title.name}</Badge>{" "}
-          {item.durusmaKatibiMi && <Badge color="warning">Duruşma</Badge>}
+          <Badge color="danger" pill className="me-1">
+            {item.title.name}
+          </Badge>
+          {item.durusmaKatibiMi && (
+            <Badge color="warning" pill className="ms-1">
+              Duruşma
+            </Badge>
+          )}
         </div>
       ),
     },
@@ -37,20 +88,37 @@ export default function TumPersonelListe({
       header: "Açıklama",
       render: (item) => (
         <div>
-          {item.description}{" "}
-          {item.level && <Badge color="success">Lvl. {item.level}</Badge>}
-          {item.isTemporary && (
-            <Badge color="info" className="ms-1">
-              Geçici
-            </Badge>
+          {item.description && (
+            <span className="text-muted">{item.description}</span>
           )}
+          <div className="mt-1">
+            {item.level && (
+              <Badge color="success" pill className="me-1">
+                Seviye {item.level}
+              </Badge>
+            )}
+            {item.isTemporary && (
+              <Badge color="info" pill className="me-1">
+                Geçici
+              </Badge>
+            )}
+            {item.izindeMi && (
+              <Badge color="danger" pill className="me-1">
+                İzinde
+              </Badge>
+            )}
+          </div>
         </div>
       ),
     },
     {
       key: "birim",
       header: "Birim",
-      render: (item) => item.birimID.name,
+      render: (item) => (
+        <Badge color="light" className="text-dark border">
+          {item.birimID.name}
+        </Badge>
+      ),
     },
   ];
 
@@ -114,64 +182,195 @@ export default function TumPersonelListe({
       filtered = filtered.filter((p) => p.durusmaKatibiMi === true);
     }
 
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (p) =>
+          p.ad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.soyad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.sicil.toString().includes(searchTerm) ||
+          (p.birimID.name &&
+            p.birimID.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
     return filtered;
   };
 
+  // İsim ve soyisime göre renk üretme fonksiyonu
+  const stringToColor = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const colors = [
+      "#4e79a7",
+      "#f28e2c",
+      "#e15759",
+      "#76b7b2",
+      "#59a14f",
+      "#edc949",
+      "#af7aa1",
+      "#ff9da7",
+      "#9c755f",
+      "#bab0ab",
+    ];
+
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const filteredData = getFilteredData();
+
   return (
-    <div>
-      <h3>Tüm Personel Listesi</h3>
-      <span>
-        Seçili olan kuruma kayıtlı olan tüm personeller listelenmektedir.
-        Personeller ünvan seçilerek filtreleme yapılabilir.
-      </span>
-      <hr />
+    <div className="personel-liste-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">
+            <i className="fas fa-users me-2"></i>
+            Tüm Personel Listesi
+          </h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            <i className="fas fa-info-circle me-2"></i>
+            <span>
+              {selectedKurum && <strong>{selectedKurum.name}</strong>} kurumuna
+              kayıtlı tüm personeller listelenmektedir. Arama yapabilir veya
+              ünvana göre filtreleyebilirsiniz.
+            </span>
+          </Alert>
 
-      <div className="mb-3">
-        <FormGroup>
-          <Label for="selectUnvan">Ünvan</Label>
-          <Input
-            type="select"
-            name="selectUnvan"
-            id="selectUnvan"
-            onChange={handleUnvanChange}
-          >
-            <option value="0">Tümü</option>
-            {unvanlar.map((unvan) => (
-              <option key={unvan.name} value={unvan.name}>
-                {unvan.name}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+          <Card className="border-0 shadow-sm mb-4">
+            <CardBody className="bg-light">
+              <Row className="g-3">
+                <Col md={4}>
+                  <FormGroup>
+                    <Label for="selectUnvan" className="fw-bold">
+                      <i className="fas fa-user-tie me-1"></i> Ünvan Filtresi
+                    </Label>
+                    <Input
+                      type="select"
+                      name="selectUnvan"
+                      id="selectUnvan"
+                      onChange={handleUnvanChange}
+                      className="form-select"
+                      value={selectedUnvan ? selectedUnvan.name : "0"}
+                    >
+                      <option value="0">Tüm Ünvanlar</option>
+                      {unvanlar.map((unvan) => (
+                        <option key={unvan.name} value={unvan.name}>
+                          {unvan.name}
+                        </option>
+                      ))}
+                    </Input>
+                  </FormGroup>
+                </Col>
 
-        {selectedUnvan && selectedUnvan.kind === "zabitkatibi" && (
-          <FormGroup>
-            <Label check>
-              <Input
-                type="checkbox"
-                onChange={(e) => setIsDurusmaKatibiChecked(e.target.checked)}
-              />{" "}
-              Duruşma Katiplerini Göster
-            </Label>
-          </FormGroup>
-        )}
-      </div>
+                <Col md={4}>
+                  <FormGroup>
+                    <Label for="searchInput" className="fw-bold">
+                      <i className="fas fa-search me-1"></i> Personel Ara
+                    </Label>
+                    <InputGroup>
+                      <Input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Ad, Soyad, Sicil veya Birim..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      {searchTerm && (
+                        <InputGroupText
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSearchTerm("")}
+                        >
+                          <i className="fas fa-times"></i>
+                        </InputGroupText>
+                      )}
+                    </InputGroup>
+                  </FormGroup>
+                </Col>
 
-      {loadSpinner ? (
-        <div className="text-center">
-          <Spinner color="primary" />
-        </div>
-      ) : personeller.length === 0 ? (
-        <div className="alert alert-info">Personel bulunamadı.</div>
-      ) : (
-        <DataTable
-          data={getFilteredData()}
-          columns={columns}
-          onDetailClick={showPersonelDetay}
-          tableName="tumPersonelTable"
-          initialPageSize={50}
-        />
-      )}
+                <Col md={4} className="d-flex align-items-end">
+                  {selectedUnvan && selectedUnvan.kind === "zabitkatibi" && (
+                    <FormGroup check className="ms-2 mb-3">
+                      <Input
+                        type="checkbox"
+                        id="durusmaKatibiCheck"
+                        onChange={(e) =>
+                          setIsDurusmaKatibiChecked(e.target.checked)
+                        }
+                        checked={isDurusmaKatibiChecked}
+                      />
+                      <Label check for="durusmaKatibiCheck">
+                        <Badge color="warning" pill className="me-1">
+                          Duruşma
+                        </Badge>
+                        Sadece Duruşma Katipleri
+                      </Label>
+                    </FormGroup>
+                  )}
+
+                  <Button
+                    color="secondary"
+                    className="ms-auto mb-3"
+                    onClick={getPersoneller}
+                    title="Listeyi Yenile"
+                  >
+                    <i className="fas fa-sync-alt"></i>
+                  </Button>
+                </Col>
+              </Row>
+            </CardBody>
+          </Card>
+
+          {loadSpinner ? (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">Personel listesi yükleniyor...</p>
+            </div>
+          ) : personeller.length === 0 ? (
+            <Alert color="warning">
+              <i className="fas fa-exclamation-triangle me-2"></i>
+              Personel bulunamadı.
+            </Alert>
+          ) : (
+            <div>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">
+                  <i className="fas fa-list me-2"></i>
+                  Personel Listesi
+                  <Badge color="danger" pill className="ms-2">
+                    {filteredData.length} personel
+                  </Badge>
+                </h5>
+
+                {personeller.length !== filteredData.length && (
+                  <Badge color="info" pill>
+                    Filtrelendi: {filteredData.length} / {personeller.length}
+                  </Badge>
+                )}
+              </div>
+
+              <DataTable
+                data={filteredData}
+                columns={columns}
+                onDetailClick={showPersonelDetay}
+                tableName="tumPersonelTable"
+                initialPageSize={50}
+                tableClassName="table-hover"
+                striped={true}
+                customRowClassName={(row) =>
+                  row.izindeMi ? "table-danger bg-opacity-25" : ""
+                }
+              />
+            </div>
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Button, Badge, Spinner, Label, FormGroup, Input } from "reactstrap";
+import {
+  Button,
+  Badge,
+  Spinner,
+  Label,
+  FormGroup,
+  Input,
+  Card,
+  CardHeader,
+  CardBody,
+  Alert,
+  Table,
+  Row,
+  Col,
+} from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
-
 
 export default function UnitMissingClerk({ token, selectedKurum }) {
   const [aramaYapilacakBirimler, setAramaYapilacakBirimler] = useState([]);
@@ -58,7 +71,8 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
     let configuration = {
       method: "GET",
       url:
-        "/api/reports/eksikKatibiOlanBirimler?institutionId=" + selectedKurum.id,
+        "/api/reports/eksikKatibiOlanBirimler?institutionId=" +
+        selectedKurum.id,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -76,122 +90,178 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
   };
 
   return (
-    <div>
-      <h3>Rapor - Eksik Katibi Olan Birimler</h3>
-      <span>
-        Bu rapor ile birlikte eksik katibi olan birimler listelenebilir.
-      </span>
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">
+            <i className="fas fa-clipboard-list me-2"></i>
+            Eksik Katibi Olan Birimler
+          </h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            <i className="fas fa-info-circle me-2"></i>
+            Bu rapor ile birlikte eksik katibi olan birimler listelenebilir.
+          </Alert>
 
-      <hr />
-      <div className="mt-3">
-        <FormGroup>
-          <Label for="kontrolEdilecekBirimListesi">
-            Kontrol Edilecek Birim Listesi
-          </Label>
-          <Input
-            id="kontrolEdilecekBirimListesi"
-            multiple
-            name="selectMulti"
-            type="select"
-            disabled
-          >
-            {aramaYapilacakBirimler.map((birim) => (
-              <option key={birim.id} value={birim.id}>
-                {birim.birimAdi}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+          <Card className="mb-4 border-light">
+            <CardBody>
+              <Row className="align-items-end">
+                <Col md={8}>
+                  <FormGroup>
+                    <Label
+                      for="kontrolEdilecekBirimListesi"
+                      className="fw-bold"
+                    >
+                      <i className="fas fa-building me-1"></i>
+                      Kontrol Edilecek Birim Listesi
+                    </Label>
+                    <Input
+                      id="kontrolEdilecekBirimListesi"
+                      multiple
+                      name="selectMulti"
+                      type="select"
+                      disabled
+                      className="form-control-sm"
+                      style={{ height: "150px" }}
+                    >
+                      {aramaYapilacakBirimler.map((birim) => (
+                        <option key={birim.id} value={birim.id}>
+                          {birim.birimAdi}
+                        </option>
+                      ))}
+                    </Input>
+                    <small className="text-muted">
+                      Toplam {aramaYapilacakBirimler.length} birim kontrol
+                      edilecektir.
+                    </small>
+                  </FormGroup>
+                </Col>
+                <Col md={4} className="text-center">
+                  <Button
+                    disabled={aramaYapilacakBirimler.length === 0}
+                    className="mt-3 w-100"
+                    size="lg"
+                    color="danger"
+                    id="getRapor"
+                    onClick={(e) => handleGetRapor(e)}
+                  >
+                    <i className="fas fa-file-alt me-2"></i>
+                    Rapor Getir
+                  </Button>
+                </Col>
+              </Row>
+            </CardBody>
+          </Card>
 
-        <Button
-          disabled={aramaYapilacakBirimler.length === 0}
-          className="m-3"
-          size="lg"
-          color="danger"
-          id="getRapor"
-          onClick={(e) => handleGetRapor(e)}
-        >
-          Rapor Getir
-        </Button>
+          {isLoading && (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, lütfen bekleyiniz...
+              </p>
+            </div>
+          )}
 
-        {isLoading && (
-          <div>
-            <Spinner color="primary" />{" "}
-            <span>yükleniyor...</span>
-          </div>
-        )}
+          {eksikKatibiOlanBirimler.length > 0 && (
+            <Card className="border-0 shadow-sm">
+              <CardBody>
+                <h5 className="mb-3 text-danger">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  Eksik Katibi Olan Birimler ({
+                    eksikKatibiOlanBirimler.length
+                  }{" "}
+                  birim)
+                </h5>
 
-        {eksikKatibiOlanBirimler.length > 0 && (
-          <div>
-            <table className="table" id="unitMissingClerkTable">
-              <thead>
-                <tr>
-                  <th>Birim Adı</th>
-                  <th>Gereken Katip Sayısı</th>
-                  <th>Mevcut Katip Sayısı</th>
-                  <th>Eksik Katip Sayısı</th>
-                </tr>
-              </thead>
-              <tbody>
-                {eksikKatibiOlanBirimler.map((birim) => (
-                  <tr key={birim._id}>
-                    <td>{birim.birimAdi}</td>
-                    <td>{birim.gerekenKatipSayisi}</td>
-                    <td>{birim.mevcutKatipSayisi}</td>
-                    <td>
-                      <Badge
-                        color={
-                          birim.eksikKatipSayisi > 0 ? "danger" : "success"
-                        }
-                      >
-                        {birim.eksikKatipSayisi}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                <div className="table-responsive">
+                  <Table
+                    hover
+                    striped
+                    className="border"
+                    id="unitMissingClerkTable"
+                  >
+                    <thead className="table-light">
+                      <tr>
+                        <th>Birim Adı</th>
+                        <th className="text-center">Gereken Katip Sayısı</th>
+                        <th className="text-center">Mevcut Katip Sayısı</th>
+                        <th className="text-center">Eksik Katip Sayısı</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {eksikKatibiOlanBirimler.map((birim) => (
+                        <tr key={birim._id}>
+                          <td>{birim.birimAdi}</td>
+                          <td className="text-center">
+                            {birim.gerekenKatipSayisi}
+                          </td>
+                          <td className="text-center">
+                            {birim.mevcutKatipSayisi}
+                          </td>
+                          <td className="text-center">
+                            <Badge
+                              color={
+                                birim.eksikKatipSayisi > 0
+                                  ? "danger"
+                                  : "success"
+                              }
+                              pill
+                              style={{
+                                fontSize: "0.9rem",
+                                padding: "0.35em 0.65em",
+                              }}
+                            >
+                              {birim.eksikKatipSayisi}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
 
-            <Button
-              disabled
-              className="m-3"
-              size="lg"
-              id="exportExcel"
-              color="danger"
-              type="submit"
-            >
-              Excel'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              id="exportPdf"
-              color="danger"
-              onClick={(e) => {
-                generatePdf(
-                  document,
-                  "unitMissingClerkTable",
-                  "Eksik Katibi Olan Birimler Listesi",
-                  "detayTD"
-                );
-              }}
-            >
-              Pdf'e Aktar
-            </Button>
-            <Button
-              className="m-3"
-              size="lg"
-              id="print"
-              color="danger"
-              onClick={(e) => {
-                printDocument(document, "unitMissingClerkTable", "detayTD");
-              }}
-            >
-              Yazdır
-            </Button>
-          </div>
-        )}
-      </div>
+                <div className="mt-4">
+                  <Button
+                    className="me-2"
+                    size="md"
+                    id="exportPdf"
+                    color="danger"
+                    onClick={(e) => {
+                      generatePdf(
+                        document,
+                        "unitMissingClerkTable",
+                        "Eksik Katibi Olan Birimler Listesi",
+                        "detayTD"
+                      );
+                    }}
+                  >
+                    <i className="fas fa-file-pdf me-1">PDF'e Aktar</i>{" "}
+                  </Button>
+
+                  <Button
+                    size="md"
+                    id="print"
+                    color="secondary"
+                    onClick={(e) => {
+                      printDocument(
+                        document,
+                        "unitMissingClerkTable",
+                        "detayTD"
+                      );
+                    }}
+                  >
+                    <i className="fas fa-print me-1"></i> Yazdır
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

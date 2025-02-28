@@ -9,6 +9,15 @@ import {
   FormGroup,
   Input,
   Label,
+  Alert,
+  Spinner,
+  Row,
+  Col,
+  Badge,
+  InputGroup,
+  InputGroupText,
+  Card,
+  CardBody,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -22,47 +31,89 @@ export default function PersonelDurumGuncelleModal({
 }) {
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newDeactivationReason, setNewDeactivationReason] = useState("");
-  const [newDeactivationDate, setNewDeactivationDate] = useState(new Date());
-
-  const [suspensionEndDate, setSuspensionEndDate] = useState();
+  const [newDeactivationDate, setNewDeactivationDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [suspensionEndDate, setSuspensionEndDate] = useState("");
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
+  // Modal açıldığında form durumunu ayarla
   useEffect(() => {
-    if (personel && !personel.status) {
-      setUpdateButtonDisabled(false);
+    if (modal && personel) {
+      // Personel pasifse veya uzaklaştırma durumundaysa güncelleme butonunu etkinleştir
+      if (!personel.status || personel.isSuspended) {
+        setUpdateButtonDisabled(false);
+      } else {
+        setUpdateButtonDisabled(true);
+      }
+
+      // Form alanlarını sıfırla
+      setNewDeactivationReason("");
+      setSuspensionEndDate("");
+      setSuspensionReason("");
+      setNewDeactivationDate(new Date().toISOString().split("T")[0]);
+      setErrors({});
     }
-    if (personel && personel.isSuspended === true) {
-      setUpdateButtonDisabled(false);
+  }, [modal, personel]);
+
+  // Form değişikliklerinde validasyon kontrolü yap
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Uzaklaştırma seçilmişse bitiş tarihi ve gerekçe zorunlu olmalı
+    if (newDeactivationReason === "Uzaklastirma") {
+      if (!suspensionEndDate) {
+        newErrors.suspensionEndDate = "Uzaklaştırma bitiş tarihi gereklidir";
+      } else if (new Date(suspensionEndDate) <= new Date()) {
+        newErrors.suspensionEndDate =
+          "Uzaklaştırma bitiş tarihi bugünden sonra olmalıdır";
+      }
+
+      if (!suspensionReason || suspensionReason.trim() === "") {
+        newErrors.suspensionReason = "Uzaklaştırma gerekçesi gereklidir";
+      }
     }
-  }, [personel, newDeactivationReason]);
+
+    // Aktif personel için durum değişimi yapılacaksa ayrılış nedeni seçilmiş olmalı
+    if (personel?.status && !personel?.isSuspended && !newDeactivationReason) {
+      newErrors.deactivationReason = "Ayrılış gerekçesi seçilmelidir";
+    }
+
+    setErrors(newErrors);
+
+    // Personel aktifse ve yeni bir durum seçilmişse veya
+    // Personel pasifse ya da uzaklaştırma durumundaysa ve hatalar yoksa butonu aktif et
+    if (
+      (personel?.status &&
+        newDeactivationReason &&
+        Object.keys(newErrors).length === 0) ||
+      ((!personel?.status || personel?.isSuspended) &&
+        Object.keys(newErrors).length === 0)
+    ) {
+      setUpdateButtonDisabled(false);
+    } else if (
+      personel?.status &&
+      !personel?.isSuspended &&
+      !newDeactivationReason
+    ) {
+      setUpdateButtonDisabled(true);
+    }
+  };
+
+  // Form alanları değişince validasyon yap
+  useEffect(() => {
+    if (personel) validateForm();
+  }, [newDeactivationReason, suspensionEndDate, suspensionReason]);
 
   const handleCancel = () => {
-    setNewDeactivationReason("");
     toggle();
   };
 
   const handleUpdate = () => {
-    const configuration = {
-      method: "PUT",
-      url: "api/persons/" + personel._id,
-      data: {
-        status: !personel.status,
-        deactivationReason: newDeactivationReason,
-        deactivationDate: newDeactivationDate,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    if (personel.isSuspended) {
-      configuration.data.status = true;
-      configuration.data.isSuspended = false;
-      configuration.data.suspensionEndDate = null;
-      configuration.data.suspensionReason = null;
-    }
-
-    if (newDeactivationReason === "Uzaklastirma") {
+    // Son kontroller
+    if (personel.status && newDeactivationReason === "Uzaklastirma") {
       if (!suspensionEndDate) {
         alertify.error("Uzaklaştırma bitiş tarihi boş bırakılamaz");
         return;
@@ -71,187 +122,402 @@ export default function PersonelDurumGuncelleModal({
         alertify.error("Uzaklaştırma bitiş tarihi bugünden önce olamaz");
         return;
       }
-      configuration.data.status = true;
-      configuration.data.isSuspended = true;
-      configuration.data.suspensionEndDate = suspensionEndDate;
-      configuration.data.suspensionReason = suspensionReason;
+      if (!suspensionReason || suspensionReason.trim() === "") {
+        alertify.error("Uzaklaştırma gerekçesi boş bırakılamaz");
+        return;
+      }
+    }
+
+    if (personel.status && !personel.isSuspended && !newDeactivationReason) {
+      alertify.error("Ayrılış gerekçesi seçmelisiniz");
+      return;
+    }
+
+    setLoading(true);
+
+    const configuration = {
+      method: "PUT",
+      url: `/api/persons/${personel._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        status: !personel.status,
+        deactivationReason: newDeactivationReason,
+        deactivationDate: newDeactivationDate,
+      },
+    };
+
+    // Personel şu an uzaklaştırma durumunda ise, uzaklaştırmayı kaldır
+    if (personel.isSuspended) {
+      configuration.data = {
+        status: true,
+        isSuspended: false,
+        suspensionEndDate: null,
+        suspensionReason: null,
+      };
+    }
+
+    // Yeni durum uzaklaştırma ise, gerekli alanları ekle
+    if (newDeactivationReason === "Uzaklastirma") {
+      configuration.data = {
+        status: true,
+        isSuspended: true,
+        suspensionEndDate: suspensionEndDate,
+        suspensionReason: suspensionReason,
+      };
     }
 
     axios(configuration)
       .then((response) => {
-        alertify.success("Personel durumu başarıyla güncellendi");
-        setNewDeactivationReason("");
+        let successMessage = "";
+
+        if (personel.isSuspended) {
+          successMessage = "Personelin uzaklaştırma durumu kaldırıldı";
+        } else if (newDeactivationReason === "Uzaklastirma") {
+          successMessage = "Personel uzaklaştırma durumuna alındı";
+        } else if (!personel.status) {
+          successMessage = "Personel aktif duruma getirildi";
+        } else {
+          successMessage = "Personel pasif duruma getirildi";
+        }
+
+        alertify.success(successMessage);
+        setLoading(false);
         refreshPersonel();
         toggle();
       })
       .catch((error) => {
-        alertify.error("Personel durumu güncellenirken bir hata oluştu");
+        const errorMessage =
+          error.response?.data?.message ||
+          "Personel durumu güncellenirken bir hata oluştu";
+        alertify.error(errorMessage);
+        setLoading(false);
       });
   };
 
-  function handleTypeChange(event) {
-    if (event.target.value === "Seçiniz") {
-      return;
-    }
+  // Ayrılış gerekçesi değişince state'i güncelle
+  const handleTypeChange = (event) => {
+    setNewDeactivationReason(
+      event.target.value === "Seçiniz" ? "" : event.target.value
+    );
+  };
 
-    setNewDeactivationReason(event.target.value);
-    setUpdateButtonDisabled(false);
-  }
-
-  function handleDateChange(event) {
+  // Tarih değişince state'i güncelle
+  const handleDateChange = (event) => {
     setNewDeactivationDate(event.target.value);
-  }
+  };
 
-  function handleSuspensionEndDateChange(event) {
+  // Uzaklaştırma bitiş tarihi değişince state'i güncelle
+  const handleSuspensionEndDateChange = (event) => {
     setSuspensionEndDate(event.target.value);
-  }
+  };
+
+  // Personel durumuna göre işlem butonunun metni
+  const getButtonText = () => {
+    if (!personel) return "Güncelle";
+    if (personel.status) {
+      if (personel.isSuspended) return "UZAKLAŞTIRMA KALDIR";
+      if (newDeactivationReason === "Uzaklastirma") return "UZAKLAŞTIR";
+      return "PASİF YAP";
+    }
+    return "AKTİF YAP";
+  };
+
+  // Personel durumuna göre yazı ve badge rengi
+  const getStatusInfo = () => {
+    if (!personel) return { text: "", color: "secondary" };
+
+    if (personel.status) {
+      if (personel.isSuspended)
+        return { text: "Aktif (Uzaklaştırılmış)", color: "warning" };
+      return { text: "Aktif", color: "success" };
+    }
+    return { text: "Pasif", color: "danger" };
+  };
+
+  const statusInfo = getStatusInfo();
 
   return (
-    <Modal isOpen={modal} toggle={toggle}>
-      <ModalHeader toggle={toggle}>Durum Güncelle</ModalHeader>
+    <Modal isOpen={modal} toggle={toggle} centered size="lg">
+      <ModalHeader toggle={toggle} className="bg-warning text-white">
+        <i className="fas fa-user-edit me-2"></i>
+        Personel Durum Güncelleme
+      </ModalHeader>
 
       <ModalBody>
-        <p>
-          {" "}
-          Personel durumu Pasif yapıldığı takdirde listelerde gözükmez, sicili
-          ile birlikte tekrar güncelleme yapabilirsiniz.
-        </p>
-        <Form>
-          {personel && (
-            <div>
-              <FormGroup>
-                <Label for="personelStatus">Şuanki Durum</Label>
-                <Input
-                  id="personelStatus"
-                  type="text"
-                  value={
-                    personel.status
-                      ? personel.isSuspended
-                        ? "Aktif (Uzaklaştırma)"
-                        : "Aktif"
-                      : "Pasif"
-                  }
-                  disabled
-                />
-              </FormGroup>
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner
+              color="warning"
+              style={{ width: "3rem", height: "3rem" }}
+            />
+            <p className="mt-3">Durum güncelleniyor, lütfen bekleyin...</p>
+          </div>
+        ) : (
+          personel && (
+            <Form>
+              <Alert color="info" className="mb-4">
+                <i className="fas fa-info-circle me-2"></i>
+                <span>
+                  Personel durumu <strong>Pasif</strong> yapıldığında listelerde
+                  gözükmez. Pasif personeli, sicil numarasını kullanarak tekrar
+                  aktif yapabilirsiniz.
+                </span>
+              </Alert>
 
-              <FormGroup hidden={personel.status}>
-                <Label for="personelDeactivationReason">
-                  Ayrılış Gerekçesi
-                </Label>
-                <Input
-                  id="personelDeactivationReason"
-                  type="text"
-                  value={
-                    personel.deactivationReason
-                      ? personel.deactivationReason
-                      : ""
-                  }
-                  disabled
-                />
-              </FormGroup>
+              <Card className="mb-4">
+                <CardBody className="bg-light">
+                  <Row className="align-items-center">
+                    <Col md={6}>
+                      <h5 className="mb-1">
+                        {personel.ad} {personel.soyad}
+                      </h5>
+                      <p className="mb-0 text-muted">Sicil: {personel.sicil}</p>
+                    </Col>
+                    <Col md={6} className="text-end">
+                      <h6 className="mb-1">Mevcut Durum:</h6>
+                      <Badge
+                        color={statusInfo.color}
+                        pill
+                        className="px-3 py-2"
+                      >
+                        {statusInfo.text}
+                      </Badge>
+                    </Col>
+                  </Row>
+                </CardBody>
+              </Card>
 
-              <FormGroup
-                hidden={
-                  !personel.status ||
-                  (personel.status === true && personel.isSuspended === true)
-                }
-              >
-                <Label for="personelNewDeactivationReason">
-                  Ayrılış Gerekçesi
-                </Label>
-                <Input
-                  id="personelNewDeactivationReason"
-                  onChange={(e) => handleTypeChange(e)}
-                  name="select"
-                  type="select"
-                >
-                  <option key={-1}>Seçiniz</option>
-                  <option key={0} value={"Emekli"}>
-                    Emekli
-                  </option>
-                  <option key={1} value={"İstifa"}>
-                    İstifa
-                  </option>
-                  <option key={2} value={"Naklen Atama"}>
-                    Naklen Atama
-                  </option>
-                  <option key={4} value={"Ölüm"}>
-                    Ölüm
-                  </option>
-                  <option key={3} value={"Diğer"}>
-                    Diğer
-                  </option>
+              {/* Pasif personel bilgisi */}
+              {personel.status === false && (
+                <FormGroup className="mb-4">
+                  <Label className="form-label fw-bold">
+                    Ayrılış Gerekçesi
+                  </Label>
+                  <Input
+                    id="personelDeactivationReason"
+                    type="text"
+                    value={personel.deactivationReason || "Belirtilmemiş"}
+                    disabled
+                    className="bg-light"
+                  />
+                </FormGroup>
+              )}
 
-                  <option key={5} value={"Uzaklastirma"}>
-                    Uzaklaştırma
-                  </option>
-                </Input>
-              </FormGroup>
+              {/* Uzaklaştırma durumu bilgisi */}
+              {personel.isSuspended && (
+                <Row className="mb-4">
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label className="form-label fw-bold">
+                        Uzaklaştırma Gerekçesi
+                      </Label>
+                      <Input
+                        type="text"
+                        value={personel.suspensionReason || "Belirtilmemiş"}
+                        disabled
+                        className="bg-light"
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label className="form-label fw-bold">
+                        Uzaklaştırma Bitiş Tarihi
+                      </Label>
+                      <Input
+                        type="text"
+                        value={
+                          personel.suspensionEndDate
+                            ? new Date(
+                                personel.suspensionEndDate
+                              ).toLocaleDateString()
+                            : "Belirtilmemiş"
+                        }
+                        disabled
+                        className="bg-light"
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+              )}
 
-              <FormGroup
-                hidden={
-                  personel.status === false ||
-                  (personel.status === true &&
-                    newDeactivationReason === "Uzaklastirma") ||
-                  (personel.status === true && personel.isSuspended === true)
-                }
-              >
-                <Label for="personelNewDeactivationDate">Ayrılış Tarihi</Label>
-                <Input
-                  id="personelNewDeactivationDate"
-                  type="date"
-                  value={newDeactivationDate}
-                  onChange={(e) => handleDateChange(e)}
-                />
-              </FormGroup>
+              {/* Aktif personel için ayrılış gerekçesi seçimi */}
+              {personel.status === true && personel.isSuspended === false && (
+                <FormGroup className="mb-4">
+                  <Label
+                    for="personelNewDeactivationReason"
+                    className="form-label fw-bold"
+                  >
+                    Ayrılış/Durum Değişikliği Nedeni
+                  </Label>
+                  <Input
+                    id="personelNewDeactivationReason"
+                    name="select"
+                    type="select"
+                    onChange={(e) => handleTypeChange(e)}
+                    className={`form-select ${
+                      errors.deactivationReason ? "is-invalid" : ""
+                    }`}
+                  >
+                    <option key={-1}>Seçiniz</option>
+                    <option key={0} value="Emekli">
+                      Emekli
+                    </option>
+                    <option key={1} value="İstifa">
+                      İstifa
+                    </option>
+                    <option key={2} value="Naklen Atama">
+                      Naklen Atama
+                    </option>
+                    <option key={4} value="Ölüm">
+                      Ölüm
+                    </option>
+                    <option key={3} value="Diğer">
+                      Diğer
+                    </option>
+                    <option key={5} value="Uzaklastirma">
+                      Uzaklaştırma
+                    </option>
+                  </Input>
+                  {errors.deactivationReason && (
+                    <div className="invalid-feedback">
+                      {errors.deactivationReason}
+                    </div>
+                  )}
+                </FormGroup>
+              )}
 
-              <FormGroup
-                hidden={
-                  personel.status === false ||
-                  (personel.status === true &&
-                    newDeactivationReason !== "Uzaklastirma")
-                }
-              >
-                <Label for="suspensionEndDate">
-                  Uzaklaştırma Bitiş Tarihi *{" "}
-                </Label>
-                <Input
-                  id="suspensionEndDate"
-                  type="date"
-                  value={suspensionEndDate}
-                  onChange={(e) => handleSuspensionEndDateChange(e)}
-                />
-              </FormGroup>
-              <FormGroup
-                hidden={
-                  personel.status === false ||
-                  (personel.status === true &&
-                    newDeactivationReason !== "Uzaklastirma")
-                }
-              >
-                <Label for="suspensionEndDate">Uzaklaştırma Gerekçe </Label>
-                <Input
-                  id="suspensionEndDate"
-                  type="text"
-                  value={suspensionReason}
-                  onChange={(e) => setSuspensionReason(e.target.value)}
-                />
-              </FormGroup>
-            </div>
-          )}
-        </Form>
+              {/* Ayrılış tarihi seçimi - uzaklaştırma hariç diğer seçenekler için */}
+              {personel.status === true &&
+                personel.isSuspended === false &&
+                newDeactivationReason &&
+                newDeactivationReason !== "Uzaklastirma" && (
+                  <FormGroup className="mb-4">
+                    <Label
+                      for="personelNewDeactivationDate"
+                      className="form-label fw-bold"
+                    >
+                      Ayrılış Tarihi
+                    </Label>
+                    <InputGroup>
+                      <InputGroupText>
+                        <i className="fas fa-calendar-alt"></i>
+                      </InputGroupText>
+                      <Input
+                        id="personelNewDeactivationDate"
+                        type="date"
+                        value={newDeactivationDate}
+                        onChange={(e) => handleDateChange(e)}
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                )}
+
+              {/* Uzaklaştırma seçildiğinde gösterilen alanlar */}
+              {personel.status === true &&
+                personel.isSuspended === false &&
+                newDeactivationReason === "Uzaklastirma" && (
+                  <div className="border rounded p-3 bg-light mb-4">
+                    <h5 className="mb-3">Uzaklaştırma Bilgileri</h5>
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label
+                            for="suspensionEndDate"
+                            className="form-label fw-bold"
+                          >
+                            Uzaklaştırma Bitiş Tarihi*
+                          </Label>
+                          <InputGroup>
+                            <InputGroupText>
+                              <i className="fas fa-calendar-check"></i>
+                            </InputGroupText>
+                            <Input
+                              id="suspensionEndDate"
+                              type="date"
+                              value={suspensionEndDate}
+                              onChange={(e) => handleSuspensionEndDateChange(e)}
+                              className={
+                                errors.suspensionEndDate ? "is-invalid" : ""
+                              }
+                            />
+                          </InputGroup>
+                          {errors.suspensionEndDate && (
+                            <div className="text-danger small mt-1">
+                              {errors.suspensionEndDate}
+                            </div>
+                          )}
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label
+                            for="suspensionReason"
+                            className="form-label fw-bold"
+                          >
+                            Uzaklaştırma Gerekçesi*
+                          </Label>
+                          <Input
+                            id="suspensionReason"
+                            type="text"
+                            value={suspensionReason}
+                            onChange={(e) =>
+                              setSuspensionReason(e.target.value)
+                            }
+                            placeholder="Uzaklaştırma gerekçesini belirtin"
+                            className={
+                              errors.suspensionReason ? "is-invalid" : ""
+                            }
+                          />
+                          {errors.suspensionReason && (
+                            <div className="invalid-feedback">
+                              {errors.suspensionReason}
+                            </div>
+                          )}
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Alert color="warning" className="mt-2 mb-0">
+                      <i className="fas fa-exclamation-triangle me-2"></i>
+                      Uzaklaştırma durumunda personel pasife alınmaz, ancak
+                      belirtilen tarihe kadar uzaklaştırma durumunda olur.
+                    </Alert>
+                  </div>
+                )}
+            </Form>
+          )
+        )}
       </ModalBody>
+
       <ModalFooter>
         <Button
-          color="primary"
+          color={
+            personel?.isSuspended
+              ? "success"
+              : newDeactivationReason === "Uzaklastirma"
+              ? "warning"
+              : personel?.status
+              ? "danger"
+              : "success"
+          }
           onClick={handleUpdate}
-          disabled={updateButtonDisabled}
+          disabled={updateButtonDisabled || loading}
         >
-          {personel && personel.status ? personel.isSuspended ? "UZAKLAŞTIRMA KALDIR" : "Pasif Yap" : "Aktif Yap"}
+          <i
+            className={`fas ${
+              personel?.status
+                ? personel?.isSuspended
+                  ? "fa-user-check"
+                  : "fa-user-slash"
+                : "fa-user-check"
+            } me-1`}
+          ></i>
+          {getButtonText()}
         </Button>{" "}
-        <Button color="secondary" onClick={handleCancel}>
-          İptal
+        <Button color="secondary" onClick={handleCancel} disabled={loading}>
+          <i className="fas fa-times me-1"></i> İptal
         </Button>
       </ModalFooter>
     </Modal>

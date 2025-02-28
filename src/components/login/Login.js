@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MDBBtn,
   MDBContainer,
@@ -6,12 +6,13 @@ import {
   MDBCol,
   MDBInput,
   MDBCheckbox,
+  MDBCard,
+  MDBCardBody,
+  MDBIcon,
 } from "mdb-react-ui-kit";
-import { useNavigate } from "react-router-dom"; // useHistory yerine useNavigate
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo300.png";
 import "../../styles/Login.css";
-
 import axios from "axios";
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
@@ -22,13 +23,15 @@ function Login() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate(); // useHistory yerine useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = cookies.get("TOKEN");
     if (token) {
-      navigate("/"); // history.push yerine navigate
+      navigate("/");
     }
   }, [navigate]);
 
@@ -50,15 +53,16 @@ function Login() {
       setErrorMessage("Lütfen tüm alanları doldurunuz");
       return false;
     }
-
     return true;
   };
+
   const login = () => {
     if (!validateForm()) {
       return;
     }
 
-    // username and password ttrim
+    setLoading(true);
+    // username and password trim
     configuration.data.username = sicilNo.trim();
     configuration.data.password = sifre.trim();
 
@@ -68,6 +72,7 @@ function Login() {
         if (result.status !== 200) {
           setError(true);
           setErrorMessage("Hata! Daha sonra tekrar deneyiniz");
+          setLoading(false);
           return;
         }
         if (rememberMe) {
@@ -88,10 +93,11 @@ function Login() {
       })
       .catch((error) => {
         const message =
-          error.response.data.message || "Hata! Daha sonra tekrar deneyiniz";
+          error.response?.data?.message || "Hata! Daha sonra tekrar deneyiniz";
         setError(true);
         setErrorMessage(message);
         setSifre(""); // Şifreyi temizle
+        setLoading(false);
       });
   };
 
@@ -100,94 +106,178 @@ function Login() {
     login();
   };
 
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <MDBContainer className="my-5 gradient-form">
-      <MDBRow>
-        <MDBCol col="6" className="mb-5">
-          <form onSubmit={handleSubmit}>
-            <div className="d-flex flex-column ms-5">
-              <div
-                onClick={() => navigate("/")} // history.push yerine navigate
-                className="text-center mt-5"
-                style={{
-                  cursor: "pointer",
-                }}
-              >
-                <img src={logo} style={{ width: "185px" }} alt="logo" />
-                <h4 hidden className="mt-1 mb-5 pb-1">
-                  Eskişehir Adliyesi{" "}
-                </h4>
-              </div>
-
-              <p className="mt-5">Devam edebilmek için lütfen giriş yapın</p>
-
-              <MDBInput
-                wrapperClass="mb-4"
-                label="Sicil Numarası (abXXXXXX)"
-                id="sicilNo"
-                onChange={(e) => {
-                  setSicilNo(e.target.value);
-                  setError(false);
-                  setErrorMessage("");
-                }}
-                value={sicilNo}
-                type="text"
-              />
-              <MDBInput
-                wrapperClass="mb-4"
-                label="Şifre"
-                id="sifre"
-                onChange={(e) => {
-                  setSifre(e.target.value);
-                  setError(false);
-                  setErrorMessage("");
-                }}
-                value={sifre}
-                type="password"
-              />
-
-              {/* oturum açık kalsın mı  */}
-              <MDBCheckbox
-                id="rememberMe"
-                label="Beni Hatırla"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-              />
-
-              <div className="text-center pt-1 mb-5 pb-1">
-                <MDBBtn
-                  onClick={() => {
-                    login();
-                  }}
-                  className="mb-4 w-100 "
-                  color="danger"
+    <MDBContainer className="my-5">
+      <MDBCard className="login-card">
+        <MDBRow className="g-0">
+          <MDBCol md="6" className="d-flex align-items-center">
+            <MDBCardBody className="p-4 p-lg-5">
+              <div className="text-center mb-4">
+                <div
+                  onClick={() => navigate("/")}
+                  style={{ cursor: "pointer" }}
+                  className="mb-4"
                 >
+                  <img
+                    src={logo}
+                    alt="logo"
+                    className="img-fluid logo-animation"
+                    style={{ maxWidth: "200px" }}
+                  />
+                </div>
+                <h3 className="fw-bold mb-4" style={{ color: "#d32f2f" }}>
                   Giriş Yap
-                </MDBBtn>
-                {error && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}{" "}
+                </h3>
               </div>
-            </div>
-          </form>
-        </MDBCol>
 
-        <MDBCol col="6" className="mb-5">
-          <div className="d-flex flex-column justify-content-center gradient-custom-2 h-100 mb-4">
-            <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-              <h4 className="mb-4">Eskişehir Adliyesi Yönetim Sistemi</h4>
-              <p className="small mb-0">
-                Eskişehir Adliyesi Yönetim Sistemi, Eskişehir Adliyesi
-                personelinin işlemlerini kolaylaştırmak ve hızlandırmak amacıyla
+              <form onSubmit={handleSubmit}>
+                <div className="form-outline mb-4">
+                  <MDBInput
+                    wrapperClass="mb-4 position-relative"
+                    label="Sicil Numarası (abXXXXXX)"
+                    id="sicilNo"
+                    onChange={(e) => {
+                      setSicilNo(e.target.value);
+                      setError(false);
+                      setErrorMessage("");
+                    }}
+                    value={sicilNo}
+                    type="text"
+                    autoComplete="username"
+                    icon={<MDBIcon fas icon="user" />}
+                  />
+
+                  <div className="password-input position-relative">
+                    <MDBInput
+                      wrapperClass="mb-4"
+                      label="Şifre"
+                      id="sifre"
+                      onChange={(e) => {
+                        setSifre(e.target.value);
+                        setError(false);
+                        setErrorMessage("");
+                      }}
+                      value={sifre}
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      icon={<MDBIcon fas icon="lock" />}
+                    />
+                    <span
+                      className="password-toggle"
+                      onClick={toggleShowPassword}
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        zIndex: 2,
+                      }}
+                    >
+                      <MDBIcon fas icon={showPassword ? "eye-slash" : "eye"} />
+                    </span>
+                  </div>
+
+                  <div className="d-flex justify-content-between mb-4">
+                    <MDBCheckbox
+                      id="rememberMe"
+                      label="Beni Hatırla"
+                      checked={rememberMe}
+                      onChange={() => setRememberMe(!rememberMe)}
+                    />
+                  </div>
+
+                  {error && (
+                    <div
+                      className="alert alert-danger mb-4 text-center fade-in"
+                      role="alert"
+                    >
+                      <MDBIcon
+                        fas
+                        icon="exclamation-triangle"
+                        className="me-2"
+                      />
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  <MDBBtn
+                    type="submit"
+                    onClick={login}
+                    className="mb-4 w-100 btn-login"
+                    color="danger"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                        Giriş Yapılıyor...
+                      </>
+                    ) : (
+                      <>
+                        <MDBIcon fas icon="sign-in-alt" className="me-2" />
+                        Giriş Yap
+                      </>
+                    )}
+                  </MDBBtn>
+                </div>
+              </form>
+            </MDBCardBody>
+          </MDBCol>
+
+          <MDBCol
+            md="6"
+            className="system-info text-white d-flex align-items-center"
+          >
+            <div className="px-4 py-5 p-md-5">
+              <h3 className="fw-bold mb-4">
+                Eskişehir Adliyesi Yönetim Sistemi
+              </h3>
+              <p className="mb-4">
+                Eskişehir Adliyesi Yönetim Sistemi, adliye personelinin
+                işlemlerini kolaylaştırmak ve hızlandırmak amacıyla
                 geliştirilmiştir.
               </p>
+              <div className="d-flex align-items-center mb-4">
+                <div className="feature-icon me-3">
+                  <MDBIcon fas icon="chart-line" />
+                </div>
+                <div>
+                  <h6 className="fw-bold mb-1">Verimli Çalışma</h6>
+                  <p className="small mb-0">İş süreçlerinizi optimize edin</p>
+                </div>
+              </div>
+              <div className="d-flex align-items-center mb-4">
+                <div className="feature-icon me-3">
+                  <MDBIcon fas icon="shield-alt" />
+                </div>
+                <div>
+                  <h6 className="fw-bold mb-1">Güvenli Erişim</h6>
+                  <p className="small mb-0">Verileriniz güvende</p>
+                </div>
+              </div>
+              <div className="d-flex align-items-center">
+                <div className="feature-icon me-3">
+                  <MDBIcon fas icon="sync" />
+                </div>
+                <div>
+                  <h6 className="fw-bold mb-1">Güncel Bilgiler</h6>
+                  <p className="small mb-0">Her zaman güncel verilere erişin</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </MDBCol>
-      </MDBRow>
-      <p>Developed by Bilgehan Kalay</p>
+          </MDBCol>
+        </MDBRow>
+      </MDBCard>
+      <p className="text-center text-muted mt-4">Developed by Bilgehan Kalay</p>
     </MDBContainer>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, Spinner } from "reactstrap";
+import { Button, Spinner, Card, CardHeader, CardBody, Alert } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   renderDate_GGAAYYYY,
@@ -103,45 +103,54 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
   };
 
   return (
-    <div>
-      <h3>Geçici Personel Listesi</h3>
-      <span>
-        Bu rapor ile tüm kurumlardaki geçici personellerin listesini
-        görüntüleyebilirsiniz.
-      </span>
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-danger text-white">
+          <h3 className="mb-0">Geçici Personel Listesi</h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            Bu rapor ile tüm kurumlardaki geçici personellerin listesini
+            görüntüleyebilirsiniz.
+          </Alert>
 
-      <Button
-        color="danger"
-        className="m-1"
-        size="sm"
-        onClick={getGeciciPersonel}
-        style={{ width: "200px" }}
-      >
-        Rapor Getir
-      </Button>
+          <Button
+            color="danger"
+            className="mb-4"
+            onClick={getGeciciPersonel}
+            size="lg"
+            style={{ width: "200px" }}
+          >
+            <i className="fas fa-file-alt me-2"></i> Rapor Getir
+          </Button>
 
-      {raporGetiriliyorMu ? (
-        <div className="m-5">
-          <Spinner color="danger" />
-          <span className="m-2">
-            Rapor yükleniyor, bu işlem biraz zaman alabilir.
-          </span>
-        </div>
-      ) : (
-        geciciPersonelList.length > 0 && (
-          <div className="mt-5">
-            <DataTable
-              data={geciciPersonelList}
-              columns={columns}
-              onDetailClick={showPersonelDetay}
-              tableName="pasifPersonelTable"
-              generatePdf={handleExportPdf}
-              printTable={handlePrint}
-              initialPageSize={15} // Başlangıç değeri 15
-            />
-          </div>
-        )
-      )}
+          {raporGetiriliyorMu ? (
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, bu işlem biraz zaman alabilir...
+              </p>
+            </div>
+          ) : (
+            geciciPersonelList.length > 0 && (
+              <div className="mt-4">
+                <DataTable
+                  data={geciciPersonelList}
+                  columns={columns}
+                  onDetailClick={showPersonelDetay}
+                  tableName="pasifPersonelTable"
+                  generatePdf={handleExportPdf}
+                  printTable={handlePrint}
+                  initialPageSize={15}
+                />
+              </div>
+            )
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }
