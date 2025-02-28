@@ -9,345 +9,677 @@ import {
   FormGroup,
   Input,
   Label,
+  Alert,
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  FormFeedback,
+  Row,
+  Col,
+  Spinner,
+  FormText,
+  InputGroup,
+  InputGroupText,
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
-import { GET_UNIT_TYPES } from "../../constants/AxiosConfiguration";
-
 
 function BirimEkleModal({ modal, toggle, kurum, token, getBirimler }) {
-  const [birim, setBirim] = useState({});
-  const [seciliAltBirim, setSeciliAltBirim] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const [altKurum, setAltKurum] = useState(null);
-  const [birimler, setBirimler] = useState([]);
-  const [tekilMahkeme, setTekilMahkeme] = useState(false);
+  // Birim bilgileri
+  const [birimType, setBirimType] = useState(null);
+  const [unitTypes, setUnitTypes] = useState([]);
+  const [selectedUnitType, setSelectedUnitType] = useState(null);
 
-  const [mahkemeSayi, setMahkemeSayi] = useState(1);
-  const [heyetSayi, setHeyetSayi] = useState("1");
+  // Mahkeme özellikleri
+  const [isSingleCourt, setIsSingleCourt] = useState(false);
+  const [courtNumber, setCourtNumber] = useState(1);
+  const [delegationType, setDelegationType] = useState("1");
   const [birimName, setBirimName] = useState("");
-  const [mahkemeDurum, setMahkemeDurum] = useState(true);
-  const [minKatipSayisi, setMinKatipSayisi] = useState(1);
+  const [status, setStatus] = useState(true);
+  const [minClerkCount, setMinClerkCount] = useState(1);
 
-  const handleHeyetRadioChange = (event) => {
-    setHeyetSayi(event.target.value);
-    birimAdiHesapla();
-  };
+  // Birim Adı hesaplama
+  const calculateBirimName = () => {
+    if (!birimType || !selectedUnitType) return;
 
-  const handleRadioChange = (e) => {
-    if (e.target.value === "Tek mahkeme") {
-      setTekilMahkeme(true);
-      setMahkemeSayi(0);
-    } else {
-      setTekilMahkeme(false);
-      setMahkemeSayi(1);
+    if (birimType.id === 0) {
+      // Mahkeme
+      let name = "";
+
+      if (!isSingleCourt && courtNumber > 0) {
+        name += `${courtNumber}. `;
+      }
+
+      if (selectedUnitType) {
+        name += `${selectedUnitType.name} `;
+      }
+
+      if (delegationType === "1/2" || delegationType === "1/3") {
+        name += "(1. Heyet)";
+      } else if (name.charAt(name.length - 1) === " ") {
+        name = name.slice(0, -1);
+      }
+
+      setBirimName(name.trim());
+    } else if (birimType.id === 1) {
+      // Savcılık
+      if (selectedUnitType) {
+        setBirimName(selectedUnitType.name);
+      }
     }
   };
 
-  const birimAdiHesapla = () => {
-    if (altKurum && altKurum.id === 0) {
-      let birimAdi = "";
-      if (mahkemeSayi > 0) {
-        if (mahkemeSayi > 0) {
-          birimAdi += mahkemeSayi + ". ";
-          if (seciliAltBirim) {
-            birimAdi += seciliAltBirim.name + " ";
-          }
-        }
-      } else {
-        if (seciliAltBirim) {
-          birimAdi += seciliAltBirim.name + " ";
-        }
-      }
-      if (heyetSayi === "1/2" || heyetSayi === "1/3") {
-        birimAdi += "(1. Heyet)";
-      } else if (heyetSayi === "1") {
-        // delete last char if it is space
-        if (birimAdi.charAt(birimAdi.length - 1) === " ") {
-          birimAdi = birimAdi.slice(0, -1);
-        }
-      }
-
-      birimAdi = birimAdi.replace(/\s+/g, " ");
-      setBirimName(birimAdi);
-    } else if (altKurum && altKurum.id === 1) {
-      let birimAdi = "";
-      if (seciliAltBirim) {
-        birimAdi += seciliAltBirim.name + " ";
-      }
-      birimAdi = birimAdi.replace(/\s+/g, " ");
-      setBirimName(birimAdi);
-    } else {
-      setBirimName("");
-    }
-  };
-
-  useEffect(() => {
-    birimAdiHesapla();
-    // eslint-disable-next-line
-  }, [mahkemeSayi, seciliAltBirim, heyetSayi, altKurum]);
-
-  function handleKurumTypeSelectInputChange(e) {
-    if (e.target.value === "Alt Kurum Seçiniz") {
-      setAltKurum(null);
+  // Birim türü değişince alt birim tiplerini yükle
+  const handleBirimTypeChange = (e) => {
+    const typeName = e.target.value;
+    if (typeName === "") {
+      setBirimType(null);
+      setUnitTypes([]);
       return;
     }
-    let seciliKurum = kurum.types.find((type) => type.name === e.target.value);
-    setAltKurum(seciliKurum);
+
+    const selected = kurum.types.find((type) => type.name === typeName);
+    setBirimType(selected);
+
+    // Reset form fields
+    setSelectedUnitType(null);
     setBirimName("");
-    axios(GET_UNIT_TYPES(seciliKurum.id))
+    setIsSingleCourt(false);
+    setCourtNumber(1);
+    setDelegationType("1");
+    setStatus(true);
+
+    // Alt birim tiplerini getir
+    setLoading(true);
+    axios({
+      method: "GET",
+      url: `/api/unit_types?institutionTypeId=${selected.id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((result) => {
-        setBirimler(result.data);
+        setUnitTypes(result.data);
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        alertify.error("Birim tipleri yüklenirken bir hata oluştu");
+        setLoading(false);
       });
-  }
+  };
 
-  function handleBirimSelectInputChange(e) {
-    if (e.target.value === "Birim Seçiniz") {
-      setSeciliAltBirim(null);
+  // Alt birim tipi seçildiğinde
+  const handleUnitTypeChange = (e) => {
+    const typeName = e.target.value;
+    if (typeName === "") {
+      setSelectedUnitType(null);
       return;
     }
-    let seciliAltBirim = birimler.find(
-      (birim) => birim.name === e.target.value
-    );
-    setMinKatipSayisi(seciliAltBirim.gerekenKatipSayisi || 1);
-    setSeciliAltBirim(seciliAltBirim);
-  }
 
-  function handleAddBirim() {
-    // burada yazılan kod şuan çok karışık ve anlaşılmaz durumda vakit kısıtlı olduğu için şimdilik ellemiyorum.
-    setBirim({
-      ...birim,
-      kurumID: kurum.id,
-      kurumName: kurum.name,
-      birimTurID: altKurum ? altKurum.id : null,
-      birimTurName: altKurum ? altKurum.name : null,
-      altBirimID: seciliAltBirim ? seciliAltBirim.id : null,
-      altBirimName: seciliAltBirim ? seciliAltBirim.name : null,
+    const selected = unitTypes.find((type) => type.name === typeName);
+    setSelectedUnitType(selected);
+    setMinClerkCount(selected.gerekenKatipSayisi || 1);
+  };
+
+  // Court Type (Tek/Çoklu) değişimini handle et
+  const handleCourtTypeChange = (e) => {
+    setIsSingleCourt(e.target.value === "single");
+    if (e.target.value === "single") {
+      setCourtNumber(0);
+    } else {
+      setCourtNumber(1);
+    }
+  };
+
+  // Validasyon
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!birimType) newErrors.birimType = "Birim türü seçilmelidir";
+    if (!selectedUnitType) newErrors.unitType = "Alt birim seçilmelidir";
+    if (!birimName) newErrors.birimName = "Birim adı boş olamaz";
+    if (minClerkCount < 1) newErrors.minClerkCount = "En az 1 katip gereklidir";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Form gönderme
+  const handleAddBirim = () => {
+    if (!validateForm()) {
+      alertify.error("Lütfen tüm alanları doğru şekilde doldurunuz.");
+      return;
+    }
+
+    setLoading(true);
+
+    const birimData = {
+      unitTypeID: selectedUnitType.id,
+      institutionID: kurum.id,
+      delegationType: delegationType,
+      status: status,
+      series: courtNumber,
+      minClertCount: minClerkCount,
       name: birimName,
-      mahkemeDurum: mahkemeDurum,
-      heyetDurum: heyetSayi,
-      mahkemeSayi: mahkemeSayi,
-      minKatipSayisi: minKatipSayisi,
-    });
-    const configuration = {
+    };
+
+    axios({
       method: "POST",
-      url: "api/units",
+      url: "/api/units",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      data: {
-        unitTypeID: seciliAltBirim ? seciliAltBirim.id : null,
-        institutionID: kurum.id,
-        delegationType: heyetSayi,
-        status: mahkemeDurum,
-        series: mahkemeSayi,
-        minClertCount: minKatipSayisi,
-        name: birimName,
-      },
-    };
-    axios(configuration)
-      .then((result) => {
-        toggle();
+      data: birimData,
+    })
+      .then(() => {
         alertify.success("Birim başarıyla eklendi");
-        getBirimler();
+        toggle();
+        getBirimler(kurum);
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        alertify.error(
+          error.response?.data?.message || "Birim eklenirken bir hata oluştu"
+        );
+        setLoading(false);
       });
-  }
+  };
+
+  // Birim adı hesaplama efekti
+  useEffect(() => {
+    calculateBirimName();
+    // eslint-disable-next-line
+  }, [birimType, selectedUnitType, isSingleCourt, courtNumber, delegationType]);
 
   return (
-    <div>
-      <Modal isOpen={modal} toggle={toggle}>
-        {kurum && (
-          <ModalHeader toggle={toggle}>{kurum.name} - Birim Ekleme</ModalHeader>
-        )}
-        <ModalBody>
-          {kurum && (
-            <Form>
-              {/* <div>
-                <Label>
-                  Kurum ID: {kurum.id} - Kurum Adı: {kurum.name} <br />
-                </Label>
-              </div>
-              <div>
-                {altKurum && (
-                  <Label>
-                    Alt Kurum ID: {altKurum.id} - Alt Kurum Adı: {altKurum.name}
-                  </Label>
+    <Modal isOpen={modal} toggle={toggle} size="lg">
+      <ModalHeader toggle={toggle} className="bg-primary text-white">
+        <i className="fas fa-plus-circle me-2"></i>
+        Yeni Birim Ekle - {kurum?.name}
+      </ModalHeader>
+
+      <ModalBody className="bg-light">
+        {!kurum ? (
+          <Alert color="warning">
+            <i className="fas fa-exclamation-triangle me-2"></i>
+            Kurum bilgisi bulunamadı. Lütfen önce bir kurum seçiniz.
+          </Alert>
+        ) : (
+          <Form>
+            <Card className="shadow-sm mb-4">
+              <CardHeader className="bg-white">
+                <h5 className="mb-0">
+                  <i className="fas fa-sitemap me-2 text-primary"></i>
+                  Temel Birim Bilgileri
+                </h5>
+              </CardHeader>
+              <CardBody>
+                <Row>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="birimType" className="fw-bold">
+                        <i className="fas fa-layer-group me-1 text-primary"></i>
+                        Birim Türü*
+                      </Label>
+                      <Input
+                        id="birimType"
+                        name="birimType"
+                        type="select"
+                        onChange={handleBirimTypeChange}
+                        invalid={!!errors.birimType}
+                        className={birimType ? "border-primary" : ""}
+                      >
+                        <option value="">Birim Türü Seçiniz</option>
+                        {kurum.types.map((type) => (
+                          <option key={type.id} value={type.name}>
+                            {type.name}
+                          </option>
+                        ))}
+                      </Input>
+                      <FormFeedback>{errors.birimType}</FormFeedback>
+                    </FormGroup>
+                  </Col>
+
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="unitType" className="fw-bold">
+                        <i className="fas fa-tag me-1 text-primary"></i>
+                        Alt Birim Türü*
+                      </Label>
+                      <Input
+                        id="unitType"
+                        name="unitType"
+                        type="select"
+                        onChange={handleUnitTypeChange}
+                        disabled={!birimType || loading}
+                        invalid={!!errors.unitType}
+                        className={selectedUnitType ? "border-primary" : ""}
+                      >
+                        <option value="">Alt Birim Türü Seçiniz</option>
+                        {unitTypes.map((type) => (
+                          <option key={type.id} value={type.name}>
+                            {type.name}
+                          </option>
+                        ))}
+                      </Input>
+                      <FormFeedback>{errors.unitType}</FormFeedback>
+                      {loading && !unitTypes.length && (
+                        <FormText>
+                          <Spinner size="sm" color="primary" className="me-1" />
+                          Alt birimler yükleniyor...
+                        </FormText>
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                {birimType && selectedUnitType && (
+                  <Alert color="info" className="mt-2">
+                    <i className="fas fa-info-circle me-2"></i>
+                    <strong>{selectedUnitType.name}</strong> türünde yeni bir
+                    birim oluşturuyorsunuz.
+                    {selectedUnitType.description && (
+                      <p className="mb-0 mt-1 small">
+                        {selectedUnitType.description}
+                      </p>
+                    )}
+                  </Alert>
                 )}
-              </div> */}
+              </CardBody>
+            </Card>
 
-              {/* <hr /> */}
+            {birimType?.id === 0 && (
+              <Card className="shadow-sm mb-4">
+                <CardHeader className="bg-white">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">
+                      <i className="fas fa-gavel me-2 text-primary"></i>
+                      Mahkeme Özellikleri
+                    </h5>
+                    <Badge color="danger" pill className="px-3 py-2">
+                      Mahkeme
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <Row className="mb-3">
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label className="fw-bold">Mahkeme Türü</Label>
+                        <div>
+                          <FormGroup check inline>
+                            <Input
+                              id="multiCourt"
+                              type="radio"
+                              name="courtType"
+                              value="multi"
+                              checked={!isSingleCourt}
+                              onChange={handleCourtTypeChange}
+                            />
+                            <Label check for="multiCourt">
+                              <Badge color="info" className="me-1">
+                                Çoklu Mahkeme
+                              </Badge>
+                            </Label>
+                          </FormGroup>
+                          <FormGroup check inline>
+                            <Input
+                              id="singleCourt"
+                              type="radio"
+                              name="courtType"
+                              value="single"
+                              checked={isSingleCourt}
+                              onChange={handleCourtTypeChange}
+                            />
+                            <Label check for="singleCourt">
+                              <Badge color="secondary" className="me-1">
+                                Tek Mahkeme
+                              </Badge>
+                            </Label>
+                          </FormGroup>
+                        </div>
+                      </FormGroup>
+                    </Col>
 
-              <FormGroup>
-                <Label for="kurumTypeSelect">Birim Türü </Label>
-                <Input
-                  onChange={(e) => {
-                    handleKurumTypeSelectInputChange(e);
-                  }}
-                  id="kurumTypeSelect"
-                  name="select"
-                  type="select"
-                >
-                  <option>Alt Kurum Seçiniz</option>
-                  {kurum.types.map((type) => (
-                    <option key={type.id}>{type.name}</option>
-                  ))}
-                </Input>
-              </FormGroup>
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label for="courtNumber" className="fw-bold">
+                          <i className="fas fa-sort-numeric-up me-1 text-primary"></i>
+                          Mahkeme Sırası
+                        </Label>
+                        <Input
+                          type="number"
+                          id="courtNumber"
+                          name="courtNumber"
+                          placeholder="Mahkeme sıra numarası"
+                          value={courtNumber}
+                          disabled={isSingleCourt}
+                          min={1}
+                          onChange={(e) =>
+                            setCourtNumber(parseInt(e.target.value, 10) || 0)
+                          }
+                        />
+                        <FormText>
+                          {isSingleCourt
+                            ? "Tek mahkeme seçildiğinde sıra numarası kullanılmaz"
+                            : "Örn: 1. Asliye Ceza, 5. Ağır Ceza gibi"}
+                        </FormText>
+                      </FormGroup>
+                    </Col>
+                  </Row>
 
-              <FormGroup
-              // hidden={!(altKurum && (altKurum.id === 1 || altKurum.id === 0))}
-              >
-                <Label for="birimSelect">Alt Birim </Label>
-                <Input
-                  onChange={(e) => {
-                    handleBirimSelectInputChange(e);
-                    birimAdiHesapla();
-                  }}
-                  id="birimSelect"
-                  name="select"
-                  type="select"
-                >
-                  <option>Birim Seçiniz</option>
-                  {birimler.map((birim) => (
-                    <option key={birim.id}>{birim.name}</option>
-                  ))}
-                </Input>
-              </FormGroup>
+                  <Row>
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label className="fw-bold">Heyet Durumu</Label>
+                        <div>
+                          <FormGroup check className="mb-2">
+                            <Input
+                              id="delegation1"
+                              type="radio"
+                              name="delegation"
+                              value="1"
+                              checked={delegationType === "1"}
+                              onChange={(e) =>
+                                setDelegationType(e.target.value)
+                              }
+                            />
+                            <Label check for="delegation1">
+                              Tekli Mahkeme
+                            </Label>
+                            <FormText>Tek hakimli mahkemeler için</FormText>
+                          </FormGroup>
 
-              <FormGroup check hidden={!(altKurum && altKurum.id === 0)}>
-                <Input
-                  onClick={(e) => {
-                    handleRadioChange(e);
-                  }}
-                  value="Tek mahkeme"
-                  name="radio2"
-                  type="radio"
-                />{" "}
-                <Label check>Tek mahkeme</Label>
-              </FormGroup>
-              <FormGroup check hidden={!(altKurum && altKurum.id === 0)}>
-                <Input
-                  onClick={(e) => {
-                    handleRadioChange(e);
-                  }}
-                  value="Çoklu mahkeme"
-                  name="radio2"
-                  type="radio"
-                  defaultChecked
-                />{" "}
-                <Label check>Çoklu mahkeme</Label>
-              </FormGroup>
+                          <FormGroup check className="mb-2">
+                            <Input
+                              id="delegation12"
+                              type="radio"
+                              name="delegation"
+                              value="1/2"
+                              checked={delegationType === "1/2"}
+                              onChange={(e) =>
+                                setDelegationType(e.target.value)
+                              }
+                            />
+                            <Label check for="delegation12">
+                              1/2 Heyet
+                            </Label>
+                            <FormText>
+                              İki hakimli heyetli mahkemeler için
+                            </FormText>
+                          </FormGroup>
 
-              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
-                <Label for="mahkemeSayi">Mahkeme Sayı</Label>
-                <Input
-                  type="number"
-                  name="mahkemeSayi"
-                  id="mahkemeSayi"
-                  placeholder="Mahkeme Sayı"
-                  disabled={tekilMahkeme}
-                  value={mahkemeSayi}
-                  min={1}
-                  onChange={(e) => {
-                    setMahkemeSayi(parseInt(e.target.value, 10));
-                    birimAdiHesapla();
-                  }}
-                />
-              </FormGroup>
+                          <FormGroup check>
+                            <Input
+                              id="delegation13"
+                              type="radio"
+                              name="delegation"
+                              value="1/3"
+                              checked={delegationType === "1/3"}
+                              onChange={(e) =>
+                                setDelegationType(e.target.value)
+                              }
+                            />
+                            <Label check for="delegation13">
+                              1/3 Heyet
+                            </Label>
+                            <FormText>
+                              Üç hakimli heyetli mahkemeler için
+                            </FormText>
+                          </FormGroup>
+                        </div>
+                      </FormGroup>
+                    </Col>
 
-              <FormGroup hidden={!(altKurum && altKurum.id === 0)}>
-                <Label for="mahkemeHeyet">Heyet Sayısı</Label>
-                <div>
-                  <Input
-                    type="radio"
-                    value="1"
-                    name="heyet"
-                    checked={heyetSayi === "1"}
-                    onChange={handleHeyetRadioChange}
-                  />
-                  <Label>1</Label>
-                </div>
-                <div>
-                  <Input
-                    type="radio"
-                    value="1/2"
-                    name="heyet"
-                    checked={heyetSayi === "1/2"}
-                    onChange={handleHeyetRadioChange}
-                  />
-                  <Label>1/2</Label>
-                </div>
-                <div>
-                  <Input
-                    type="radio"
-                    value="1/3"
-                    name="heyet"
-                    checked={heyetSayi === "1/3"}
-                    onChange={handleHeyetRadioChange}
-                  />
-                  <Label>1/3</Label>
-                </div>
-              </FormGroup>
+                    <Col md={6}>
+                      <FormGroup className="mb-3">
+                        <Label className="fw-bold d-block mb-2">
+                          Mahkeme Durumu
+                        </Label>
+                        <div className="form-check form-switch">
+                          <Input
+                            type="switch"
+                            id="statusSwitch"
+                            name="status"
+                            checked={status}
+                            onChange={() => setStatus(!status)}
+                          />
+                          <Label
+                            for="statusSwitch"
+                            className="form-check-label"
+                          >
+                            {status ? (
+                              <Badge color="success">Aktif</Badge>
+                            ) : (
+                              <Badge color="danger">Pasif</Badge>
+                            )}
+                          </Label>
+                        </div>
+                        <FormText>
+                          {status
+                            ? "Mahkeme aktif durumdadır ve personel ataması yapılabilir"
+                            : "Mahkeme pasif durumdadır, işletimde değildir"}
+                        </FormText>
+                      </FormGroup>
 
-              <FormGroup switch hidden={!(altKurum && altKurum.id === 0)}>
-                <Input
-                  type="switch"
-                  checked={mahkemeDurum}
-                  onClick={() => {
-                    setMahkemeDurum(!mahkemeDurum);
-                  }}
-                />
-                <Label check>
-                  {mahkemeDurum ? "Mahkeme İşletimde" : "Mahkeme Kapalı"}
-                </Label>
-              </FormGroup>
+                      <FormGroup>
+                        <Label for="clerkCount" className="fw-bold">
+                          <i className="fas fa-users me-1 text-primary"></i>
+                          Gerekli Katip Sayısı*
+                        </Label>
+                        <Input
+                          type="number"
+                          id="clerkCount"
+                          name="clerkCount"
+                          value={minClerkCount}
+                          min={1}
+                          invalid={!!errors.minClerkCount}
+                          onChange={(e) =>
+                            setMinClerkCount(parseInt(e.target.value, 10) || 0)
+                          }
+                        />
+                        <FormFeedback>{errors.minClerkCount}</FormFeedback>
+                        <FormText>
+                          Bu birim için gerekli minimum zabıt katibi sayısı
+                        </FormText>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </CardBody>
+              </Card>
+            )}
 
-              <FormGroup >
-                <Label for="minKatipSayi">Gerekli Katip Sayısı</Label>
-                <Input
-                  type="number"
-                  name="minKatipSayi"
-                  id="minKatipSayi"
-                  placeholder="Katip sayısı"
-                  value={minKatipSayisi}
-                  min={1}
-                  onChange={(e) =>
-                    setMinKatipSayisi(parseInt(e.target.value, 10))
-                  }
-                />
-              </FormGroup>
+            {birimType?.id !== 0 && birimType && (
+              <Card className="shadow-sm mb-4">
+                <CardHeader className="bg-white">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">
+                      <i
+                        className={`fas ${
+                          birimType.id === 1
+                            ? "fa-balance-scale"
+                            : "fa-building"
+                        } me-2 text-primary`}
+                      ></i>
+                      {birimType.name} Özellikleri
+                    </h5>
+                    <Badge
+                      color={birimType.id === 1 ? "warning" : "info"}
+                      pill
+                      className="px-3 py-2"
+                    >
+                      {birimType.name}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <Row>
+                    <Col md={6}>
+                      <FormGroup className="mb-3">
+                        <Label className="fw-bold d-block mb-2">
+                          Birim Durumu
+                        </Label>
+                        <div className="form-check form-switch">
+                          <Input
+                            type="switch"
+                            id="statusSwitch"
+                            name="status"
+                            checked={status}
+                            onChange={() => setStatus(!status)}
+                          />
+                          <Label
+                            for="statusSwitch"
+                            className="form-check-label"
+                          >
+                            {status ? (
+                              <Badge color="success">Aktif</Badge>
+                            ) : (
+                              <Badge color="danger">Pasif</Badge>
+                            )}
+                          </Label>
+                        </div>
+                      </FormGroup>
+                    </Col>
 
-              <FormGroup>
-                <Label for="birimAdi">Birim Adı</Label>
-                <Input
-                  type="text"
-                  name="birimAdi"
-                  id="birimAdi"
-                  placeholder="Birim Adı"
-                  value={birimName}
-                  onChange={(e) => setBirimName(e.target.value)}
-                />
-              </FormGroup>
-            </Form>
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label for="clerkCount" className="fw-bold">
+                          <i className="fas fa-users me-1 text-primary"></i>
+                          Gerekli Personel Sayısı*
+                        </Label>
+                        <Input
+                          type="number"
+                          id="clerkCount"
+                          name="clerkCount"
+                          value={minClerkCount}
+                          min={1}
+                          invalid={!!errors.minClerkCount}
+                          onChange={(e) =>
+                            setMinClerkCount(parseInt(e.target.value, 10) || 0)
+                          }
+                        />
+                        <FormFeedback>{errors.minClerkCount}</FormFeedback>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </CardBody>
+              </Card>
+            )}
+
+            <Card className="shadow-sm">
+              <CardHeader className="bg-white">
+                <h5 className="mb-0">
+                  <i className="fas fa-file-signature me-2 text-primary"></i>
+                  Birim Adı
+                </h5>
+              </CardHeader>
+              <CardBody>
+                <FormGroup>
+                  <Label for="birimName" className="fw-bold">
+                    <i className="fas fa-tag me-1 text-primary"></i>
+                    Birim Adı*
+                  </Label>
+                  <InputGroup>
+                    <Input
+                      type="text"
+                      id="birimName"
+                      name="birimName"
+                      placeholder="Birim adını giriniz"
+                      value={birimName}
+                      onChange={(e) => setBirimName(e.target.value)}
+                      invalid={!!errors.birimName}
+                    />
+                    {birimType && (
+                      <InputGroupText>
+                        <Badge
+                          color={
+                            birimType.id === 0
+                              ? "danger"
+                              : birimType.id === 1
+                              ? "warning"
+                              : "info"
+                          }
+                        >
+                          {birimType.name}
+                        </Badge>
+                      </InputGroupText>
+                    )}
+                  </InputGroup>
+                  <FormFeedback>{errors.birimName}</FormFeedback>
+                  <FormText>
+                    Birim adı yukarıdaki seçimlerinize göre otomatik
+                    oluşturulur, ancak düzenleyebilirsiniz
+                  </FormText>
+                </FormGroup>
+
+                {selectedUnitType && (
+                  <div className="mt-3 text-center">
+                    <h6>Önizleme</h6>
+                    <div className="p-3 border rounded bg-white text-center">
+                      <Badge
+                        color={
+                          birimType?.id === 0
+                            ? "danger"
+                            : birimType?.id === 1
+                            ? "warning"
+                            : "info"
+                        }
+                        pill
+                        className="mb-2"
+                      >
+                        {selectedUnitType.name}
+                      </Badge>
+                      <h5 className="mb-0 fw-bold">
+                        {birimName || "Birim adı girilmedi"}
+                      </h5>
+                      <div className="small text-muted mt-1">
+                        {status ? "Aktif Birim" : "Pasif Birim"} •
+                        {birimType?.id === 0
+                          ? ` ${
+                              delegationType === "1" ? "Tekli" : "Heyetli"
+                            } Mahkeme • ${minClerkCount} Katip`
+                          : ` ${minClerkCount} Personel`}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          </Form>
+        )}
+      </ModalBody>
+
+      <ModalFooter className="bg-light">
+        <small className="text-muted me-auto">
+          * ile işaretli alanlar zorunludur
+        </small>
+        <Button color="secondary" onClick={toggle} disabled={loading}>
+          <i className="fas fa-times me-1"></i> Vazgeç
+        </Button>{" "}
+        <Button
+          color="primary"
+          onClick={handleAddBirim}
+          disabled={loading || !kurum}
+        >
+          {loading ? (
+            <>
+              <Spinner size="sm" className="me-1" /> Kaydediliyor...
+            </>
+          ) : (
+            <>
+              <i className="fas fa-save me-1"></i> Birimi Ekle
+            </>
           )}
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onClick={handleAddBirim}>
-            Kaydet
-          </Button>{" "}
-          <Button color="danger" onClick={toggle}>
-            İptal
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </div>
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }
 
