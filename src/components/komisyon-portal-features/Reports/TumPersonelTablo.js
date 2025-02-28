@@ -12,6 +12,10 @@ import {
   Popover,
   PopoverHeader,
   PopoverBody,
+  Card,
+  CardHeader,
+  CardBody,
+  Alert,
 } from "reactstrap";
 import { renderDate_GGAA } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
@@ -108,26 +112,58 @@ export default function TumPersonelTablo({
       });
   };
 
+  // Renk paletini tanımlayalım - modern bir görünüm için
+  const colors = {
+    primary: "#0d6efd",
+    secondary: "#6c757d",
+    success: "#198754",
+    info: "#0dcaf0",
+    warning: "#ffc107",
+    danger: "#dc3545",
+    light: "#f8f9fa",
+    dark: "#212529",
+    lightGray: "#f5f5f5",
+    borderGray: "#dee2e6",
+  };
+
+  // Stiller için yeni tanımlamalar
   const birimTipStyle = {
     fontWeight: "bold",
-
-    color: "red",
-    //backgroundColor: "lightgray",
-
-    // centering the text
+    color: colors.danger,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: "10px",
+    margin: "15px 0",
+    borderBottom: `2px solid ${colors.danger}`,
+    backgroundColor: colors.lightGray,
+    borderRadius: "5px",
   };
 
   const divBirimNameStyle = {
     fontWeight: "bold",
-    color: "black",
-    //backgroundColor: "lightgray",
-    // centering the text
+    color: colors.dark,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: "8px 0",
+    borderBottom: `1px solid ${colors.borderGray}`,
+  };
+
+  const cardStyle = {
+    height: "100%",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    transition: "all 0.3s ease",
+  };
+
+  const sectionTitleStyle = {
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: colors.dark,
+    padding: "5px",
+    margin: "10px 0 5px 0",
+    borderBottom: `1px dashed ${colors.borderGray}`,
+    textTransform: "uppercase",
   };
 
   // Açıklama metnini kısaltmak için yardımcı fonksiyon
@@ -168,7 +204,12 @@ export default function TumPersonelTablo({
 
       if (kind === "other") {
         badges.push(
-          <Badge color="secondary" className="ms-2" key="unvan">
+          <Badge
+            color="secondary"
+            className="ms-2 rounded-pill"
+            key="unvan"
+            style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
+          >
             {personel.title.name}
           </Badge>
         );
@@ -176,25 +217,43 @@ export default function TumPersonelTablo({
 
       if (personel.durusmaKatibiMi) {
         badges.push(
-          <Badge color="warning" className="ms-2" key="durusma">
+          <Badge
+            color="warning"
+            className="ms-2 rounded-pill"
+            key="durusma"
+            style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
+          >
             Duruşma
           </Badge>
         );
       }
+
       if (personel.isTemporary) {
         badges.push(
-          <Badge color="danger" className="ms-2" key="gecici">
+          <Badge
+            color="danger"
+            className="ms-2 rounded-pill"
+            key="gecici"
+            style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
+          >
             Geçici
           </Badge>
         );
       }
+
       if (personel.level) {
         badges.push(
-          <Badge color="secondary" className="ms-2" key="seviye">
+          <Badge
+            color="secondary"
+            className="ms-2 rounded-pill"
+            key="seviye"
+            style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
+          >
             Svy. {personel.level}
           </Badge>
         );
       }
+
       if (personel.description) {
         const descriptionPopoverId = `descriptionPopover-${
           personel._id || personel.id
@@ -207,11 +266,15 @@ export default function TumPersonelTablo({
             <Badge
               id={descriptionPopoverId}
               color="info"
-              className="ms-2"
+              className="ms-2 rounded-pill"
               key="aciklama"
               onMouseEnter={() => setHoveredDescriptionId(descriptionPopoverId)}
               onMouseLeave={() => setHoveredDescriptionId(null)}
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                padding: "0.35em 0.65em",
+              }}
             >
               {truncateText(personel.description)}
             </Badge>
@@ -228,14 +291,17 @@ export default function TumPersonelTablo({
       }
 
       if (personel.izindeMi) {
-        // personel.izinleri endDate'e göre sırala en sonuncusunu al
-
         let lastPersonelIzin = personel.izinler.sort((a, b) => {
           return new Date(b.endDate) - new Date(a.endDate);
         })[0];
 
         badges.push(
-          <Badge color="danger" className="ms-2" key="izin">
+          <Badge
+            color="danger"
+            className="ms-2 rounded-pill"
+            key="izin"
+            style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
+          >
             İzinde {renderDate_GGAA(lastPersonelIzin.startDate)} -{" "}
             {renderDate_GGAA(lastPersonelIzin.endDate)}
           </Badge>
@@ -246,6 +312,9 @@ export default function TumPersonelTablo({
         fontWeight: "normal",
         cursor: "pointer",
         textDecoration: isHovered ? "underline" : "none",
+        padding: "5px 0",
+        margin: "0",
+        borderBottom: `1px dotted ${colors.borderGray}`,
       };
 
       return (
@@ -257,6 +326,7 @@ export default function TumPersonelTablo({
           }
           onMouseEnter={() => setHoveredPersonelId(personel._id || personel.id)}
           onMouseLeave={() => setHoveredPersonelId(null)}
+          className="personel-item"
         >
           {personel.ad} {personel.soyad}{" "}
           {badges.length < 3 ? (
@@ -268,7 +338,8 @@ export default function TumPersonelTablo({
               <Badge
                 id={`badgePopover-${personel._id || personel.id}`}
                 color="primary"
-                className="ms-2"
+                className="ms-2 rounded-pill"
+                style={{ fontSize: "0.75rem", padding: "0.35em 0.65em" }}
               >
                 {badges.length} Rozet
               </Badge>
@@ -296,198 +367,264 @@ export default function TumPersonelTablo({
   };
 
   return (
-    <div>
-      <h3>Personel Tablosu</h3>
-      <span>
-        Bu rapor ile birlikte seçilen kurumun tüm personelleri tablo halinde
-        listelenmektedir.
-        <br /> Yüklenecek veri miktarına göre işlem{" "}
-        <b> biraz zaman alabilir.</b>
-      </span>
-      <div>
-        <FormGroup>
-          <Label for="radioCeza">Birim Alan: </Label>{" "}
-          <Input
-            className="ms-2"
-            type="radio"
-            name="radio"
-            id="radioCeza"
-            value="Ceza"
-            checked={selectedUnitType === "Ceza"}
-            onChange={handleRadioFilterChange}
-          />
-          <Label for="radioCeza">Ceza</Label>{" "}
-          <Input
-            className="ms-2"
-            type="radio"
-            name="radio"
-            id="radioHukuk"
-            value="Hukuk"
-            checked={selectedUnitType === "Hukuk"}
-            onChange={handleRadioFilterChange}
-          />
-          <Label for="radioHukuk">Hukuk</Label>
-          <Input
-            className="ms-2"
-            type="radio"
-            name="radio"
-            id="radioDiger"
-            value="Diger"
-            checked={selectedUnitType === "Diger"}
-            onChange={handleRadioFilterChange}
-          />
-          <Label for="radioDiger">Diğer</Label>
-        </FormGroup>
-        <FormGroup>
-          <Label for="kontrolEdilecekBirimTip">
-            Kontrol Edilecek Birim Tipleri
-          </Label>
-          <Input
-            id="kontrolEdilecekBirimTip"
-            multiple
-            name="selectMulti"
-            type="select"
-            disabled
-          >
-            {kontrolEdilecekBirimTipi.map((birimTip) => (
-              <option key={birimTip.id} value={birimTip.id}>
-                {birimTip.name}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+    <div className="personel-tablo-container">
+      <Card className="mb-4 shadow-sm">
+        <CardHeader className="bg-primary text-white">
+          <h3 className="mb-0">Personel Tablosu</h3>
+        </CardHeader>
+        <CardBody>
+          <Alert color="info" className="mb-4">
+            Bu rapor ile birlikte seçilen kurumun tüm personelleri tablo halinde
+            listelenmektedir.
+            <br /> Yüklenecek veri miktarına göre işlem{" "}
+            <strong>biraz zaman alabilir.</strong>
+          </Alert>
 
-        <FormGroup>
-          <Label for="kontrolEdilecekBirimListesi">
-            Kontrol Edilecek Birim Listesi
-          </Label>
-          <Input
-            id="kontrolEdilecekBirimListesi"
-            multiple
-            name="selectMulti"
-            type="select"
-            disabled
-          >
-            {kontrolEdilecekBirimler.map((birim) => (
-              <option key={birim.id} value={birim.id}>
-                {birim.name}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+          <Card className="mb-4 border-light">
+            <CardBody>
+              <FormGroup tag="fieldset" className="mb-3">
+                <legend className="col-form-label mb-2">Birim Alan:</legend>
+                <div className="d-flex">
+                  <div className="me-3">
+                    <Input
+                      className="me-1"
+                      type="radio"
+                      name="radio"
+                      id="radioCeza"
+                      value="Ceza"
+                      checked={selectedUnitType === "Ceza"}
+                      onChange={handleRadioFilterChange}
+                    />
+                    <Label for="radioCeza">Ceza</Label>
+                  </div>
+                  <div className="me-3">
+                    <Input
+                      className="me-1"
+                      type="radio"
+                      name="radio"
+                      id="radioHukuk"
+                      value="Hukuk"
+                      checked={selectedUnitType === "Hukuk"}
+                      onChange={handleRadioFilterChange}
+                    />
+                    <Label for="radioHukuk">Hukuk</Label>
+                  </div>
+                  <div>
+                    <Input
+                      className="me-1"
+                      type="radio"
+                      name="radio"
+                      id="radioDiger"
+                      value="Diger"
+                      checked={selectedUnitType === "Diger"}
+                      onChange={handleRadioFilterChange}
+                    />
+                    <Label for="radioDiger">Diğer</Label>
+                  </div>
+                </div>
+              </FormGroup>
 
-        <Button
-          color="danger"
-          disabled={kontrolEdilecekBirimler.length === 0}
-          className="m-3"
-          size="lg"
-          id="getPersonelTablo"
-          onClick={(e) => getPersonelTablo(e)}
-          style={{ width: "100%" }}
-        >
-          Rapor Getir
-        </Button>
+              <Row>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="kontrolEdilecekBirimTip">
+                      Kontrol Edilecek Birim Tipleri
+                    </Label>
+                    <Input
+                      id="kontrolEdilecekBirimTip"
+                      multiple
+                      name="selectMulti"
+                      type="select"
+                      disabled
+                      className="form-control-sm"
+                    >
+                      {kontrolEdilecekBirimTipi.map((birimTip) => (
+                        <option key={birimTip.id} value={birimTip.id}>
+                          {birimTip.name}
+                        </option>
+                      ))}
+                    </Input>
+                  </FormGroup>
+                </Col>
 
-        <div>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label for="kontrolEdilecekBirimListesi">
+                      Kontrol Edilecek Birim Listesi
+                    </Label>
+                    <Input
+                      id="kontrolEdilecekBirimListesi"
+                      multiple
+                      name="selectMulti"
+                      type="select"
+                      disabled
+                      className="form-control-sm"
+                    >
+                      {kontrolEdilecekBirimler.map((birim) => (
+                        <option key={birim.id} value={birim.id}>
+                          {birim.name}
+                        </option>
+                      ))}
+                    </Input>
+                  </FormGroup>
+                </Col>
+              </Row>
+
+              <Button
+                color="danger"
+                disabled={kontrolEdilecekBirimler.length === 0}
+                className="mt-3"
+                size="lg"
+                id="getPersonelTablo"
+                onClick={(e) => getPersonelTablo(e)}
+                style={{ width: "100%" }}
+              >
+                <i className="fas fa-file-alt me-2"></i> Rapor Getir
+              </Button>
+            </CardBody>
+          </Card>
+
           {raporGetiriliyorMu && (
-            <div className="m-5">
-              <Spinner color="danger" />
-              <span className="m-2">
-                Rapor yükleniyor, bu işlem biraz zaman alabilir.
-              </span>
+            <div className="text-center my-5">
+              <Spinner
+                color="danger"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <p className="mt-3 text-muted">
+                Rapor yükleniyor, bu işlem biraz zaman alabilir...
+              </p>
             </div>
           )}
-        </div>
 
-        <div hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
-          {kontrolEdilecekBirimTipi.length > 0 &&
-            kontrolEdilecekBirimTipi.map((birimTip) => (
-              <div key={birimTip.unitTypeID} className="mt-5  ">
-                <h2 style={birimTipStyle}>{birimTip.tabloHeaderName}</h2>
-                <Row xs="4" className="equal-height">
-                  {mahkemeTablo.length > 0 &&
-                    mahkemeTablo
-                      .filter((birim) => birim.unitTypeID === birimTip.id)
-                      .map((birim) => (
-                        <Col key={birim.unitID} className="mt-2 col ">
-                          <div style={borderDivStyle} className="bg-light">
-                            <div style={divBirimNameStyle} id="birimName">
-                              <h4 className="text-center">{birim.name}</h4>
-                            </div>
+          <div hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
+            {kontrolEdilecekBirimTipi.length > 0 &&
+              kontrolEdilecekBirimTipi.map((birimTip) => (
+                <div key={birimTip.unitTypeID} className="mt-5">
+                  <h2 style={birimTipStyle}>
+                    <i className="fas fa-building me-2"></i>
+                    {birimTip.tabloHeaderName}
+                  </h2>
+                  <Row xs={1} md={2} lg={3} xl={4} className="g-3 equal-height">
+                    {mahkemeTablo.length > 0 &&
+                      mahkemeTablo
+                        .filter((birim) => birim.unitTypeID === birimTip.id)
+                        .map((birim) => (
+                          <Col key={birim.unitID}>
+                            <Card style={cardStyle} className="h-100">
+                              <CardHeader className="text-center bg-light">
+                                <h4 className="mb-0 birim-title">
+                                  {birim.name}
+                                </h4>
+                              </CardHeader>
+                              <CardBody>
+                                <div
+                                  className="text-center"
+                                  id="baskan"
+                                  hidden={!birimTip.baskanGerekliMi}
+                                >
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-gavel me-1"></i>{" "}
+                                    Mahkeme Başkanı
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "baskan"
+                                    )}
+                                </div>
 
-                            <div
-                              className="text-center"
-                              id="baskan"
-                              hidden={!birimTip.baskanGerekliMi}
-                            >
-                              <h5>Mahkeme Başkanı</h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(birim.persons, "baskan")}
-                            </div>
+                                <div
+                                  className="text-center"
+                                  id="uyehakim"
+                                  hidden={!birimTip.uyeHakimGerekliMi}
+                                >
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-balance-scale me-1"></i>{" "}
+                                    Üye Hakimler
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "uyehakim"
+                                    )}
+                                </div>
 
-                            <div
-                              className="text-center"
-                              id="uyehakim"
-                              hidden={!birimTip.uyeHakimGerekliMi}
-                            >
-                              <h5>Üye Hakimler </h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(
-                                  birim.persons,
-                                  "uyehakim"
-                                )}
-                            </div>
+                                <div
+                                  className="text-center"
+                                  id="hakim"
+                                  hidden={!birimTip.hakimGerekliMi}
+                                >
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-balance-scale me-1"></i>{" "}
+                                    Hakim
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "hakim"
+                                    )}
+                                </div>
 
-                            <div
-                              className="text-center"
-                              id="hakim"
-                              hidden={!birimTip.hakimGerekliMi}
-                            >
-                              <h5>Hakim </h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(birim.persons, "hakim")}
-                            </div>
+                                <div
+                                  className="text-center"
+                                  id="yaziislerimudürü"
+                                >
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-user-tie me-1"></i>{" "}
+                                    Yazı İşleri Müdürü
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "yaziislerimudürü"
+                                    )}
+                                </div>
 
-                            <div className="text-center" id="yaziislerimudürü">
-                              <h5>Yazı İşleri Müdürü</h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(
-                                  birim.persons,
-                                  "yaziislerimudürü"
-                                )}
-                            </div>
+                                <div className="text-center" id="mubasir">
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-bullhorn me-1"></i>{" "}
+                                    Mübaşir
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "mubasir"
+                                    )}
+                                </div>
 
-                            <div className="text-center" id="mubasir">
-                              <h5>Mübaşir</h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(
-                                  birim.persons,
-                                  "mubasir"
-                                )}
-                            </div>
+                                <div className="text-center" id="zabitkatibi">
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-pen me-1"></i> Zabıt
+                                    Katipleri
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "zabitkatibi"
+                                    )}
+                                </div>
 
-                            <div className="text-center" id="zabitkatibi">
-                              <h5>Zabıt Katipleri</h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(
-                                  birim.persons,
-                                  "zabitkatibi"
-                                )}
-                            </div>
-
-                            <div className="text-center" id="diger">
-                              <h5>Diğer Personel</h5>
-                              {birim.persons &&
-                                renderPersonelWithKind(birim.persons, "other")}
-                            </div>
-                          </div>
-                        </Col>
-                      ))}
-                </Row>
-              </div>
-            ))}
-        </div>
-      </div>
+                                <div className="text-center" id="diger">
+                                  <h5 style={sectionTitleStyle}>
+                                    <i className="fas fa-users me-1"></i> Diğer
+                                    Personel
+                                  </h5>
+                                  {birim.persons &&
+                                    renderPersonelWithKind(
+                                      birim.persons,
+                                      "other"
+                                    )}
+                                </div>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                        ))}
+                  </Row>
+                </div>
+              ))}
+          </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }
