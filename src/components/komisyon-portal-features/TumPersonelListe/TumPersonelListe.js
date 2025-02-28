@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FormGroup, Input, Label, Badge, Spinner, Button } from "reactstrap";
+import { FormGroup, Input, Label, Badge, Spinner } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
 import DataTable from "../../common/DataTable";
