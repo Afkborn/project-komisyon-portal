@@ -30,6 +30,8 @@ export default function TumPersonelTablo({
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
   const [selectedUnitType, setSelectedUnitType] = useState("Ceza");
   const [mahkemeTablo, setMahkemeTablo] = useState([]);
+  const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
+  const [hoveredDescriptionId, setHoveredDescriptionId] = useState(null);
 
   useEffect(() => {
     if (selectedKurum) {
@@ -128,7 +130,13 @@ export default function TumPersonelTablo({
     alignItems: "center",
   };
 
-  const [hoveredPersonelId, setHoveredPersonelId] = useState(null);
+  // Açıklama metnini kısaltmak için yardımcı fonksiyon
+  const truncateText = (text, maxLength = 15) => {
+    if (!text) return "";
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
+  };
 
   function renderPersonelWithKind(personelTablo, kind) {
     let filteredPersonel = personelTablo.filter(
@@ -188,16 +196,33 @@ export default function TumPersonelTablo({
         );
       }
       if (personel.description) {
+        const descriptionPopoverId = `descriptionPopover-${
+          personel._id || personel.id
+        }`;
+        const isDescriptionHovered =
+          hoveredDescriptionId === descriptionPopoverId;
+
         badges.push(
           <>
             <Badge
-              id={`descriptionPopover-${personel._id || personel.id}`}
+              id={descriptionPopoverId}
               color="info"
               className="ms-2"
               key="aciklama"
+              onMouseEnter={() => setHoveredDescriptionId(descriptionPopoverId)}
+              onMouseLeave={() => setHoveredDescriptionId(null)}
+              style={{ cursor: "pointer" }}
             >
-              {personel.description}
+              {truncateText(personel.description)}
             </Badge>
+            <Popover
+              placement="right"
+              isOpen={isDescriptionHovered}
+              target={descriptionPopoverId}
+            >
+              <PopoverHeader>Açıklama</PopoverHeader>
+              <PopoverBody>{personel.description}</PopoverBody>
+            </Popover>
           </>
         );
       }
