@@ -100,6 +100,7 @@ export default function PersonelIzinEkleModal({
       setIzin(initialIzinState);
       setErrors({});
     }
+    // eslint-disable-next-line 
   }, [modal]);
 
   // İzin süresini hesapla

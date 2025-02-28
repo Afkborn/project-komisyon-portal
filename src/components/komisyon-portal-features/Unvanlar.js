@@ -17,8 +17,6 @@ import {
   Label,
   InputGroup,
   InputGroupText,
-  Row,
-  Col,
   Tooltip,
 } from "reactstrap";
 import {
