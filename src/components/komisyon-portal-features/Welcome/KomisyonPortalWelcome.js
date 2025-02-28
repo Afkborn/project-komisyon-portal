@@ -149,6 +149,8 @@ export default function KomisyonPortalWelcome({
 
     axios(configuration)
       .then((response) => {
+        // response.data
+
         setUrgentJobs(response.data.urgentJobs);
         setUrgentJobsLoading(false);
       })
@@ -173,6 +175,11 @@ export default function KomisyonPortalWelcome({
 
   const handleTdOnClickPersonel = (personel) => {
     showPersonelDetay(personel);
+  };
+
+  // Tarihin geçip geçmediğini kontrol eden fonksiyon
+  const isDatePassed = (date) => {
+    return new Date(date) < new Date();
   };
 
   return (
@@ -213,31 +220,51 @@ export default function KomisyonPortalWelcome({
         )}
         {urgentJobs && urgentJobs.length > 0 && (
           <div className="mt-2">
-            <div>
+            {/* <div>
               <h5>Acele İşler</h5>
-            </div>
+            </div> */}
 
-            <Table striped size="sm">
+            <Table size="sm">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>İş Tanımı</th>
+                  <th>Acele İş Tanımı</th>
                   <th>Hedef</th>
                   <th>İşin Bitiş Tarihi</th>
                 </tr>
               </thead>
               <tbody>
                 {urgentJobs.map((job, index) => (
-                  <tr key={job.personID}>
+                  <tr
+                    id={job.personID}
+                    // mouse geldiğinde renk değiştirme
+                    onMouseEnter={() => {
+                      document.getElementById(
+                        job.personID
+                      ).style.backgroundColor = "lightgray";
+                    }}
+                    onMouseLeave={() => {
+                      document.getElementById(
+                        job.personID
+                      ).style.backgroundColor = "white";
+                    }}
+                    key={job.personID}
+                  >
                     <th scope="row">{index + 1}</th>
                     <td>{job.urgentJobType}</td>
                     <td
                       style={clickableTdStyle}
                       onClick={() => handleTdOnClickPersonel(job)}
                     >
-                      {job.ad} {job.soyad} ({job.sicil})
+                      {job.ad} {job.soyad} ({job.sicil} - {job.title})
                     </td>
-                    <td>
+                    <td
+                      style={{
+                        color: isDatePassed(job.urgentJobEndDate)
+                          ? "#dc3545"
+                          : "inherit",
+                      }}
+                    >
                       {renderDate_GGAAYYYY(job.urgentJobEndDate)} (
                       {calculateKalanGorevSuresi(job.urgentJobEndDate)})
                     </td>

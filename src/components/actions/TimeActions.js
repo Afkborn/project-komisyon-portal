@@ -49,7 +49,7 @@ function calculateKalanGorevSuresi(date) {
   const diff = d - now;
   const gun = Math.ceil(diff / 86400000); // Math.floor yerine Math.ceil ile tam gün elde edilir
   if (gun === 0) return "Bugün"; 
-  if (gun < 0) return "Süre Doldu";
+  if (gun < 0) return "Gecikti";
 
 
   return `${gun} Gün`;
