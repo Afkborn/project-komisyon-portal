@@ -259,7 +259,7 @@ export default function KomisyonPortalWelcome({
           <div className="d-flex justify-content-between align-items-center">
             <div>
               <h3 className="m-0 font-weight-bold">
-                EPSİS - Elektronik Personel Sistemi
+                EPSİS - Eskişehir Personel Sistemi
                 {user && user.roles.includes("komisyonbaskan") && (
                   <Badge color="danger" className="ml-2 p-2">
                     REİS
