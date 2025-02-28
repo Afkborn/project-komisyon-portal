@@ -57,17 +57,6 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
     },
   ];
 
-  const handleSearchByChange = (e) => {
-    setSearchBy(e.target.value);
-    clearForm();
-  };
-
-  const clearForm = () => {
-    setStartDate(new Date());
-    setEndDate(new Date());
-    setPersonelList([]);
-    setAramaYapildiMi(false);
-  };
 
   const handleReasonChange = (e) => {
     if (e.target.value === "Tüm İzin Türleri") {
