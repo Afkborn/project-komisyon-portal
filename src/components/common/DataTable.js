@@ -10,8 +10,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  FormGroup,
-  Label,
 } from "reactstrap";
 import {
   FaSort,
