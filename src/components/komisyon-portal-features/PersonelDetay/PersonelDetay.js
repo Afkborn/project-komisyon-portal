@@ -63,7 +63,7 @@ export default function PersonelDetay({
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [activeTab, setActiveTab] = useState("1");
-  
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
@@ -94,8 +94,6 @@ export default function PersonelDetay({
   const toggleTab = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
-
-
 
   useEffect(() => {
     // URL'de sicil varsa personeli getir
@@ -211,8 +209,6 @@ export default function PersonelDetay({
       axios(configuration)
         .then((response) => {
           setPersonel(response.data.person);
-
-
 
           setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
         })
@@ -387,8 +383,6 @@ export default function PersonelDetay({
             setUpdatedPersonel(null);
             return;
           }
-
-   
 
           setUpdatedPersonel(updatedPersonelAttributes(person));
         }

@@ -366,6 +366,8 @@ export default function TumPersonelListe({
                 customRowClassName={(row) =>
                   row.izindeMi ? "table-danger bg-opacity-25" : ""
                 }
+                // Sıralama işlemi DataTable içinde ele alınacak
+                disableExternalSort={false}
               />
             </div>
           )}

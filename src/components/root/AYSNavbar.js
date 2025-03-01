@@ -39,9 +39,25 @@ export default function AYSNavbar() {
   }, [user]);
 
   function logout() {
-    cookies.remove("TOKEN");
     setUser(null);
+    // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
+    cookies.remove("TOKEN", { path: "/" });
+
+    // Tarayıcı önbelleğini temizle ve session'ı sonlandır
+    if (window.sessionStorage) {
+      window.sessionStorage.clear();
+    }
+
+    // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
     window.location.href = "/";
+
+    // Alternatif olarak daha güçlü bir çözüm
+    setTimeout(() => {
+      if (cookies.get("TOKEN")) {
+        // Eğer token hala duruyorsa, sayfayı tamamen yenile
+        window.location.reload(true);
+      }
+    }, 100);
   }
 
   function handleLogin() {
@@ -85,9 +101,7 @@ export default function AYSNavbar() {
           <img alt="logo" src={logo} className="navbar-logo mr-3" />
           <span className="navbar-title">Adliye Yönetim Sistemi</span>
         </NavbarBrand>
-        <div className="navbar-dropdown-container">
-          {renderDropdown()}
-        </div>
+        <div className="navbar-dropdown-container">{renderDropdown()}</div>
       </Container>
     </Navbar>
   );

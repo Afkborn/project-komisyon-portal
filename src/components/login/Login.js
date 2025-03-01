@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {
-  MDBBtn,
-  MDBContainer,
-  MDBRow,
-  MDBCol,
-  MDBInput,
-  MDBCheckbox,
-  MDBCard,
-  MDBCardBody,
-  MDBIcon,
-} from "mdb-react-ui-kit";
+  Container,
+  Row,
+  Col,
+  Card,
+  CardBody,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Button,
+  Alert,
+} from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo300.png";
 import "../../styles/Login.css";
@@ -111,11 +113,11 @@ function Login() {
   };
 
   return (
-    <MDBContainer className="my-5">
-      <MDBCard className="login-card">
-        <MDBRow className="g-0">
-          <MDBCol md="6" className="d-flex align-items-center">
-            <MDBCardBody className="p-4 p-lg-5">
+    <Container className="my-5">
+      <Card className="login-card">
+        <Row className="g-0">
+          <Col md="6" className="d-flex align-items-center">
+            <CardBody className="p-4 p-lg-5">
               <div className="text-center mb-4">
                 <div
                   onClick={() => navigate("/")}
@@ -134,11 +136,10 @@ function Login() {
                 </h3>
               </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="form-outline mb-4">
-                  <MDBInput
-                    wrapperClass="mb-4 position-relative"
-                    label="Sicil Numarası (abXXXXXX)"
+              <Form onSubmit={handleSubmit}>
+                <FormGroup className="form-outline mb-4">
+                  <Label for="sicilNo">Sicil Numarası (abXXXXXX)</Label>
+                  <Input
                     id="sicilNo"
                     onChange={(e) => {
                       setSicilNo(e.target.value);
@@ -148,13 +149,11 @@ function Login() {
                     value={sicilNo}
                     type="text"
                     autoComplete="username"
-                    icon={<MDBIcon fas icon="user" />}
                   />
 
                   <div className="password-input position-relative">
-                    <MDBInput
-                      wrapperClass="mb-4"
-                      label="Şifre"
+                    <Label for="sifre">Şifre</Label>
+                    <Input
                       id="sifre"
                       onChange={(e) => {
                         setSifre(e.target.value);
@@ -164,7 +163,6 @@ function Login() {
                       value={sifre}
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
-                      icon={<MDBIcon fas icon="lock" />}
                     />
                     <span
                       className="password-toggle"
@@ -178,34 +176,36 @@ function Login() {
                         zIndex: 2,
                       }}
                     >
-                      <MDBIcon fas icon={showPassword ? "eye-slash" : "eye"} />
+                      <i
+                        className={`fas fa-${
+                          showPassword ? "eye-slash" : "eye"
+                        }`}
+                      ></i>
                     </span>
                   </div>
 
                   <div className="d-flex justify-content-between mb-4">
-                    <MDBCheckbox
-                      id="rememberMe"
-                      label="Beni Hatırla"
-                      checked={rememberMe}
-                      onChange={() => setRememberMe(!rememberMe)}
-                    />
+                    <FormGroup check>
+                      <Label check>
+                        <Input
+                          type="checkbox"
+                          id="rememberMe"
+                          checked={rememberMe}
+                          onChange={() => setRememberMe(!rememberMe)}
+                        />
+                        Beni Hatırla
+                      </Label>
+                    </FormGroup>
                   </div>
 
                   {error && (
-                    <div
-                      className="alert alert-danger mb-4 text-center fade-in"
-                      role="alert"
-                    >
-                      <MDBIcon
-                        fas
-                        icon="exclamation-triangle"
-                        className="me-2"
-                      />
+                    <Alert color="danger" className="mb-4 text-center fade-in">
+                      <i className="fas fa-exclamation-triangle me-2"></i>
                       {errorMessage}
-                    </div>
+                    </Alert>
                   )}
 
-                  <MDBBtn
+                  <Button
                     type="submit"
                     onClick={login}
                     className="mb-4 w-100 btn-login"
@@ -223,17 +223,17 @@ function Login() {
                       </>
                     ) : (
                       <>
-                        <MDBIcon fas icon="sign-in-alt" className="me-2" />
+                        <i className="fas fa-sign-in-alt me-2"></i>
                         Giriş Yap
                       </>
                     )}
-                  </MDBBtn>
-                </div>
-              </form>
-            </MDBCardBody>
-          </MDBCol>
+                  </Button>
+                </FormGroup>
+              </Form>
+            </CardBody>
+          </Col>
 
-          <MDBCol
+          <Col
             md="6"
             className="system-info text-white d-flex align-items-center"
           >
@@ -248,7 +248,7 @@ function Login() {
               </p>
               <div className="d-flex align-items-center mb-4">
                 <div className="feature-icon me-3">
-                  <MDBIcon fas icon="chart-line" />
+                  <i className="fas fa-chart-line"></i>
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1">Verimli Çalışma</h6>
@@ -257,7 +257,7 @@ function Login() {
               </div>
               <div className="d-flex align-items-center mb-4">
                 <div className="feature-icon me-3">
-                  <MDBIcon fas icon="shield-alt" />
+                  <i className="fas fa-shield-alt"></i>
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1">Güvenli Erişim</h6>
@@ -266,7 +266,7 @@ function Login() {
               </div>
               <div className="d-flex align-items-center">
                 <div className="feature-icon me-3">
-                  <MDBIcon fas icon="sync" />
+                  <i className="fas fa-sync"></i>
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1">Güncel Bilgiler</h6>
@@ -274,11 +274,11 @@ function Login() {
                 </div>
               </div>
             </div>
-          </MDBCol>
-        </MDBRow>
-      </MDBCard>
+          </Col>
+        </Row>
+      </Card>
       <p className="text-center text-muted mt-4">Developed by Bilgehan Kalay</p>
-    </MDBContainer>
+    </Container>
   );
 }
 

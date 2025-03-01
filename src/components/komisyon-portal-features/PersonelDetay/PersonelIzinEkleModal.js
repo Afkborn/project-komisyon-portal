@@ -300,6 +300,7 @@ export default function PersonelIzinEkleModal({
                               type="select"
                               name="reason"
                               id="reason"
+                              size="sm"
                               onChange={handleInputChange}
                               value={izin.reason}
                               className={`form-select ${
@@ -417,6 +418,7 @@ export default function PersonelIzinEkleModal({
                                   type="date"
                                   name="startDate"
                                   id="startDate"
+                                  size="sm"
                                   value={izin.startDate}
                                   onChange={handleInputChange}
                                   className={
@@ -446,6 +448,7 @@ export default function PersonelIzinEkleModal({
                                   name="endDate"
                                   id="endDate"
                                   value={izin.endDate}
+                                  size="sm"
                                   onChange={handleInputChange}
                                   className={errors.endDate ? "is-invalid" : ""}
                                 />

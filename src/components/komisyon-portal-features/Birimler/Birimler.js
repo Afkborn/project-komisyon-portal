@@ -409,7 +409,7 @@ export default function Birimler({ selectedKurum, token }) {
                     <th>Adı</th>
                     <th>Durum</th>
                     <th className="text-center">Min. Katip</th>
-                    <th>Heyet/Tek</th>
+                    <th>Tek/Çift</th>
                     <th className="text-center">İşlemler</th>
                   </tr>
                 </thead>

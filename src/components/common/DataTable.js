@@ -17,6 +17,10 @@ const DataTable = ({
   generatePdf,
   printTable,
   initialPageSize = 30, // varsayılan değer
+  tableClassName = "",
+  striped = true,
+  customRowClassName = null,
+  disableExternalSort = false, // Dışarıda sıralama yapılmışsa sıralamayı atlayabilmek için
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -51,8 +55,8 @@ const DataTable = ({
       );
     }
 
-    // Sıralama
-    if (sortConfig.key) {
+    // Sıralama - disableExternalSort false ise sırala
+    if (sortConfig.key && !disableExternalSort) {
       processedData.sort((a, b) => {
         // İlgili kolonu bul
         const column = columns.find((col) => col.key === sortConfig.key);
@@ -60,6 +64,24 @@ const DataTable = ({
         // Değerleri al (render fonksiyonu varsa onu kullan)
         let aValue = column.render ? column.render(a) : a[sortConfig.key];
         let bValue = column.render ? column.render(b) : b[sortConfig.key];
+
+        // String olarak kullanmak için text çıkarıyoruz render fonksiyonu varsa
+        if (
+          column.render &&
+          typeof aValue !== "string" &&
+          typeof aValue !== "number"
+        ) {
+          // React elementi olabilir, text içeriğini almaya çalışalım
+          aValue =
+            column.key === "fullName"
+              ? `${a.ad || ""} ${a.soyad || ""}`
+              : a[sortConfig.key]?.toString() || "";
+
+          bValue =
+            column.key === "fullName"
+              ? `${b.ad || ""} ${b.soyad || ""}`
+              : b[sortConfig.key]?.toString() || "";
+        }
 
         // Sıralama yönüne göre karşılaştır
         if (aValue < bValue) {
@@ -73,7 +95,7 @@ const DataTable = ({
     }
 
     return processedData;
-  }, [data, searchTerm, sortConfig, columns]);
+  }, [data, searchTerm, sortConfig, columns, disableExternalSort]);
 
   // Pagination için veriyi böl
   const paginatedData = useMemo(() => {
@@ -180,7 +202,13 @@ const DataTable = ({
         </div>
       </div>
 
-      <Table hover responsive striped id={tableName}>
+      <Table
+        hover={true}
+        responsive={true}
+        striped={striped}
+        id={tableName}
+        className={tableClassName}
+      >
         <thead>
           <tr>
             {columns.map((column) => (
@@ -197,7 +225,10 @@ const DataTable = ({
         </thead>
         <tbody>
           {paginatedData.map((item, index) => (
-            <tr key={item._id || index}>
+            <tr
+              key={item._id || index}
+              className={customRowClassName ? customRowClassName(item) : ""}
+            >
               {columns.map((column) => (
                 <td key={column.key}>
                   {column.render ? column.render(item) : item[column.key]}

@@ -277,6 +277,24 @@ export default function KomisyonPortalWelcome({
         <CardBody className="py-4">
           <Row className="align-items-center">
             <Col md="2" className="text-center mb-3 mb-md-0">
+              {/* <div
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  background: "#e9ecef",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px",
+                }}
+              >
+                <span>
+                  {user.name?.charAt(0)}
+                  {user.surname?.charAt(0)}
+                </span>
+              </div> */}
+
               <div
                 style={{
                   background: "#f0f4ff",
@@ -289,7 +307,11 @@ export default function KomisyonPortalWelcome({
                   margin: "0 auto",
                 }}
               >
-                <FaUser size={40} color="#3f51b5" />
+                {/* <FaUser size={10} color="#3f51b5" /> */}
+                <span>
+                  {user.name?.charAt(0)}
+                  {user.surname?.charAt(0)}
+                </span>
               </div>
             </Col>
             <Col md="10">
@@ -307,13 +329,6 @@ export default function KomisyonPortalWelcome({
                 EPSİS'e hoşgeldiniz. Sistemdeki güncel bilgilere ulaşabilir,
                 işlemlerinizi kolayca gerçekleştirebilirsiniz.
               </CardText>
-              {selectedKurum && (
-                <div className="mt-2">
-                  <Badge color="secondary" style={{ fontSize: "0.8rem" }}>
-                    {selectedKurum.name}
-                  </Badge>
-                </div>
-              )}
             </Col>
           </Row>
         </CardBody>

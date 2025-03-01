@@ -237,9 +237,32 @@ export default function KomisyonPortalDashboard() {
 
   // Logout function
   function logout() {
+    // Tüm yerel depolamayı temizle
     localStorage.removeItem("selectedKurum");
-    cookies.remove("TOKEN");
-    window.location.href = "/login";
+
+    // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
+    cookies.remove("TOKEN", { path: "/" });
+
+    // Tarayıcı önbelleğini temizle ve session'ı sonlandır
+    if (window.sessionStorage) {
+      window.sessionStorage.clear();
+    }
+
+    // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
+    window.location.href = "/";
+
+    // Alternatif olarak daha güçlü bir çözüm
+    setTimeout(() => {
+      if (cookies.get("TOKEN")) {
+        // Eğer token hala duruyorsa, sayfayı tamamen yenile
+        window.location.reload(true);
+      }
+    }, 100);
+  }
+
+  // Portal Navigation
+  function handlePortal() {
+    navigate("/");
   }
 
   // Home navigation
@@ -585,9 +608,9 @@ export default function KomisyonPortalDashboard() {
                   <i className="fas fa-exchange-alt me-1"></i>
                   Kurum Değiştir
                 </Button>
-                <Button color="danger" size="sm" onClick={logout}>
-                  <i className="fas fa-sign-out-alt me-1"></i>
-                  Çıkış
+                <Button color="danger" size="sm" onClick={handlePortal}>
+                  <i className="fas fa-home me-1"></i>
+                  Ana Sayfa
                 </Button>
               </div>
             </Nav>
@@ -878,6 +901,26 @@ export default function KomisyonPortalDashboard() {
           z-index: 1030;
           transition: all 0.3s ease;
           overflow-y: auto;
+          scrollbar-width: thin; /* Firefox için ince scrollbar */
+          scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Firefox için scrollbar rengi */
+        }
+
+        /* WebKit (Chrome, Safari, Edge) tarayıcılar için scrollbar stilleri */
+        .sidebar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.3);
         }
 
         .sidebar.closed {
@@ -888,11 +931,71 @@ export default function KomisyonPortalDashboard() {
           margin-left: 250px;
           width: calc(100% - 250px);
           transition: all 0.3s ease;
+          overflow-x: hidden;
+        }
+
+        /* Ana içerik scrollbar stilini özelleştirme */
+        .main-content::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.2);
         }
 
         .sidebar-closed .main-content {
           margin-left: 0;
           width: 100%;
+        }
+
+        /* Sidebar menü bölümünün scrollbar'ını gizle/özelleştir */
+        .sidebar-menu {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.15);
+          border-radius: 10px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.25);
+        }
+
+        /* Genel olarak tüm sayfa için scrollbar stili */
+        body::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        body::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        body::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.15);
+          border-radius: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.25);
         }
 
         .dashboard-navbar {
