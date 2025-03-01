@@ -19,10 +19,16 @@ export function generatePdf(
 
   // İstenilen öğeleri kaldıralım
   if (deleteID) {
+    console.log("İSTENİLMEYEN ÖGE ID: ", deleteID);
     let elementsToRemove = tempElement.querySelectorAll(
       `#${deleteID}, .no-print`
     );
-    elementsToRemove.forEach((el) => el.remove());
+    let silinenElemanSayisi = elementsToRemove.length;
+    elementsToRemove.forEach((el) => {
+      el.remove();
+    } );
+    console.log("SİLİNEN ELEMAN SAYISI: ", silinenElemanSayisi);
+
   }
 
   // PDF için özel stil elemanı oluştur

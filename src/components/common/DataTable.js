@@ -220,7 +220,7 @@ const DataTable = ({
                 {column.header} {renderSortIcon(column.key)}
               </th>
             ))}
-            {onDetailClick && <th>İşlemler</th>}
+            {onDetailClick && <th id="detayTD">İşlemler</th>}
           </tr>
         </thead>
         <tbody>
