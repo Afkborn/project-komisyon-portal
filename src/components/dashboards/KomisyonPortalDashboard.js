@@ -84,7 +84,7 @@ export default function KomisyonPortalDashboard() {
   const token = cookies.get("TOKEN");
 
   // Auth kontrolü hook'u ekleyin
-  const { isAuthenticated, checkTokenValidity, forceLogout } = useAuthCheck();
+  const { checkTokenValidity, forceLogout } = useAuthCheck();
 
   // Toggle functions
   const toggleNavbar = () => setCollapsed(!collapsed);
