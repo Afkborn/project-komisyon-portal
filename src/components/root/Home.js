@@ -148,7 +148,13 @@ export default function Home() {
       detail:
         "Eskişehir Personel Sistemi ile adliye personellerinin bilgilerini görüntüleyebilirsiniz.",
       type: "item",
-      visibleRoles: ["komisyonbaskan", "komisyonuye", "komisyonkatip", "admin"],
+      visibleRoles: [
+        "komisyonbaskan",
+        "komisyonuye",
+        "komisyonkatip",
+        "komisyonmudur",
+        "admin",
+      ],
       image: epsisLogo,
       onClick: handleKomisyonPortal,
       visible: true,

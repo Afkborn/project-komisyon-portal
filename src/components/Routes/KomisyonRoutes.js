@@ -25,7 +25,13 @@ function KomisyonRoutes() {
 
   // Rol kontrolü
   // komisyonuyesi, komisyonbaskani, admin rolleri için yetkilendirme
-  const requiredRoles = ["komisyonuye", "komisyonbaskan", "admin", "komisyonkatip"];
+  const requiredRoles = [
+    "komisyonbaskan",
+    "komisyonuye",
+    "komisyonkatip",
+    "komisyonmudur",
+    "admin",
+  ];
 
   if (!hasRequiredRole(decodedToken, requiredRoles)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
