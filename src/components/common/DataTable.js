@@ -6,8 +6,20 @@ import {
   Pagination,
   PaginationItem,
   PaginationLink,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  FormGroup,
+  Label,
 } from "reactstrap";
-import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import {
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaFilePdf,
+  FaPrint,
+} from "react-icons/fa";
 
 const DataTable = ({
   data,
@@ -16,21 +28,34 @@ const DataTable = ({
   tableName = "Tablo",
   generatePdf,
   printTable,
-  initialPageSize = 30, // varsayılan değer
+  initialPageSize = 30,
   tableClassName = "",
   striped = true,
   customRowClassName = null,
-  disableExternalSort = false, // Dışarıda sıralama yapılmışsa sıralamayı atlayabilmek için
+  disableExternalSort = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
+  // Modal durumları - değişti
+  const [pdfConfirmOpen, setPdfConfirmOpen] = useState(false);
+  const [printConfirmOpen, setPrintConfirmOpen] = useState(false);
+
+  // Modal togglers - değişti
+  const togglePdfConfirm = () => setPdfConfirmOpen(!pdfConfirmOpen);
+  const togglePrintConfirm = () => setPrintConfirmOpen(!printConfirmOpen);
+
   // Sayfa boyutu değiştiğinde ilk sayfaya dön
   const handlePageSizeChange = (newSize) => {
     setPageSize(parseInt(newSize));
     setCurrentPage(1);
+  };
+
+  // Pagination kontrolü
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   // Sıralama fonksiyonu
@@ -106,9 +131,30 @@ const DataTable = ({
   // Toplam sayfa sayısını hesapla
   const totalPages = Math.ceil(filteredAndSortedData.length / pageSize);
 
-  // Pagination kontrolü
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  // PDF oluşturma işlemi - basitleştirildi
+  const handlePdfExport = () => {
+    if (generatePdf) {
+      // Önce modalı kapat
+      setPdfConfirmOpen(false);
+      // Sadece görünen verileri PDF'e aktar
+      generatePdf(
+        document,
+        tableName,
+        tableName,
+        "detayTD",
+        columns.length > 5
+      );
+    }
+  };
+
+  // Yazdırma işlemi - basitleştirildi
+  const handlePrint = () => {
+    if (printTable) {
+      // Önce modalı kapat
+      setPrintConfirmOpen(false);
+      // Sadece görünen verileri yazdır
+      printTable(document, tableName, tableName, "detayTD", columns.length > 5);
+    }
   };
 
   // Sıralama ikonu render
@@ -155,6 +201,78 @@ const DataTable = ({
     );
   };
 
+  // PDF Onay Modalı (seçenekleri kaldırıldı, sadece bilgilendirme içeriyor)
+  const pdfConfirmContent = (
+    <Modal isOpen={pdfConfirmOpen} toggle={togglePdfConfirm}>
+      <ModalHeader toggle={togglePdfConfirm}>PDF Dışa Aktarma</ModalHeader>
+      <ModalBody>
+        <div className="d-flex align-items-start mb-3">
+          <div className="text-danger me-3">
+            <i className="fas fa-info-circle fa-2x"></i>
+          </div>
+          <div>
+            <h5>PDF'e Aktarma Bilgisi</h5>
+            <p className="mb-0">
+              Bu işlem sadece tabloda şu anda görünen {paginatedData.length}{" "}
+              kaydı PDF'e aktaracak.
+              {filteredAndSortedData.length > paginatedData.length && (
+                <span className="text-muted d-block mt-2">
+                  Not: Filtrelenmiş toplam {filteredAndSortedData.length} kayıt
+                  var, ancak yalnızca bu sayfada görüntülenen kayıtlar PDF'e
+                  aktarılacak.
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={handlePdfExport}>
+          <FaFilePdf className="me-2" /> PDF Oluştur
+        </Button>
+        <Button color="secondary" onClick={togglePdfConfirm}>
+          İptal
+        </Button>
+      </ModalFooter>
+    </Modal>
+  );
+
+  // Yazdırma Onay Modalı (seçenekleri kaldırıldı, sadece bilgilendirme içeriyor)
+  const printConfirmContent = (
+    <Modal isOpen={printConfirmOpen} toggle={togglePrintConfirm}>
+      <ModalHeader toggle={togglePrintConfirm}>Yazdırma</ModalHeader>
+      <ModalBody>
+        <div className="d-flex align-items-start mb-3">
+          <div className="text-danger me-3">
+            <i className="fas fa-info-circle fa-2x"></i>
+          </div>
+          <div>
+            <h5>Yazdırma Bilgisi</h5>
+            <p className="mb-0">
+              Bu işlem sadece tabloda şu anda görünen {paginatedData.length}{" "}
+              kaydı yazdıracak.
+              {filteredAndSortedData.length > paginatedData.length && (
+                <span className="text-muted d-block mt-2">
+                  Not: Filtrelenmiş toplam {filteredAndSortedData.length} kayıt
+                  var, ancak yalnızca bu sayfada görüntülenen kayıtlar
+                  yazdırılacak.
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={handlePrint}>
+          <FaPrint className="me-2" /> Yazdır
+        </Button>
+        <Button color="secondary" onClick={togglePrintConfirm}>
+          İptal
+        </Button>
+      </ModalFooter>
+    </Modal>
+  );
+
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -190,13 +308,17 @@ const DataTable = ({
               ` (Sayfa ${currentPage}/${totalPages})`}
           </span>
           {generatePdf && (
-            <Button color="danger" className="ms-2" onClick={generatePdf}>
-              PDF'e Aktar
+            <Button color="danger" className="ms-2" onClick={togglePdfConfirm}>
+              <FaFilePdf className="me-1" /> PDF'e Aktar
             </Button>
           )}
           {printTable && (
-            <Button color="danger" className="ms-2" onClick={printTable}>
-              Yazdır
+            <Button
+              color="danger"
+              className="ms-2"
+              onClick={togglePrintConfirm}
+            >
+              <FaPrint className="me-1" /> Yazdır
             </Button>
           )}
         </div>
@@ -246,6 +368,10 @@ const DataTable = ({
         </tbody>
       </Table>
       {totalPages > 1 && renderPagination()}
+
+      {/* PDF ve Yazdırma Modalları - güncellendi */}
+      {pdfConfirmContent}
+      {printConfirmContent}
     </div>
   );
 };

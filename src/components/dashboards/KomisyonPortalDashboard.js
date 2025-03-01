@@ -568,7 +568,15 @@ export default function KomisyonPortalDashboard() {
         {/* Sidebar Footer */}
         <div className="sidebar-footer text-center p-3 border-top">
           <small className="text-muted">
-            &copy; {new Date().getFullYear()} EPSİS
+            &copy; {new Date().getFullYear()} EPSİS - Designed by{" "}
+            <a
+              href="https://github.com/Afkborn"
+              target="_blank"
+              rel="noreferrer"
+              className="text-danger"
+            >
+              Bilgehan KALAY
+            </a>
           </small>
         </div>
       </div>

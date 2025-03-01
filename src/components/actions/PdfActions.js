@@ -31,6 +31,11 @@ export function generatePdf(
 
   }
 
+  // Debug log ekleyelim
+  console.log(`PDF oluşturuluyor: ${fileName}`);
+  console.log(`Element içeriği:`, tempElement.innerHTML.substring(0, 200) + '...');
+  console.log(`Toplam tablo satır sayısı:`, tempElement.querySelectorAll('tr').length);
+
   // PDF için özel stil elemanı oluştur
   const styleElement = document.createElement("style");
   styleElement.textContent = `
