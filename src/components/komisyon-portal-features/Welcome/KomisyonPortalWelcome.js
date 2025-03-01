@@ -260,11 +260,6 @@ export default function KomisyonPortalWelcome({
             <div>
               <h3 className="m-0 font-weight-bold">
                 EPSİS - Eskişehir Personel Sistemi
-                {user && user.roles.includes("komisyonbaskan") && (
-                  <Badge color="danger" className="ml-2 p-2">
-                    REİS
-                  </Badge>
-                )}
               </h3>
               <p className="text-muted small mb-0">{today}</p>
             </div>
@@ -320,7 +315,7 @@ export default function KomisyonPortalWelcome({
                 {user && (
                   <span style={{ color: "#3f51b5" }}>
                     {user.roles.includes("komisyonbaskan")
-                      ? "Sayın Reis"
+                      ? " REİS"
                       : user.name}
                   </span>
                 )}
