@@ -39,25 +39,43 @@ export default function AYSNavbar() {
   }, [user]);
 
   function logout() {
-    setUser(null);
-    // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
-    cookies.remove("TOKEN", { path: "/" });
-
-    // Tarayıcı önbelleğini temizle ve session'ı sonlandır
-    if (window.sessionStorage) {
-      window.sessionStorage.clear();
-    }
-
-    // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
-    window.location.href = "/";
-
-    // Alternatif olarak daha güçlü bir çözüm
-    setTimeout(() => {
-      if (cookies.get("TOKEN")) {
-        // Eğer token hala duruyorsa, sayfayı tamamen yenile
-        window.location.reload(true);
+    // Backend'e logout isteği gönder
+    axios({
+      method: 'POST',
+      url: '/api/users/logout',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    }, 100);
+    })
+    .then(() => {
+      console.log("Başarıyla çıkış yapıldı");
+    })
+    .catch(error => {
+      console.error("Çıkış yaparken bir hata oluştu:", error);
+    })
+    .finally(() => {
+      // İşlem başarılı olsa da olmasa da kullanıcı bilgisini temizle ve çıkış işlemini tamamla
+      setUser(null);
+      
+      // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
+      cookies.remove("TOKEN", { path: "/" });
+
+      // Tarayıcı önbelleğini temizle ve session'ı sonlandır
+      if (window.sessionStorage) {
+        window.sessionStorage.clear();
+      }
+
+      // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
+      window.location.href = "/";
+
+      // Alternatif olarak daha güçlü bir çözüm
+      setTimeout(() => {
+        if (cookies.get("TOKEN")) {
+          // Eğer token hala duruyorsa, sayfayı tamamen yenile
+          window.location.reload(true);
+        }
+      }, 100);
+    });
   }
 
   function handleLogin() {

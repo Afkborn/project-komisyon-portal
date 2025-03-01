@@ -50,10 +50,7 @@ function App() {
         </Route>
 
         <Route element={<SegbisRoutes />}>
-          <Route
-            path="/segbis-rehber/*"
-            element={<SegbisRehberDashboard />}
-          />
+          <Route path="/segbis-rehber/*" element={<SegbisRehberDashboard />} />
         </Route>
 
         {/* Public Routes */}
@@ -61,7 +58,7 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      
+
       {/* Global styles for app wrapper */}
       <style jsx="true">{`
         .app-wrapper {

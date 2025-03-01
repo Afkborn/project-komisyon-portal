@@ -57,6 +57,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import useAuthCheck from "../utils/AuthCheck";
 
 export default function KomisyonPortalDashboard() {
   const [selectedBirimID, setSelectedBirimID] = useState(null);
@@ -81,6 +82,9 @@ export default function KomisyonPortalDashboard() {
   const location = useLocation();
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+
+  // Auth kontrolü hook'u ekleyin
+  const { isAuthenticated, checkTokenValidity, forceLogout } = useAuthCheck();
 
   // Toggle functions
   const toggleNavbar = () => setCollapsed(!collapsed);
@@ -116,18 +120,37 @@ export default function KomisyonPortalDashboard() {
 
   // Initial data loading
   useEffect(() => {
-    const loadInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await Promise.all([getUser(), getKurum(), getUnvanlar()]);
-      } catch (error) {
-        console.error("Initial data loading error:", error);
-      } finally {
-        setIsLoading(false);
+    // Token geçerliliği ile ilk kontrol
+    const validateSession = async () => {
+      const isValid = await checkTokenValidity();
+      if (!isValid) {
+        return;
       }
+
+      // Token geçerliyse verileri yüklemeye devam et
+      const loadInitialData = async () => {
+        setIsLoading(true);
+        try {
+          await Promise.all([getUser(), getKurum(), getUnvanlar()]);
+        } catch (error) {
+          console.error("Initial data loading error:", error);
+          if (
+            error.response &&
+            (error.response.status === 401 || error.response.status === 403)
+          ) {
+            forceLogout(
+              "Oturum süreniz doldu veya hesabınızla ilgili bir değişiklik yapıldı."
+            );
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadInitialData();
     };
 
-    loadInitialData();
+    validateSession();
 
     // Handle responsive sidebar
     const handleResize = () => {
@@ -237,27 +260,43 @@ export default function KomisyonPortalDashboard() {
 
   // Logout function
   function logout() {
-    // Tüm yerel depolamayı temizle
-    localStorage.removeItem("selectedKurum");
+    // Backend'e logout isteği gönder
+    axios({
+      method: "POST",
+      url: "/api/users/logout",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => {
+        console.log("Başarıyla çıkış yapıldı");
+      })
+      .catch((error) => {
+        console.error("Çıkış yaparken bir hata oluştu:", error);
+      })
+      .finally(() => {
+        // Tüm yerel depolamayı temizle
+        localStorage.removeItem("selectedKurum");
 
-    // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
-    cookies.remove("TOKEN", { path: "/" });
+        // Cookie'yi doğru şekilde temizle (path ve domain parametreleriyle)
+        cookies.remove("TOKEN", { path: "/" });
 
-    // Tarayıcı önbelleğini temizle ve session'ı sonlandır
-    if (window.sessionStorage) {
-      window.sessionStorage.clear();
-    }
+        // Tarayıcı önbelleğini temizle ve session'ı sonlandır
+        if (window.sessionStorage) {
+          window.sessionStorage.clear();
+        }
 
-    // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
-    window.location.href = "/";
+        // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
+        window.location.href = "/";
 
-    // Alternatif olarak daha güçlü bir çözüm
-    setTimeout(() => {
-      if (cookies.get("TOKEN")) {
-        // Eğer token hala duruyorsa, sayfayı tamamen yenile
-        window.location.reload(true);
-      }
-    }, 100);
+        // Alternatif olarak daha güçlü bir çözüm
+        setTimeout(() => {
+          if (cookies.get("TOKEN")) {
+            // Eğer token hala duruyorsa, sayfayı tamamen yenile
+            window.location.reload(true);
+          }
+        }, 100);
+      });
   }
 
   // Portal Navigation

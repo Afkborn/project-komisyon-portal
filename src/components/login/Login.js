@@ -33,7 +33,26 @@ function Login() {
   useEffect(() => {
     const token = cookies.get("TOKEN");
     if (token) {
-      navigate("/");
+      // Token'ın geçerliliğini backend'e sorarak kontrol et
+      axios({
+        method: "GET",
+        url: "/api/users/validate-token",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((result) => {
+          if (result.data.valid) {
+            navigate("/");
+          } else {
+            // Token geçersizse cookie'yi temizle
+            cookies.remove("TOKEN", { path: "/" });
+          }
+        })
+        .catch(() => {
+          // Hata durumunda da cookie'yi temizle
+          cookies.remove("TOKEN", { path: "/" });
+        });
     }
   }, [navigate]);
 
