@@ -820,14 +820,33 @@ export default function PersonelDetay({
                                   className="form-control-plaintext fw-bold"
                                   value={
                                     personel.deactivationReason
-                                      ? personel.deactivationReason
+                                      ? personel.deactivationReason 
                                       : "BELİRTİLMEMİŞ"
                                   }
                                   disabled
                                 />
                               </FormGroup>
                             </Col>
-                            <Col md={4}>
+                            
+                            <Col md={4} hidden={personel.status}>
+                              <FormGroup>
+                                <Label className="text-muted small text-uppercase">
+                                  Ayrılış Nedeni
+                                </Label>
+                                <Input
+                                  type="text"
+                                  className="form-control-plaintext fw-bold"
+                                  value={
+                                    personel.deactivationComment
+                                      ? personel.deactivationComment 
+                                      : "BELİRTİLMEMİŞ"
+                                  }
+                                  disabled
+                                />
+                              </FormGroup>
+                            </Col>
+
+                            <Col md={4} hidden={!personel.status}>
                               <FormGroup>
                                 <Label className="fw-bold" for="isTemporary">
                                   Geçici Personel
@@ -1161,7 +1180,7 @@ export default function PersonelDetay({
                                             name="durusmaKatibiMi"
                                             id="durusmaKatibiMi"
                                             value={
-                                              updatedPersonel.durusmaKatibiMi 
+                                              updatedPersonel.durusmaKatibiMi
                                             }
                                             onChange={handleInputChange}
                                             className="form-select"

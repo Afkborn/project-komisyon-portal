@@ -29,6 +29,11 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
       render: (item) => item.deactivationReason,
     },
     {
+      key: "aciklama",
+      header: "Açıklama",
+      render: (item) => item.deactivationComment,
+    },
+    {
       key: "tarih",
       header: "Tarih",
       render: (item) =>

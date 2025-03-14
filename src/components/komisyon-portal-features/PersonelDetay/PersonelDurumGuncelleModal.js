@@ -36,6 +36,7 @@ export default function PersonelDurumGuncelleModal({
   );
   const [suspensionEndDate, setSuspensionEndDate] = useState("");
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [deactivationComment, setDeactivationComment] = useState(""); // Yeni eklenen açıklama alanı
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -53,6 +54,7 @@ export default function PersonelDurumGuncelleModal({
       setNewDeactivationReason("");
       setSuspensionEndDate("");
       setSuspensionReason("");
+      setDeactivationComment(""); // Açıklama alanını sıfırla
       setNewDeactivationDate(new Date().toISOString().split("T")[0]);
       setErrors({});
     }
@@ -106,7 +108,7 @@ export default function PersonelDurumGuncelleModal({
   // Form alanları değişince validasyon yap
   useEffect(() => {
     if (personel) validateForm();
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, [newDeactivationReason, suspensionEndDate, suspensionReason]);
 
   const handleCancel = () => {
@@ -147,6 +149,7 @@ export default function PersonelDurumGuncelleModal({
         status: !personel.status,
         deactivationReason: newDeactivationReason,
         deactivationDate: newDeactivationDate,
+        deactivationComment: deactivationComment, // Açıklama alanını ekle
       },
     };
 
@@ -208,6 +211,11 @@ export default function PersonelDurumGuncelleModal({
   // Tarih değişince state'i güncelle
   const handleDateChange = (event) => {
     setNewDeactivationDate(event.target.value);
+  };
+
+  // Açıklama değişince state'i güncelle
+  const handleCommentChange = (event) => {
+    setDeactivationComment(event.target.value);
   };
 
   // Uzaklaştırma bitiş tarihi değişince state'i güncelle
@@ -293,18 +301,59 @@ export default function PersonelDurumGuncelleModal({
 
               {/* Pasif personel bilgisi */}
               {personel.status === false && (
-                <FormGroup className="mb-4">
-                  <Label className="form-label fw-bold">
-                    Ayrılış Gerekçesi
-                  </Label>
-                  <Input
-                    id="personelDeactivationReason"
-                    type="text"
-                    value={personel.deactivationReason || "Belirtilmemiş"}
-                    disabled
-                    className="bg-light"
-                  />
-                </FormGroup>
+                <div className="mb-4">
+                  <Row>
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label className="form-label fw-bold">
+                          Ayrılış Gerekçesi
+                        </Label>
+                        <Input
+                          id="personelDeactivationReason"
+                          type="text"
+                          value={personel.deactivationReason || "Belirtilmemiş"}
+                          disabled
+                          className="bg-light"
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label className="form-label fw-bold">
+                          Ayrılış Tarihi
+                        </Label>
+                        <Input
+                          id="personelDeactivationDate"
+                          type="text"
+                          value={
+                            personel.deactivationDate
+                              ? new Date(
+                                  personel.deactivationDate
+                                ).toLocaleDateString()
+                              : "Belirtilmemiş"
+                          }
+                          disabled
+                          className="bg-light"
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  {personel.deactivationComment && (
+                    <FormGroup>
+                      <Label className="form-label fw-bold">
+                        Ayrılış Açıklaması
+                      </Label>
+                      <Input
+                        id="personelDeactivationComment"
+                        type="textarea"
+                        rows="3"
+                        value={personel.deactivationComment}
+                        disabled
+                        className="bg-light"
+                      />
+                    </FormGroup>
+                  )}
+                </div>
               )}
 
               {/* Uzaklaştırma durumu bilgisi */}
@@ -391,30 +440,70 @@ export default function PersonelDurumGuncelleModal({
                 </FormGroup>
               )}
 
-              {/* Ayrılış tarihi seçimi - uzaklaştırma hariç diğer seçenekler için */}
+              {/* Ayrılış için detay bilgileri - uzaklaştırma hariç diğer seçenekler için */}
               {personel.status === true &&
                 personel.isSuspended === false &&
                 newDeactivationReason &&
                 newDeactivationReason !== "Uzaklastirma" && (
-                  <FormGroup className="mb-4">
-                    <Label
-                      for="personelNewDeactivationDate"
-                      className="form-label fw-bold"
-                    >
-                      Ayrılış Tarihi
-                    </Label>
-                    <InputGroup>
-                      <InputGroupText>
-                        <i className="fas fa-calendar-alt"></i>
-                      </InputGroupText>
+                  <div className="border rounded p-3 bg-light mb-4">
+                    <h5 className="mb-3">Ayrılış Bilgileri</h5>
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label
+                            for="personelNewDeactivationDate"
+                            className="form-label fw-bold"
+                          >
+                            Ayrılış Tarihi
+                          </Label>
+                          <InputGroup>
+                            <InputGroupText>
+                              <i className="fas fa-calendar-alt"></i>
+                            </InputGroupText>
+                            <Input
+                              id="personelNewDeactivationDate"
+                              type="date"
+                              value={newDeactivationDate}
+                              onChange={(e) => handleDateChange(e)}
+                            />
+                          </InputGroup>
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label className="form-label fw-bold">
+                            Ayrılış Nedeni
+                          </Label>
+                          <Input
+                            type="text"
+                            value={newDeactivationReason}
+                            disabled
+                            className="bg-light"
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <FormGroup className="mt-2">
+                      <Label
+                        for="deactivationComment"
+                        className="form-label fw-bold"
+                      >
+                        Ek Açıklama (İsteğe bağlı)
+                      </Label>
                       <Input
-                        id="personelNewDeactivationDate"
-                        type="date"
-                        value={newDeactivationDate}
-                        onChange={(e) => handleDateChange(e)}
+                        id="deactivationComment"
+                        type="textarea"
+                        rows="3"
+                        value={deactivationComment}
+                        onChange={(e) => handleCommentChange(e)}
+                        placeholder="Ayrılış ile ilgili ek açıklama ekleyebilirsiniz..."
                       />
-                    </InputGroup>
-                  </FormGroup>
+                      <small className="text-muted">
+                        Bu alanda personelin ayrılışı ile ilgili detaylı bilgi
+                        verebilirsiniz.
+                      </small>
+                    </FormGroup>
+                  </div>
                 )}
 
               {/* Uzaklaştırma seçildiğinde gösterilen alanlar */}

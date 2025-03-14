@@ -29,12 +29,15 @@ export function printDocument(
       `#${deleteID}, .no-print`
     );
     elementsToRemove.forEach((el) => el.remove());
-  }
 
-  // AVATAR varsa sil
+
+      // AVATAR varsa sil
   let avatarElements = tempElement.querySelectorAll(".avatar-circle");
 
   avatarElements.forEach((el) => el.remove());
+  }
+
+
 
 
   // Başlık oluştur
