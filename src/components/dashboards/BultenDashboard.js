@@ -726,8 +726,8 @@ export default function BultenDashboard() {
             <br />
             <small className="text-success">
               <i className="fas fa-info-circle me-1"></i>
-              Ayarlarınız otomatik olarak kaydedilecek ve tekrar ziyaret
-              ettiğinizde korunacaktır.
+              Ayarlarınız kaydedilecek ve tekrar ziyaret ettiğinizde
+              korunacaktır.
             </small>
           </p>
 

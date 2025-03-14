@@ -42,6 +42,7 @@ import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHar
 import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
 import SehitGaziYakiniPersonel from "../komisyon-portal-features/Reports/SehitGaziYakiniPersonel";
 import EngelliPersonel from "../komisyon-portal-features/Reports/EngelliPersonel";
+import Nobet from "../komisyon-portal-features/SucUstuNobet/Nobet";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -368,6 +369,13 @@ export default function KomisyonPortalDashboard() {
       path: "birim-personel-listele",
       icon: "fas fa-user-friends",
     },
+    {
+      id: 21,
+      label : "Suç Üstü Nöbet",
+      type: "item",
+      path: "nobet",
+      icon: "fas fa-solid fa-person-military-pointing",
+    },
     // Reports section
     { id: 1002, label: "Raporlar", type: "heading" },
     {
@@ -655,6 +663,15 @@ export default function KomisyonPortalDashboard() {
                   <i className="fas fa-exchange-alt me-1"></i>
                   Kurum Değiştir
                 </Button>
+                <Button
+                  color="light"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => navigate("/bulten")}
+                >
+                  <i class="fa-solid fa-handcuffs me-1"></i>
+                  Bülten
+                </Button>
                 <Button color="danger" size="sm" onClick={handlePortal}>
                   <i className="fas fa-home me-1"></i>
                   Ana Sayfa
@@ -775,6 +792,18 @@ export default function KomisyonPortalDashboard() {
                 />
               }
             />
+            <Route
+              path="nobet"
+              element={
+                <Nobet
+                  selectedKurum={selectedKurum}
+                  unvanlar={unvanlar}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+
             <Route
               path="izinde-olan-personel"
               element={
