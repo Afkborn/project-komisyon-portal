@@ -9,11 +9,6 @@ import {
   Col,
   Badge,
   Button,
-  Carousel,
-  CarouselItem,
-  CarouselControl,
-  CarouselIndicators,
-  CarouselCaption,
 } from "reactstrap";
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
@@ -31,48 +26,18 @@ export default function Home() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
 
-  // Bültenler ve haberler için state
-  const [bulletins, setBulletins] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
-
-  // Örnek bültenler (API'den gelecek)
-  const dummyBulletins = [
-    {
-      id: 1,
-      title: "Adliye Haftalık Bülten - 15 Mayıs 2023",
-      // image: "https://via.placeholder.com/800x400?text=Eskişehir+Adliyesi+Bülteni",
-      shortDescription: "Bu haftaki adliye etkinlikleri ve duyuruları",
-      date: "15 Mayıs 2023",
-      link: "#",
-    },
-    {
-      id: 2,
-      title: "Yeni Görevlendirme Duyurusu - 8 Mayıs 2023",
-      // image: "#",
-      shortDescription: "Önemli görevlendirmeler ve personel değişiklikleri",
-      date: "8 Mayıs 2023",
-      link: "#",
-    },
-    {
-      id: 3,
-      title: "Adalet Bakanlığı Genelgesi - 1 Mayıs 2023",
-      // image: "#",
-      shortDescription: "Yeni genelge ve uygulamalar hakkında bilgilendirme",
-      date: "1 Mayıs 2023",
-      link: "#",
-    },
-  ];
+  // Bültenler için state (sadece en son bülteni göstereceğiz)
+  const latestBulletin = {
+    id: 1,
+    image:
+      "https://eskisehirekspresnet.teimg.com/eskisehirekspres-net/uploads/2023/02/ekspres-manset-kopya-5.png",
+    shortDescription: "Eskişehir Ekspress Son Dakika Haberleri",
+  };
 
   useEffect(() => {
     if (user === null) {
       getUser();
     }
-
-    // API'den bülten verilerini çek
-    // Şimdilik dummy veri kullanıyoruz
-
-    setBulletins(dummyBulletins);
     // eslint-disable-next-line
   }, []);
 
@@ -86,25 +51,10 @@ export default function Home() {
       });
   }
 
-  // Carousel fonksiyonları
-  const next = () => {
-    if (animating) return;
-    const nextIndex =
-      activeIndex === bulletins.length - 1 ? 0 : activeIndex + 1;
-    setActiveIndex(nextIndex);
-  };
-
-  const previous = () => {
-    if (animating) return;
-    const nextIndex =
-      activeIndex === 0 ? bulletins.length - 1 : activeIndex - 1;
-    setActiveIndex(nextIndex);
-  };
-
-  const goToIndex = (newIndex) => {
-    if (animating) return;
-    setActiveIndex(newIndex);
-  };
+  // Bülten sayfasına yönlendirme
+  function handleBulletinClick() {
+    window.location.href = "/bulten";
+  }
 
   // Uygulama yönlendirme fonksiyonları
   function handleKomisyonPortal() {
@@ -221,52 +171,6 @@ export default function Home() {
     window.location.href = "/login";
   }
 
-  // Carousel öğeleri oluşturma fonksiyonu - güncellenmiş
-  const renderSlides = () => {
-    return bulletins.map((bulletin) => {
-      return (
-        <CarouselItem
-          onExiting={() => setAnimating(true)}
-          onExited={() => setAnimating(false)}
-          key={bulletin.id}
-          className="bulletin-carousel-item"
-        >
-          <div className="carousel-image-container">
-            <img
-              src={bulletin.image}
-              alt={bulletin.title}
-              className="carousel-image"
-              onError={(e) => {
-                // Resim yüklenemezse varsayılan resim kullan
-                e.target.onerror = null;
-                e.target.src =
-                  "https://via.placeholder.com/800x400?text=Eskişehir+Adliyesi+Bülteni";
-              }}
-            />
-          </div>
-          <CarouselCaption
-            captionHeader={bulletin.title}
-            captionText={
-              <>
-                <p className="carousel-date">{bulletin.date}</p>
-                <p>{bulletin.shortDescription}</p>
-                <Button
-                  color="light"
-                  outline
-                  size="sm"
-                  className="mt-2"
-                  href={bulletin.link}
-                >
-                  Detaylar <i className="fas fa-arrow-right ms-1"></i>
-                </Button>
-              </>
-            }
-          />
-        </CarouselItem>
-      );
-    });
-  };
-
   return (
     <div className="home-page">
       <AYSNavbar />
@@ -373,47 +277,34 @@ export default function Home() {
               <div className="bulletin-section">
                 <h3 className="section-title">
                   <i className="fas fa-newspaper me-2"></i>
-                  Haftalık Bülten
+                  Bülten
                 </h3>
-                <Card className="bulletin-card mb-4">
+
+                <Card
+                  className="bulletin-card mb-4 cursor-pointer"
+                  onClick={handleBulletinClick}
+                  style={{ cursor: "pointer" }}
+                >
+                  <CardImg
+                    top
+                    width="100%"
+                    src={latestBulletin.image}
+                    alt={latestBulletin.title}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/800x400";
+                    }}
+                  />
                   <CardBody>
-                    {bulletins.length > 0 ? (
-                      <div className="bulletin-carousel-wrapper">
-                        <Carousel
-                          activeIndex={activeIndex}
-                          next={next}
-                          previous={previous}
-                          interval={8000}
-                          className="bulletin-carousel"
-                          dark={false}
-                          ride="carousel"
-                          slide
-                        >
-                          <CarouselIndicators
-                            items={bulletins}
-                            activeIndex={activeIndex}
-                            onClickHandler={goToIndex}
-                            className="carousel-indicators"
-                          />
-                          {renderSlides()}
-                          <CarouselControl
-                            direction="prev"
-                            directionText="Önceki"
-                            onClickHandler={previous}
-                          />
-                          <CarouselControl
-                            direction="next"
-                            directionText="Sonraki"
-                            onClickHandler={next}
-                          />
-                        </Carousel>
-                      </div>
-                    ) : (
-                      <div className="text-center py-5">
-                        <i className="fas fa-inbox fa-3x mb-3 text-muted"></i>
-                        <p>Henüz bülten bulunmamaktadır.</p>
-                      </div>
-                    )}
+                    <p className="bulletin-description">
+                      {latestBulletin.shortDescription}
+                    </p>
+                    <div className="text-end">
+                      <small className="text-primary">
+                        Bültenleri görüntülemek için tıkla
+                        <i className="fas fa-arrow-right"></i>
+                      </small>
+                    </div>
                   </CardBody>
                 </Card>
               </div>
@@ -431,7 +322,7 @@ export default function Home() {
                       </div>
                       <div className="quick-info-content">
                         <h5>Çalışma Saatleri</h5>
-                        <p>Pazartesi-Cuma: 08:30-17:30</p>
+                        <p>Pazartesi-Cuma: 08:00-17:00</p>
                       </div>
                     </div>
 
@@ -441,17 +332,7 @@ export default function Home() {
                       </div>
                       <div className="quick-info-content">
                         <h5>Santral</h5>
-                        <p>0222 123 45 67</p>
-                      </div>
-                    </div>
-
-                    <div className="quick-info-item">
-                      <div className="quick-info-icon bg-success">
-                        <i className="fas fa-envelope"></i>
-                      </div>
-                      <div className="quick-info-content">
-                        <h5>E-posta</h5>
-                        <p>iletisim@eskisehiradliyesi.gov.tr</p>
+                        <p>0222 240 72 22</p>
                       </div>
                     </div>
                   </CardBody>

@@ -5,6 +5,7 @@ import Unauthorized from "../common/Unauthorized";
 import Home from "./Home";
 import Login from "../login/Login";
 
+
 import KomisyonRoutes from "../Routes/KomisyonRoutes";
 import KomisyonPortalDashboard from "../dashboards/KomisyonPortalDashboard";
 import SantralRoutes from "../Routes/SantralRoutes";
@@ -14,7 +15,7 @@ import KullaniciYonetimSistemDashboard from "../dashboards/KullaniciYonetimSiste
 import SegbisRoutes from "../Routes/SegbisRoutes";
 import SegbisRehberDashboard from "../dashboards/SegbisRehberDashboard";
 import KullaniciAktiviteleri from "../dashboards/KullaniciAktiviteleri";
-
+import BultenDashboard from "../dashboards/BultenDashboard";
 import "../../styles/App.css";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
     <div className="app-wrapper">
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/bulten" element={<BultenDashboard />} />
 
         {/* Protected Routes */}
         <Route element={<KomisyonRoutes />}>
