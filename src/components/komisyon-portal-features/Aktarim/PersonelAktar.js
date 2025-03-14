@@ -40,7 +40,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
   const fetchUnitsNames = async () => {
     const config = {
       method: "GET",
-      url: `api/units/institution/${selectedKurum.id}/name`,
+      url: `/api/units/institution/${selectedKurum.id}/name`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -162,7 +162,7 @@ export default function PersonelAktar({ selectedKurum, token, unvanlar }) {
         let bugunYYYYMMDD = new Date().toISOString().split("T")[0];
         const config = {
           method: "POST",
-          url: "api/persons/",
+          url: "/api/persons/",
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -168,6 +168,7 @@ export default function PersonelDetay({
 
       isMartyrRelative: updatedPersonel.isMartyrRelative,
       isDisabled: updatedPersonel.isDisabled,
+      nobetTutuyorMu: updatedPersonel.nobetTutuyorMu,
     };
   };
 
@@ -820,14 +821,14 @@ export default function PersonelDetay({
                                   className="form-control-plaintext fw-bold"
                                   value={
                                     personel.deactivationReason
-                                      ? personel.deactivationReason 
+                                      ? personel.deactivationReason
                                       : "BELİRTİLMEMİŞ"
                                   }
                                   disabled
                                 />
                               </FormGroup>
                             </Col>
-                            
+
                             <Col md={4} hidden={personel.status}>
                               <FormGroup>
                                 <Label className="text-muted small text-uppercase">
@@ -838,7 +839,7 @@ export default function PersonelDetay({
                                   className="form-control-plaintext fw-bold"
                                   value={
                                     personel.deactivationComment
-                                      ? personel.deactivationComment 
+                                      ? personel.deactivationComment
                                       : "BELİRTİLMEMİŞ"
                                   }
                                   disabled
@@ -1244,6 +1245,30 @@ export default function PersonelDetay({
                                       </FormGroup>
                                     </Col>
                                   )}
+
+                                  {personel.title.kind === "mubasir" ||
+                                    (personel.title.kind === "zabitkatibi" && (
+                                      <Col md={6}>
+                                        <FormGroup>
+                                          <Label className="fw-bold">
+                                            Nöbete Dahil Mi
+                                          </Label>
+                                          <Input
+                                            type="select"
+                                            name="nobetTutuyorMu"
+                                            id="nobetTutuyorMu"
+                                            value={
+                                              updatedPersonel.nobetTutuyorMu
+                                            }
+                                            onChange={handleInputChange}
+                                            className="form-select"
+                                          >
+                                            <option value="true">Evet</option>
+                                            <option value="false">Hayır</option>
+                                          </Input>
+                                        </FormGroup>
+                                      </Col>
+                                    ))}
                                 </Row>
                               </>
                             )}

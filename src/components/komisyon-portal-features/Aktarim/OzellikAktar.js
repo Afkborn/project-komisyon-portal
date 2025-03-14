@@ -30,7 +30,7 @@ export default function OzellikAktar({ selectedKurum, token }) {
     if (aktarimIzinVerilenAttributes.length === 0) {
       const config = {
         method: "GET",
-        url: `api/persons/attributeList`,
+        url: `/api/persons/attributeList`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -123,7 +123,7 @@ export default function OzellikAktar({ selectedKurum, token }) {
 
     const config = (sicilNo, personData) => ({
       method: "PUT",
-      url: `api/persons/updateBySicil/${sicilNo}`,
+      url: `/api/persons/updateBySicil/${sicilNo}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
