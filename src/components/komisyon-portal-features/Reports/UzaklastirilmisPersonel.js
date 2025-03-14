@@ -86,7 +86,9 @@ export default function UzaklastirilmisPersonel({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "uzaklastirilmisPersonelTable", "detayTD");
+    printDocument(document, "uzaklastirilmisPersonelTable", "detayTD", null, {
+      title: "Uzaklaştırılmış Personel Listesi",
+    });
   };
 
   return (

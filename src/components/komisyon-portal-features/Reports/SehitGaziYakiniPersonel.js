@@ -72,7 +72,9 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "sehitGaziYakiniPersonelTable", "detayTD");
+    printDocument(document, "sehitGaziYakiniPersonelTable", "detayTD", null, {
+      title: "Şehit/Gazi Yakını Personel Listesi",
+    });
   };
 
   return (

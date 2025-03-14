@@ -18,6 +18,8 @@ import {
 import axios from "axios";
 import alertify from "alertifyjs";
 import DataTable from "../../common/DataTable";
+import { generatePdf } from "../../actions/PdfActions";
+import { printDocument } from "../../actions/PrintActions";
 
 export default function TumPersonelListe({
   selectedKurum,
@@ -169,6 +171,24 @@ export default function TumPersonelListe({
         ? undefined
         : unvanlar.find((u) => u.name === e.target.value)
     );
+  };
+
+  // PDF yazdırma fonksiyonu
+  const handleExportPdf = () => {
+    generatePdf(
+      document,
+      "tumPersonelTable",
+      `${selectedKurum ? selectedKurum.name : "Kurumlar"} - Personel Listesi`,
+      "detayTD",
+      true
+    );
+  };
+
+  // Tabloyu yazdırma fonksiyonu
+  const handlePrint = () => {
+    printDocument(document, "tumPersonelTable", "detayTD", null, {
+      title: "Tüm Personel Listesi",
+    });
   };
 
   const getFilteredData = () => {
@@ -366,8 +386,9 @@ export default function TumPersonelListe({
                 customRowClassName={(row) =>
                   row.izindeMi ? "table-danger bg-opacity-25" : ""
                 }
-                // Sıralama işlemi DataTable içinde ele alınacak
                 disableExternalSort={false}
+                generatePdf={handleExportPdf}
+                printTable={handlePrint}
               />
             </div>
           )}

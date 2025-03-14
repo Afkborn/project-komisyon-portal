@@ -75,7 +75,9 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "pasifPersonelTable", "detayTD");
+    printDocument(document, "pasifPersonelTable", "detayTD", null, {
+      title: "Devren Giden Personel Listesi",
+    });
   };
 
   return (

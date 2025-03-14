@@ -31,6 +31,12 @@ export function printDocument(
     elementsToRemove.forEach((el) => el.remove());
   }
 
+  // AVATAR varsa sil
+  let avatarElements = tempElement.querySelectorAll(".avatar-circle");
+
+  avatarElements.forEach((el) => el.remove());
+
+
   // Başlık oluştur
   const title = options.title || elementIDName;
   const headerHtml = `

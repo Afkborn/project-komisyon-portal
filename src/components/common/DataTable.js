@@ -235,7 +235,6 @@ const DataTable = ({
     </Modal>
   );
 
-  // Yazdırma Onay Modalı (seçenekleri kaldırıldı, sadece bilgilendirme içeriyor)
   const printConfirmContent = (
     <Modal isOpen={printConfirmOpen} toggle={togglePrintConfirm}>
       <ModalHeader toggle={togglePrintConfirm}>Yazdırma</ModalHeader>

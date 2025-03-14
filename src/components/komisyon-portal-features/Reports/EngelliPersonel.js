@@ -75,7 +75,9 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "engelliPersonelTable", "detayTD");
+    printDocument(document, "engelliPersonelTable", "detayTD", null, {
+      title: "Engelli Personel Listesi",
+    });
   };
 
   return (

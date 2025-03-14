@@ -6,7 +6,7 @@ export function generatePdf(
   fileName,
   deleteID = null,
   rotate = false,
-  customStyles = {}
+  customStyles = {},
 ) {
   const element = document.getElementById(elementIDName);
   if (!element) {
@@ -19,7 +19,7 @@ export function generatePdf(
 
   // İstenilen öğeleri kaldıralım
   if (deleteID) {
-    console.log("İSTENİLMEYEN ÖGE ID: ", deleteID);
+    // console.log("İSTENİLMEYEN ÖGE ID: ", deleteID);
     let elementsToRemove = tempElement.querySelectorAll(
       `#${deleteID}, .no-print`
     );

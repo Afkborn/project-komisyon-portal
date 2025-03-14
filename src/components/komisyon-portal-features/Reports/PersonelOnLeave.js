@@ -122,7 +122,9 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "personelOnLeaveTable", "detayTD");
+    printDocument(document, "personelOnLeaveTable", "detayTD", null, {
+      title: "İzinde Olan Personel",
+    });
   };
 
   return (

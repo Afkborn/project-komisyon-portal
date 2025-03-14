@@ -181,7 +181,15 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                             <Button
                               color="secondary"
                               onClick={(e) => {
-                                printDocument(document, "tableUnvanPersonel");
+                                printDocument(
+                                  document,
+                                  "tableUnvanPersonel",
+                                  null,
+                                  null,
+                                  {
+                                    title: "Ünvan Bazlı Personel Sayıları",
+                                  }
+                                );
                               }}
                             >
                               <i className="fas fa-print me-1"></i> Yazdır
@@ -246,7 +254,13 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                               onClick={(e) => {
                                 printDocument(
                                   document,
-                                  "tableMahkemeTipPersonel"
+                                  "tableMahkemeTipPersonel",
+                                  null,
+                                  null,
+                                  {
+                                    title:
+                                      "Mahkeme Tipi Bazlı Personel Sayıları",
+                                  }
                                 );
                               }}
                             >
@@ -334,7 +348,15 @@ export default function PersonelSayi({ selectedKurum, unvanlar, token }) {
                             <Button
                               color="secondary"
                               onClick={(e) => {
-                                printDocument(document, "tableMahkemePersonel");
+                                printDocument(
+                                  document,
+                                  "tableMahkemePersonel",
+                                  null,
+                                  null,
+                                  {
+                                    title: "Mahkeme Bazlı Personel Sayıları",
+                                  }
+                                );
                               }}
                             >
                               <i className="fas fa-print me-1"></i> Yazdır

@@ -1161,8 +1161,7 @@ export default function PersonelDetay({
                                             name="durusmaKatibiMi"
                                             id="durusmaKatibiMi"
                                             value={
-                                              updatedPersonel.durusmaKatibiMi ||
-                                              ""
+                                              updatedPersonel.durusmaKatibiMi 
                                             }
                                             onChange={handleInputChange}
                                             className="form-select"

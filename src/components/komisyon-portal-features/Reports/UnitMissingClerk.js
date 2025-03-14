@@ -250,7 +250,11 @@ export default function UnitMissingClerk({ token, selectedKurum }) {
                       printDocument(
                         document,
                         "unitMissingClerkTable",
-                        "detayTD"
+                        "detayTD",
+                        null,
+                        {
+                          title: "Eksik Katibi Olan Birimler Listesi",
+                        }
                       );
                     }}
                   >

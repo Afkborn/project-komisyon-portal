@@ -99,7 +99,9 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
   };
 
   const handlePrint = () => {
-    printDocument(document, "pasifPersonelTable", "detayTD");
+    printDocument(document, "pasifPersonelTable", "detayTD", null, {
+      title: "Geçici Personel Listesi",
+    });
   };
 
   return (
