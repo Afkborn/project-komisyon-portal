@@ -33,16 +33,19 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
   const columns = [
     {
       key: "sicil",
+      dataType: "number",
       header: "Sicil No",
     },
     {
       key: "unvan",
       header: "Ünvan",
+      dataType: "string",
       render: (item) => item.unvan.name,
     },
     {
       key: "fullName",
       header: "Ad Soyad",
+      dataType: "string",
       render: (item) =>
         `${item.ad} ${item.soyad}${
           item.isTemporary ? " (Geçici Personel)" : ""
@@ -51,21 +54,25 @@ export default function PersonelOnLeave({ token, showPersonelDetay }) {
     {
       key: "birim",
       header: "Birim",
+      dataType: "string",
       render: (item) => item.birim,
     },
     {
       key: "izinTur",
       header: "İzin Türü",
+      dataType: "string",
       render: (item) => getIzinType(item.izinTur),
     },
     {
       key: "izinBaslangic",
       header: "Başlangıç Tarihi",
+      dataType: "date",
       render: (item) => renderDate_GGAAYYYY(item.izinBaslangic),
     },
     {
       key: "izinBitis",
       header: "Bitiş Tarihi",
+      dataType: "date",
       render: (item) => renderDate_GGAAYYYY(item.izinBitis),
     },
   ];

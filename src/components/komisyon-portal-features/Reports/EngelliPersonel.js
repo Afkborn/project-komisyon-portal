@@ -14,26 +14,31 @@ export default function EngelliPersonel({ token, showPersonelDetay }) {
     {
       key: "sicil",
       header: "Sicil No",
+      dataType: "number",
       // Sicil numarası direkt erişilebilir olduğu için render gerekmiyor
     },
     {
       key: "fullName",
       header: "Ad Soyad",
+      dataType: "string",
       render: (item) => `${item.ad} ${item.soyad}`,
     },
     {
       key: "kurum",
       header: "Kurum",
+      dataType: "string",
       render: (item) => item.birimID.institution.name,
     },
     {
       key: "birim",
       header: "Birim",
+      dataType: "string",
       render: (item) => item.birimID.name,
     },
     {
       key: "unvan",
       header: "Ünvan",
+      dataType: "string",
       render: (item) => item.title.name,
     },
   ];

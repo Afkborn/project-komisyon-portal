@@ -84,9 +84,28 @@ const DataTable = ({
         // İlgili kolonu bul
         const column = columns.find((col) => col.key === sortConfig.key);
 
+        // Özel koşul: Eğer kolon adı 'tarih' veya 'vaadeTarihi' gibi tarih içeren alanlar ise zorla "date" tipi olarak işle
+        const isDateColumn = column.key.toLowerCase().includes("tarih");
+
+        // Veri tipini belirle (önce özel koşullar, sonra column.dataType, en son otomatik belirle)
+        const dataType = isDateColumn
+          ? "date"
+          : column.dataType || determineDataType(a[sortConfig.key]);
+
+        // console.log("Sıralanan sütun:", column.key);
+        // console.log("Veri tipi:", dataType);
+
         // Değerleri al (render fonksiyonu varsa onu kullan)
         let aValue = column.render ? column.render(a) : a[sortConfig.key];
         let bValue = column.render ? column.render(b) : b[sortConfig.key];
+
+        // console.log("A Değeri:", aValue);
+        // console.log("B Değeri:", bValue);
+
+        // Bazı örnekler yazdır
+        // if (typeof aValue === "string" && aValue.includes("Yıl")) {
+        //   console.log("Tarih içeren değer bulundu:", aValue);
+        // }
 
         // String olarak kullanmak için text çıkarıyoruz render fonksiyonu varsa
         if (
@@ -106,13 +125,50 @@ const DataTable = ({
               : b[sortConfig.key]?.toString() || "";
         }
 
-        // Sıralama yönüne göre karşılaştır
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
+        // Veri tipine göre karşılaştırma yap
+        switch (dataType) {
+          case "date":
+            // Tarih karşılaştırma - özellikle "d/M/yyyy (açıklama)" formatına uygun
+            // console.log("Tarih olarak işleniyor:", aValue);
+            const dateA = parseDate(aValue);
+            const dateB = parseDate(bValue);
+            // console.log("Parse edilmiş tarihler:", dateA, dateB);
+
+            if (dateA && dateB) {
+              return sortConfig.direction === "asc"
+                ? dateA - dateB
+                : dateB - dateA;
+            }
+            break;
+
+          case "number":
+            // Sayısal değer karşılaştırma
+            const numA = parseFloat(aValue);
+            const numB = parseFloat(bValue);
+
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+            }
+            break;
+
+          case "string":
+          default:
+            // String karşılaştırma - Türkçe desteğiyle
+            if (typeof aValue === "string" && typeof bValue === "string") {
+              return sortConfig.direction === "asc"
+                ? aValue.localeCompare(bValue, "tr-TR")
+                : bValue.localeCompare(aValue, "tr-TR");
+            }
+
+            // Genel karşılaştırma
+            if (aValue < bValue) {
+              return sortConfig.direction === "asc" ? -1 : 1;
+            }
+            if (aValue > bValue) {
+              return sortConfig.direction === "asc" ? 1 : -1;
+            }
         }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
+
         return 0;
       });
     }
@@ -371,6 +427,169 @@ const DataTable = ({
       {printConfirmContent}
     </div>
   );
+};
+
+// Tarih ayrıştırma yardımcı fonksiyonu
+const parseDate = (value) => {
+  // console.log("parseDate çağrıldı:", value);
+
+  if (!value) return null;
+
+  // String değilse ve Date objesi ise doğrudan kullan
+  if (value instanceof Date) return value;
+
+  // String değer için
+  if (typeof value === "string") {
+    try {
+      // Tarih kısmını çıkarma (ilk tarih deseni eşleşmesini bul)
+      const dateMatch = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (dateMatch) {
+        const day = parseInt(dateMatch[1], 10);
+        const month = parseInt(dateMatch[2], 10) - 1; // JavaScript'te aylar 0-11 arası
+        const year = parseInt(dateMatch[3], 10);
+        // console.log("Ayıklanan tarih bileşenleri:", day, month + 1, year);
+        return new Date(year, month, day);
+      }
+
+      // Türkçe tarih formatı kontrolü - daha fazla detaylı
+      if (
+        value.includes("Yıl") ||
+        value.includes("Ay") ||
+        value.includes("Gün")
+      ) {
+        // Örnek: "22/1/2025 (0 Yıl 1 Ay 21 Gün)" formatı
+        // Parantez öncesinden tarih kısmını çıkaralım
+        const dateMatch = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (dateMatch) {
+          const day = parseInt(dateMatch[1]);
+          const month = parseInt(dateMatch[2]) - 1;
+          const year = parseInt(dateMatch[3]);
+          // console.log("Tarih parçaları:", day, month, year);
+          return new Date(year, month, day);
+        }
+      }
+
+      // Önce parantez içeren formatı temizle: "13/3/2025 (Gecikti)" gibi
+      let cleanValue = value;
+      const parenthesisIndex = value.indexOf("(");
+      if (parenthesisIndex !== -1) {
+        cleanValue = value.substring(0, parenthesisIndex).trim();
+        // console.log("Temizlenmiş değer:", cleanValue);
+      }
+
+      // Olası tarih formatlarını kontrol et
+
+      // ISO formatı (2023-12-31T12:00:00.000Z)
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(cleanValue)) {
+        return new Date(cleanValue);
+      }
+
+      // Türk formatı (d/M/yyyy veya dd/MM/yyyy) - günün 1 veya 2 basamaklı olabilir, ayın 1 veya 2 basamaklı olabilir
+      const turkishDateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+      const turkishMatch = cleanValue.match(turkishDateRegex);
+      if (turkishMatch) {
+        // match[1]=gün, match[2]=ay, match[3]=yıl
+        const day = parseInt(turkishMatch[1], 10);
+        const month = parseInt(turkishMatch[2], 10) - 1; // JavaScript'te aylar 0-11 arası
+        const year = parseInt(turkishMatch[3], 10);
+        return new Date(year, month, day);
+      }
+
+      // Tarih formatı (31.12.2023, 31/12/2023, 31-12-2023)
+      const dateFormats = [
+        /(\d{2})\.(\d{2})\.(\d{4})/, // 31.12.2023
+        /(\d{2})-(\d{2})-(\d{4})/, // 31-12-2023
+      ];
+
+      for (const format of dateFormats) {
+        const match = cleanValue.match(format);
+        if (match) {
+          // match[1]=gün, match[2]=ay, match[3]=yıl
+          return new Date(match[3], match[2] - 1, match[1]);
+        }
+      }
+
+      // Amerika formatı (2023-12-31, 2023/12/31)
+      const usaFormats = [
+        /(\d{4})-(\d{2})-(\d{2})/, // 2023-12-31
+        /(\d{4})\/(\d{2})\/(\d{2})/, // 2023/12/31
+      ];
+
+      for (const format of usaFormats) {
+        const match = cleanValue.match(format);
+        if (match) {
+          // match[1]=yıl, match[2]=ay, match[3]=gün
+          return new Date(match[1], match[2] - 1, match[3]);
+        }
+      }
+    } catch (error) {
+      console.error("Tarih parse hatası:", error, value);
+      return null;
+    }
+  }
+
+  // Son çare olarak Date.parse kullan
+  try {
+    const timestamp = Date.parse(value);
+    return isNaN(timestamp) ? null : new Date(timestamp);
+  } catch (e) {
+    return null;
+  }
+};
+
+// Veri tipini belirleme yardımcı fonksiyonu
+const determineDataType = (value) => {
+  if (value === null || value === undefined) return "string";
+
+  // console.log("determineDataType için değer:", value);
+
+  // Date objesi kontrolü
+  if (value instanceof Date) return "date";
+
+  // String değer kontrolü
+  if (typeof value === "string") {
+    // console.log("String değer kontrol ediliyor:", value);
+
+    // İlk önce tarih paternleri için kontrol et
+    // Tarih formatını denetleyen regex ifadeleri
+    const datePatterns = [
+      /\d{1,2}\/\d{1,2}\/\d{4}/, // 13/3/2025, 25/10/2025
+      /\d{1,2}\/\d{1,2}\/\d{4} \(.*\)/, // 13/3/2025 (Parantez içi)
+      /\d{1,2}\/\d{1,2}\/\d{4} \(\d+ (Yıl|Ay|Gün)\)/, // 25/10/2025 (225 Gün)
+      /\d{1,2}\/\d{1,2}\/\d{4} \(\d+ Yıl \d+ Ay \d+ Gün\)/, // 22/1/2025 (0 Yıl 1 Ay 21 Gün)
+    ];
+
+    // Herhangi bir tarih paterni eşleşirse "date" olarak kabul et
+    for (const pattern of datePatterns) {
+      if (pattern.test(value)) {
+        // console.log("Tarih paterni tespit edildi:", value);
+        return "date";
+      }
+    }
+
+    // Temel kelime kontrolü
+    if (
+      value.includes("Yıl") ||
+      value.includes("Ay") ||
+      value.includes("Gün")
+    ) {
+      // console.log("Tarih anahtar kelimeleri içeriyor:", value);
+      return "date";
+    }
+
+    // Sayı kontrolü - sadece sayı ve nokta içeren string
+    if (/^-?\d+(\.\d+)?$/.test(value)) {
+      // console.log("Sayı tespit edildi:", value);
+      return "number";
+    }
+
+    return "string";
+  }
+
+  // Sayı kontrolü
+  if (typeof value === "number") return "number";
+
+  return "string";
 };
 
 export default DataTable;
