@@ -23,6 +23,8 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
     {
       key: "sicil",
       header: "Sicil No",
+      dataType: "number",
+      // Sicil numarası direkt erişilebilir olduğu için render gerekmiyor
     },
     {
       key: "fullName",

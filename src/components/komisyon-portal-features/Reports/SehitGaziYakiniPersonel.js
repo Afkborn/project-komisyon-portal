@@ -12,25 +12,29 @@ export default function SehitGaziYakiniPersonel({ token, showPersonelDetay }) {
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
 
   const columns = [
-    { key: "sicil", header: "Sicil No" },
+    { key: "sicil", header: "Sicil No", dataType: "number" },
     {
       key: "fullName",
       header: "Ad Soyad",
+      dataType: "string",
       render: (item) => `${item.ad} ${item.soyad}`,
     },
     {
       key: "kurum",
       header: "Kurum",
+      dataType: "string",
       render: (item) => item.birimID.institution.name,
     },
     {
       key: "birim",
       header: "Birim",
+      dataType: "string",
       render: (item) => item.birimID.name,
     },
     {
       key: "unvan",
       header: "Ünvan",
+      dataType: "string",
       render: (item) => item.title.name,
     },
   ];
