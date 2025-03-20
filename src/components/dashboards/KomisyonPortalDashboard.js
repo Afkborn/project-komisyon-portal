@@ -43,6 +43,7 @@ import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/Uzaklas
 import SehitGaziYakiniPersonel from "../komisyon-portal-features/Reports/SehitGaziYakiniPersonel";
 import EngelliPersonel from "../komisyon-portal-features/Reports/EngelliPersonel";
 import Nobet from "../komisyon-portal-features/SucUstuNobet/Nobet";
+import Takvim from "../komisyon-portal-features/Takvim/Takvim";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import alertify from "alertifyjs";
@@ -326,6 +327,13 @@ export default function KomisyonPortalDashboard() {
       path: "ana-sayfa",
       icon: "fas fa-home",
     },
+    {
+      id: 22,
+      label: "Takvim",
+      type: "item",
+      path: "takvim",
+      icon: "fas fa-calendar-alt",
+    },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
     // {
     //   id: 1004,
@@ -371,7 +379,7 @@ export default function KomisyonPortalDashboard() {
     },
     {
       id: 21,
-      label : "Suç Üstü Nöbet",
+      label: "Suç Üstü Nöbet",
       type: "item",
       path: "nobet",
       icon: "fas fa-solid fa-person-military-pointing",
@@ -615,15 +623,15 @@ export default function KomisyonPortalDashboard() {
         {/* Sidebar Footer */}
         <div className="sidebar-footer text-center p-3 border-top">
           <small className="text-muted">
-            &copy; {new Date().getFullYear()} EPSİS - Designed by{" "}
-            <a
+            &copy; {new Date().getFullYear()} EPSİS - Designed by{" "} Bilgehan KALAY
+            {/* <a
               href="https://github.com/Afkborn"
               target="_blank"
               rel="noreferrer"
               className="text-danger"
             >
               Bilgehan KALAY
-            </a>
+            </a> */}
           </small>
         </div>
       </div>
@@ -693,6 +701,16 @@ export default function KomisyonPortalDashboard() {
                   showPersonelDetay={showPersonelDetay}
                   showBirimPersonelListe={showBirimPersonelListe}
                   selectedKurum={selectedKurum}
+                />
+              }
+            />
+            <Route
+              path="takvim"
+              element={
+                <Takvim
+                  user={user}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
                 />
               }
             />

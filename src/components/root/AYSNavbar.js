@@ -32,7 +32,7 @@ export default function AYSNavbar() {
 
   // useState yerine useEffect kullanarak düzeltildi
   useEffect(() => {
-    if (user === null) {
+    if (user === null && token) {
       getUser();
     }
     // eslint-disable-next-line

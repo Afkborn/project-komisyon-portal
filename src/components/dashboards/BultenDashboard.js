@@ -110,7 +110,7 @@ export default function BultenDashboard() {
         // Local storage'dan ayarlar var
         const parsedSources = JSON.parse(savedRssSources);
         setRssSources(parsedSources);
-        console.log("RSS kaynakları localStorage'dan yüklendi:", parsedSources);
+        // console.log("RSS kaynakları localStorage'dan yüklendi:", parsedSources);
 
         // Gelişmiş ayarları yükle
         const savedAdvancedSettings = localStorage.getItem(
@@ -148,14 +148,14 @@ export default function BultenDashboard() {
     try {
       // Parametre olarak geçilen kaynakları veya state'teki kaynakları kullan
       const sourceList = sourcesToUse || rssSources;
-      console.log("Kullanılan RSS kaynakları:", sourceList);
+      // console.log("Kullanılan RSS kaynakları:", sourceList);
 
       // Sadece aktif RSS kaynaklarını kullan
       const activeFeeds = sourceList.filter((source) => source.active);
-      console.log("Aktif RSS kaynakları:", activeFeeds);
+      // console.log("Aktif RSS kaynakları:", activeFeeds);
 
       if (activeFeeds.length === 0) {
-        console.log("Aktif RSS kaynağı bulunamadı");
+        // console.log("Aktif RSS kaynağı bulunamadı");
         setNews([]);
         setLoading(false);
         return;
@@ -192,7 +192,7 @@ export default function BultenDashboard() {
       allNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
       setNews(allNews);
-      console.log(`${allNews.length} haber başarıyla yüklendi.`);
+      // console.log(`${allNews.length} haber başarıyla yüklendi.`);
     } catch (error) {
       console.error("RSS verisi çekilirken hata oluştu:", error);
     } finally {

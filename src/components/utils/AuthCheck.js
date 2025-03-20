@@ -95,7 +95,7 @@ export const setupAxiosInterceptors = () => {
   axios.interceptors.request.use(
     async (config) => {
       // Ana sayfa ve login sayfası için istek özel ele al
-      const publicPaths = ["/api/users/validate-token", "/api/users/login"];
+      const publicPaths = ["/api/users/validate-token", "/api/users/login", "/bulten", "/api/users/details"];
       const isPublicPath = publicPaths.some((path) =>
         config.url.includes(path)
       );

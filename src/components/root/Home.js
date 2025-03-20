@@ -35,7 +35,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (user === null) {
+    if (user === null && token) {
       getUser();
     }
     // eslint-disable-next-line
@@ -347,7 +347,8 @@ export default function Home() {
         <Container>
           <div className="text-center py-4">
             <p className="mb-1">
-              © 2023 Eskişehir Adliyesi - Tüm hakları saklıdır
+              &copy; {new Date().getFullYear()} Eskişehir Adliyesi - Tüm hakları
+              saklıdır
             </p>
             <p className="developer-info mb-0">Developed by Bilgehan Kalay</p>
           </div>
