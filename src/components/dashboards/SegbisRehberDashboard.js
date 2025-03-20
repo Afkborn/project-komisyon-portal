@@ -113,6 +113,7 @@ export default function SegbisRehberDashboard() {
 
   // Şehir seçimi
   const selectCity = (city) => {
+    searchTerm && setSearchTerm("");
     setSelectedCity(city);
     setSelectedUnit(null);
     fetchUnits(city.id);
@@ -120,6 +121,7 @@ export default function SegbisRehberDashboard() {
 
   // Birim seçimi
   const selectUnit = (unit) => {
+    searchTerm && setSearchTerm("");
     setSelectedUnit(unit);
     fetchPersonnel(unit.id);
   };
@@ -444,9 +446,7 @@ export default function SegbisRehberDashboard() {
                                     {person.title}
                                   </Badge>
                                 </td>
-                                <td className="fw-bold">
-                                  {person.ad} {person.soyad}
-                                </td>
+                                <td className="fw-bold">{person.name}</td>
                                 <td>
                                   <a
                                     href={`tel:${person.phone}`}
@@ -492,9 +492,7 @@ export default function SegbisRehberDashboard() {
                 <div className="bg-light d-inline-block rounded-circle p-4 mb-3">
                   <FaUsers className="text-primary fs-1" />
                 </div>
-                <h4>
-                  {selectedPerson.ad} {selectedPerson.soyad}
-                </h4>
+                <h4>{selectedPerson.name || "Belirtilmemiş"} </h4>
                 <Badge
                   color={getTitleColor(selectedPerson.title)}
                   pill
