@@ -1,26 +1,17 @@
 import React, { useState } from "react";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  ButtonGroup,
-  Badge,
-  Tooltip,
-} from "reactstrap";
+import { Card, CardHeader, CardBody, Button, Badge, Tooltip } from "reactstrap";
 import {
   FaCalendarAlt,
   FaChevronLeft,
   FaChevronRight,
   FaInfoCircle,
-  FaUser,
   FaGavel,
   FaUsers,
 } from "react-icons/fa";
 
 export default function Takvim() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState("month");
+
   const [tooltipOpen, setTooltipOpen] = useState({});
 
   // Tooltip toggle fonksiyonu

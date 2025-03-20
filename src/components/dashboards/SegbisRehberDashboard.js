@@ -26,7 +26,6 @@ import {
   FaCity,
   FaUsers,
   FaPhoneAlt,
-  FaEnvelope,
   FaInfoCircle,
   FaArrowLeft,
   FaQrcode,
