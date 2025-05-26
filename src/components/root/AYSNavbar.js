@@ -13,7 +13,7 @@ import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import logo from "../../assets/logo300.png";
-import "./AYSNavbar.css"; // Yeni CSS dosyası için import eklendi
+import "./AYSNavbar.css"; 
 
 export default function AYSNavbar() {
   const [user, setUser] = useState(null);
@@ -30,7 +30,6 @@ export default function AYSNavbar() {
       });
   }
 
-  // useState yerine useEffect kullanarak düzeltildi
   useEffect(() => {
     if (user === null && token) {
       getUser();
@@ -39,7 +38,6 @@ export default function AYSNavbar() {
   }, [user]);
 
   function logout() {
-    // Backend'e logout isteği gönder
     axios({
       method: 'POST',
       url: '/api/users/logout',
@@ -68,7 +66,7 @@ export default function AYSNavbar() {
       // Sayfayı tamamen yeniden yükle ve ana sayfaya yönlendir
       window.location.href = "/";
 
-      // Alternatif olarak daha güçlü bir çözüm
+      
       setTimeout(() => {
         if (cookies.get("TOKEN")) {
           // Eğer token hala duruyorsa, sayfayı tamamen yenile

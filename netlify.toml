@@ -1,6 +1,6 @@
 [[redirects]]
   from = "/api/*"
-  to = "https://ays.afkborn.keenetic.pro/api/:splat"
+  to = "https://api.bilgehan26.keenetic.pro/api/:splat"
   status = 200
   force = true
   headers = {X-From = "Netlify"}

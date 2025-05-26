@@ -61,24 +61,39 @@ export default function Home() {
     window.location.href = "/komisyon-portal/ana-sayfa";
   }
 
+  // Santral portal yönlendirme
   function handleSantralPortal() {
     window.location.href = "/santral-portal";
   }
 
+  // SEGBİS rehber yönlendirme
   function handleSegbisRehber() {
     window.location.href = "/segbis-rehber";
   }
 
+  // Eskişehir Adliyesi web sayfasına yönlendirme
   function handleEskisehirAdliyesiWebPage() {
     window.open("https://eskisehir.adalet.gov.tr/", "_blank");
   }
 
+  // UYAP Mail yönlendirme
   function handleUyapMail() {
     window.open("https://eposta.uyap.gov.tr/", "_blank");
   }
 
+  // AYS Kullanıcı Yönetim Sistemi yönlendirme
   function handleAysKullaniciYonetimSistemi() {
     window.location.href = "/ays-kys";
+  }
+
+  // Personel Bilgi Sistemi yönlendirme
+  function handlePersonelBilgiSistemi() {
+    window.location.href = "/personel-bilgi-sistemi";
+  }
+
+  // Giriş yapma yönlendirme
+  function handleLogin() {
+    window.location.href = "/login";
   }
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -164,12 +179,19 @@ export default function Home() {
       visible: true,
       color: "dark",
     },
+    {
+      id: 7,
+      label: "Personel Bilgi Sistemi",
+      detail:
+        "Personel Bilgi Sistemi ile özlük bilgilerinizi, tayin taleplerinizi vs. görüntüleyebilirsiniz.",
+      type: "item",
+      visibleRoles: ["pbs-genel"],
+      image: admin_user,
+      onClick: handlePersonelBilgiSistemi,
+      visible: true,
+      color: "secondary",
+    },
   ];
-
-  // Login fonksiyonu (eksik olan)
-  function handleLogin() {
-    window.location.href = "/login";
-  }
 
   return (
     <div className="home-page">
