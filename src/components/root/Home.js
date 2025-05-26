@@ -179,18 +179,7 @@ export default function Home() {
       visible: true,
       color: "dark",
     },
-    {
-      id: 7,
-      label: "Personel Bilgi Sistemi",
-      detail:
-        "Personel Bilgi Sistemi ile özlük bilgilerinizi, tayin taleplerinizi vs. görüntüleyebilirsiniz.",
-      type: "item",
-      visibleRoles: ["pbs-genel"],
-      image: admin_user,
-      onClick: handlePersonelBilgiSistemi,
-      visible: true,
-      color: "secondary",
-    },
+  
   ];
 
   return (
