@@ -224,6 +224,22 @@ export default function SegbisRehberDashboard() {
     }
   };
 
+  // Telefon numarasını +90 555 555 55 55 formatına çeviren fonksiyon
+  const formatPhoneNumber = (phone) => {
+    if (!phone) return "";
+    // Sadece rakamları al
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length === 10) {
+      // 10 haneli ise başına +90 ekle
+      return `+90 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+    }
+    if (digits.length === 11 && digits.startsWith("0")) {
+      // 0 ile başlıyorsa +90 ekle
+      return `+90 ${digits.slice(1, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+    }
+    return phone;
+  };
+
   return (
     <div className="segbis-rehber-dashboard">
       <AYSNavbar />
@@ -448,13 +464,15 @@ export default function SegbisRehberDashboard() {
                                 </td>
                                 <td className="fw-bold">{person.name}</td>
                                 <td>
-                                  <a
-                                    href={`tel:${person.phone}`}
-                                    className="text-decoration-none"
+                                  <span
+                                    className="text-decoration-underline text-primary"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => viewPersonDetails(person)}
+                                    title="Detayları Görüntüle"
                                   >
                                     <FaPhoneAlt className="me-2 text-success" />
-                                    {person.phone}
-                                  </a>
+                                    {formatPhoneNumber(person.phone)}
+                                  </span>
                                 </td>
 
                                 <td className="text-center">
@@ -487,7 +505,7 @@ export default function SegbisRehberDashboard() {
         </ModalHeader>
         <ModalBody>
           {selectedPerson && (
-            <div>
+            <div> 
               <div className="text-center mb-4">
                 <div className="bg-light d-inline-block rounded-circle p-4 mb-3">
                   <FaUsers className="text-primary fs-1" />
@@ -516,7 +534,7 @@ export default function SegbisRehberDashboard() {
                             className="text-decoration-none"
                           >
                             <FaPhoneAlt className="me-2 text-success" />
-                            {selectedPerson.phone}
+                            {formatPhoneNumber(selectedPerson.phone)}
                           </a>
                         </td>
                       </tr>
