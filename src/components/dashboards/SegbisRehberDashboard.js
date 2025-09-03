@@ -56,7 +56,6 @@ export default function SegbisRehberDashboard() {
   // Sayfa yüklendiğinde illeri çek
   useEffect(() => {
     fetchCities();
-
     if (token) {
       try {
         const decoded = jwtDecode(token);
@@ -68,6 +67,7 @@ export default function SegbisRehberDashboard() {
         setUserRoles("");
       }
     }
+    // eslint-disable-next-line
   }, []);
 
   // İlleri çekme fonksiyonu
@@ -289,11 +289,6 @@ export default function SegbisRehberDashboard() {
     return phone;
   };
 
-  // Personel işlemleri (örnek)
-  const handleUpdatePerson = (person) => {
-    // Güncelleme işlemi için modal veya form açabilirsiniz
-    alert("Güncelleme işlemi için form açılacak (örnek)");
-  };
   // Personel silme işlemi
   const handleDeletePerson = async (person) => {
     console.log(person);
@@ -373,15 +368,12 @@ export default function SegbisRehberDashboard() {
     }
     setAddPersonLoading(true);
     try {
-      const res = await axios.post(
-        `/api/segbis/units/${selectedUnit.id}/personel`,
-        {
-          name: addPersonForm.name,
-          title: addPersonForm.title,
-          phoneNumber: addPersonForm.phoneNumber.replace(/\D/g, ""),
-          is_default: addPersonForm.is_default,
-        }
-      );
+      await axios.post(`/api/segbis/units/${selectedUnit.id}/personel`, {
+        name: addPersonForm.name,
+        title: addPersonForm.title,
+        phoneNumber: addPersonForm.phoneNumber.replace(/\D/g, ""),
+        is_default: addPersonForm.is_default,
+      });
       // Başarılı ise personel listesini güncelle
       await fetchPersonnel(selectedUnit.id);
       setShowAddPersonModal(false);
