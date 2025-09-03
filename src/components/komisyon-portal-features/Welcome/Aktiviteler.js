@@ -216,7 +216,7 @@ export default function Aktiviteler({
       selectedUser || filterType || startDate || endDate || personelHareketleri;
     setFiltreVarMi(hasFilter);
 
-    let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10`;
+    let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10&app=EPSİS`;
 
     if (filterType && !personelHareketleri) {
       url += `&filterType=${filterType}`;
