@@ -24,7 +24,7 @@ function SegbisRoutes() {
   }
 
   // Rol kontrolü
-  const requiredRoles = ["segbis-uzman", "segbis-kullanici", "admin", ""];
+  const requiredRoles = ["segbis-uzman", "segbis-kullanici", "admin"];
 
   if (!hasRequiredRole(decodedToken, requiredRoles)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
