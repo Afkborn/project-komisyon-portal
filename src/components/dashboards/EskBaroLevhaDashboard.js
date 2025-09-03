@@ -25,7 +25,7 @@ export default function EskBaroLevhaDashboard() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
-  const [selected, setSelected] = useState(null);
+
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -76,7 +76,6 @@ export default function EskBaroLevhaDashboard() {
 
   // Detay modalı aç
   const openDetail = async (item) => {
-    setSelected(item);
     setDetailLoading(true);
     setShowModal(true);
     try {
@@ -106,7 +105,7 @@ export default function EskBaroLevhaDashboard() {
   const closeModal = () => {
     setShowModal(false);
     setDetail(null);
-    setSelected(null);
+
   };
 
   return (

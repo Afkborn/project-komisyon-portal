@@ -91,10 +91,6 @@ export default function Home() {
     window.location.href = "/ays-kys";
   }
 
-  // Personel Bilgi Sistemi yönlendirme
-  function handlePersonelBilgiSistemi() {
-    window.location.href = "/personel-bilgi-sistemi";
-  }
 
   // Giriş yapma yönlendirme
   function handleLogin() {
