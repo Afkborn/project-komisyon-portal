@@ -16,6 +16,7 @@ import SegbisRoutes from "../Routes/SegbisRoutes";
 import SegbisRehberDashboard from "../dashboards/SegbisRehberDashboard";
 import KullaniciAktiviteleri from "../dashboards/KullaniciAktiviteleri";
 import BultenDashboard from "../dashboards/BultenDashboard";
+import EskBaroLevhaDashboard from "../dashboards/EskBaroLevhaDashboard";
 import "../../styles/App.css";
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/eskisehir-baro-levha" element={<EskBaroLevhaDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 

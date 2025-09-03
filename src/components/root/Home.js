@@ -18,6 +18,7 @@ import courthouse_red from "../../assets/courthouse-red.svg";
 import email_red from "../../assets/email-red.svg";
 import admin_user from "../../assets/admin-user.svg";
 import epsisLogo from "../../assets/epsis-logo.png";
+import eskBaro from "../../assets/esk-baro.png";
 import AYSNavbar from "./AYSNavbar";
 import "../../styles/Home.css";
 
@@ -69,6 +70,10 @@ export default function Home() {
   // SEGBİS rehber yönlendirme
   function handleSegbisRehber() {
     window.location.href = "/segbis-rehber";
+  }
+
+  function handleBaroLevha() {
+    window.location.href = "/eskisehir-baro-levha";
   }
 
   // Eskişehir Adliyesi web sayfasına yönlendirme
@@ -179,7 +184,16 @@ export default function Home() {
       visible: true,
       color: "dark",
     },
-  
+    {
+      id: 7,
+      label: "Eskişehir Barosu Levhası",
+      detail: "Eskişehir Barosu Levhasına ulaşmak için tıklayınız.",
+      type: "item",
+      onClick: handleBaroLevha,
+      image: eskBaro,
+      visible: true,
+      color: "dark",
+    },
   ];
 
   return (
