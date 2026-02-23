@@ -19,6 +19,7 @@ import {
 } from "reactstrap";
 import { renderDate_GGAA } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
+import { generatePdf } from "../../actions/PdfActions";
 
 import "../../../styles/TumPersonelTablo.css";
 
@@ -41,13 +42,18 @@ export default function TumPersonelTablo({
     if (selectedKurum) {
       getKontrolEdilecekBirimler(selectedUnitType);
     }
-    if (tableResults.length !== 0) {
+    // eslint-disable-next-line
+  }, [selectedKurum]);
+
+  // tableResults değiştiğinde mahkemeTablo'yu güncelle
+  useEffect(() => {
+    if (tableResults && tableResults.length !== 0) {
       setSelectedUnitType(tableType);
       getKontrolEdilecekBirimler(tableType);
       setMahkemeTablo(tableResults);
     }
     // eslint-disable-next-line
-  }, [selectedKurum]);
+  }, [tableResults, tableType]);
 
   const handleRadioFilterChange = (e) => {
     const newFilterOption = e.target.value;
@@ -110,6 +116,19 @@ export default function TumPersonelTablo({
         alertify.error(errorMessage);
         console.log(error);
       });
+  };
+
+  const handleExportPdf = () => {
+    if (raporGetiriliyorMu) return;
+    if (!mahkemeTablo || mahkemeTablo.length === 0) {
+      alertify.error("Önce raporu getiriniz.");
+      return;
+    }
+
+    const kurumAdi = selectedKurum?.name ? ` - ${selectedKurum.name}` : "";
+    const fileName = `Personel Tablosu${kurumAdi} - ${selectedUnitType}`;
+
+    generatePdf(document, "tumPersonelTabloPdf", fileName, null, true);
   };
 
   // Renk paletini tanımlayalım - modern bir görünüm için
@@ -466,6 +485,17 @@ export default function TumPersonelTablo({
               >
                 <i className="fas fa-file-alt me-2"></i> Rapor Getir
               </Button>
+
+              <Button
+                color="success"
+                className="mt-2"
+                size="lg"
+                style={{ width: "100%" }}
+                disabled={raporGetiriliyorMu || mahkemeTablo.length === 0}
+                onClick={handleExportPdf}
+              >
+                <i className="fas fa-file-pdf me-2"></i> PDF Oluştur
+              </Button>
             </CardBody>
           </Card>
 
@@ -481,7 +511,7 @@ export default function TumPersonelTablo({
             </div>
           )}
 
-          <div hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
+          <div id="tumPersonelTabloPdf" hidden={raporGetiriliyorMu || mahkemeTablo.length === 0}>
             {kontrolEdilecekBirimTipi.length > 0 &&
               kontrolEdilecekBirimTipi.map((birimTip) => (
                 <div key={birimTip.unitTypeID} className="mt-5">

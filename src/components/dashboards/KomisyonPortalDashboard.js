@@ -27,9 +27,12 @@ import Birimler from "../komisyon-portal-features/Birimler/Birimler";
 import TumPersonelListe from "../komisyon-portal-features/TumPersonelListe/TumPersonelListe";
 import PersonelListeByBirim from "../komisyon-portal-features/PersonelListeByBirim/PersonelListeByBirim";
 import PersonelDetay from "../komisyon-portal-features/PersonelDetay/PersonelDetay";
+import PersonelEkleModal from "../komisyon-portal-features/PersonelListeByBirim/PersonelEkleModal";
+import ScrollRestoration from "../common/ScrollRestorationNew";
 import Unvanlar from "../komisyon-portal-features/Unvanlar";
 import Kurum from "../komisyon-portal-features/Kurum";
 import PersonelOnLeave from "../komisyon-portal-features/Reports/PersonelOnLeave";
+import YariZamanliCalisanPersonel from "../komisyon-portal-features/Reports/YariZamanliCalisanPersonel";
 import UnitMissingClerk from "../komisyon-portal-features/Reports/UnitMissingClerk";
 import KullaniciAyarlari from "../komisyon-portal-features/KullaniciAyarlari";
 import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
@@ -70,6 +73,7 @@ export default function KomisyonPortalDashboard() {
   const [selectedKurum, setSelectedKurum] = useState(null);
   const [unvanlar, setUnvanlar] = useState([]);
   const [showKurumChangeModal, setShowKurumChangeModal] = useState(false);
+  const [showPersonelEkleModal, setShowPersonelEkleModal] = useState(false);
   const [selectedNewKurum, setSelectedNewKurum] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -92,6 +96,7 @@ export default function KomisyonPortalDashboard() {
   const toggleNavbar = () => setCollapsed(!collapsed);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const personelEkleToggle = () => setShowPersonelEkleModal((prev) => !prev);
 
   // Change kurum function
   function changeKurum(kurum) {
@@ -394,6 +399,13 @@ export default function KomisyonPortalDashboard() {
       icon: "fas fa-plane-departure",
     },
     {
+      id: 23,
+      label: "Yarı Zamanlı Çalışan Personel",
+      type: "item",
+      path: "yari-zamanli-calisan-personel",
+      icon: "fas fa-clock",
+    },
+    {
       id: 7,
       label: "Eksik Katibi Olan Birimler",
       type: "item",
@@ -560,6 +572,8 @@ export default function KomisyonPortalDashboard() {
 
   return (
     <div className="dashboard-container d-flex">
+      {/* Scroll pozisyonlarını otomatik yönet */}
+      <ScrollRestoration />
       {/* Sidebar */}
       <div
         className={`sidebar bg-light border-end ${
@@ -654,6 +668,16 @@ export default function KomisyonPortalDashboard() {
           <Collapse isOpen={!collapsed} navbar className="justify-content-end">
             <Nav navbar>
               <div className="d-flex align-items-center">
+                <Button
+                  color="success"
+                  size="sm"
+                  className="me-2"
+                  onClick={personelEkleToggle}
+                >
+                  <i className="fas fa-user-plus me-1"></i>
+                  Personel Ekle
+                </Button>
+
                 {selectedKurum && (
                   <div className="me-3 d-none d-sm-block">
                     <Badge color="danger" pill className="px-3 py-2">
@@ -662,6 +686,7 @@ export default function KomisyonPortalDashboard() {
                     </Badge>
                   </div>
                 )}
+
                 <Button
                   color="light"
                   size="sm"
@@ -671,6 +696,7 @@ export default function KomisyonPortalDashboard() {
                   <i className="fas fa-exchange-alt me-1"></i>
                   Kurum Değiştir
                 </Button>
+                
                 <Button
                   color="light"
                   size="sm"
@@ -832,6 +858,18 @@ export default function KomisyonPortalDashboard() {
                 />
               }
             />
+
+            <Route
+              path="yari-zamanli-calisan-personel"
+              element={
+                <YariZamanliCalisanPersonel
+                  selectedKurum={selectedKurum}
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                />
+              }
+            />
+
             <Route
               path="eksik-katibi-olan-birimler"
               element={
@@ -970,6 +1008,19 @@ export default function KomisyonPortalDashboard() {
           </Button>
         </ModalFooter>
       </Modal>
+
+      {/* Personel Ekle Modal (Global) */}
+      <PersonelEkleModal
+        modal={showPersonelEkleModal}
+        toggle={personelEkleToggle}
+        token={token}
+        unvanlar={unvanlar}
+        kurumlar={kurumlar}
+        selectedKurum={selectedKurum}
+        birim={null}
+        handleBirimChange={null}
+        personel={[]}
+      />
 
       {/* Overlay for mobile */}
       {sidebarOpen && window.innerWidth < 992 && (

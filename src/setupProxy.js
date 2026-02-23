@@ -1,17 +1,19 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 module.exports = function (app) {
-  const target =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:2626/api";
+  // REACT_APP_BACKEND_URL: örn. http://localhost:3434
+  // Not: Bazı ortamlarda yanlışlıkla /api ile set edilebiliyor; çift /api olmaması için normalize ediyoruz.
+  const rawTarget = process.env.REACT_APP_BACKEND_URL || "http://localhost:2626";
+  const target = rawTarget.replace(/\/?api\/?$/, "");
 
+  // Context'i createProxyMiddleware'e veriyoruz ki path '/api/...' olarak korunabilsin.
+  // Aksi halde Express mount path'i kırpıp backend'e '/users/login' gibi gidebiliyor.
   app.use(
-    "/api",
-    createProxyMiddleware({
-      target: target,
+    createProxyMiddleware(["/api", "/komisyon-portal/api"], {
+      target,
       changeOrigin: true,
       pathRewrite: {
-        "^/komisyon-portal/api": "/api", // komisyon-portal prefix'ini kaldır
-        "^/api": "/api", // normal /api istekleri için
+        "^/komisyon-portal/api": "/api",
       },
     })
   );

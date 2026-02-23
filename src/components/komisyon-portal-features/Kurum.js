@@ -32,7 +32,9 @@ export default function Kurum({ kurumlar, selectedKurum, setSelectedKurum }) {
           </Alert>
 
           <Row>
-            {kurumlar.map((kurum, index) => (
+            {[...kurumlar]
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .map((kurum, index) => (
               <Col md={6} className="mb-3" key={kurum.id}>
                 <Card
                   className={`h-100 ${

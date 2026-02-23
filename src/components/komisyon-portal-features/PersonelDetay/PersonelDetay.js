@@ -38,6 +38,7 @@ import PersonelCalistigiKisiGuncelleModal from "./PersonelCalistigiKisiGuncelleM
 import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncelleModal";
 import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
 import PersonelSilModal from "./PersonelSilModal";
+import PersonelPartTimeModal from "./PersonelPartTimeModal";
 
 import { getIzinType } from "../../actions/IzinActions";
 import { useParams, useNavigate } from "react-router-dom";
@@ -64,6 +65,8 @@ export default function PersonelDetay({
   const [errorMessage, setErrorMessage] = useState("");
   const [activeTab, setActiveTab] = useState("1");
 
+  const [birimeBaslamaTarihiError, setBirimeBaslamaTarihiError] = useState("");
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
@@ -76,6 +79,8 @@ export default function PersonelDetay({
   const [showDeletePersonelModal, setShowDeletePersonelModal] = useState(false);
   const [showDurumDegistirModal, setShowDurumDegistirModal] = useState(false);
   const [showIzinEkleModal, setShowIzinEkleModal] = useState(false);
+  const [showPartTimeModal, setShowPartTimeModal] = useState(false);
+  const [selectedIzin, setSelectedIzin] = useState(null);
 
   // Toggle fonksiyonları
   const calistigiKisiGuncelleModalToggle = () =>
@@ -88,7 +93,19 @@ export default function PersonelDetay({
     setShowDeletePersonelModal(!showDeletePersonelModal);
   const durumDegistirModalToggle = () =>
     setShowDurumDegistirModal(!showDurumDegistirModal);
-  const izinEkleModalToggle = () => setShowIzinEkleModal(!showIzinEkleModal);
+  const izinEkleModalToggle = () => {
+    setShowIzinEkleModal(!showIzinEkleModal);
+    if (!showIzinEkleModal) {
+      setSelectedIzin(null); // Yeni izin ekle modu
+    }
+  };
+  const partTimeModalToggle = () => setShowPartTimeModal(!showPartTimeModal);
+
+  // İzin düzenleme modu ile açma
+  const handleIzinEdit = (izin) => {
+    setSelectedIzin(izin);
+    setShowIzinEkleModal(true);
+  };
 
   // Tab değişimi
   const toggleTab = (tab) => {
@@ -148,6 +165,9 @@ export default function PersonelDetay({
       ad: updatedPersonel.ad,
       soyad: updatedPersonel.soyad,
       goreveBaslamaTarihi: updatedPersonel.goreveBaslamaTarihi.split("T")[0],
+      birimeBaslamaTarihi:
+        updatedPersonel.birimeBaslamaTarihi &&
+        updatedPersonel.birimeBaslamaTarihi.split("T")[0],
       durusmaKatibiMi: updatedPersonel.durusmaKatibiMi,
       description: updatedPersonel.description,
       level: updatedPersonel.level,
@@ -178,6 +198,7 @@ export default function PersonelDetay({
       ad: "",
       soyad: "",
       goreveBaslamaTarihi: "",
+      birimeBaslamaTarihi: "",
       durusmaKatibiMi: "",
       description: "",
       level: "",
@@ -245,8 +266,37 @@ export default function PersonelDetay({
       },
       () => {
         alertify.error("İşlem iptal edildi.");
-      }
+      },
     );
+  };
+
+  const handleIzinUpdate = (updatedIzin) => {
+    const configuration = {
+      method: "PUT",
+      url: `/api/leaves/${updatedIzin._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        startDate: updatedIzin.startDate,
+        endDate: updatedIzin.endDate,
+        reason: updatedIzin.reason,
+        comment: updatedIzin.comment,
+        dayCount: updatedIzin.dayCount,
+      },
+    };
+
+    axios(configuration)
+      .then((response) => {
+        alertify.success("İzin güncellendi.");
+        setShowIzinEkleModal(false);
+        setSelectedIzin(null);
+        refreshPersonel(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        alertify.error("İzin güncellenirken bir hata oluştu.");
+      });
   };
 
   const handleGecmisBirimDelete = (birim) => {
@@ -274,12 +324,24 @@ export default function PersonelDetay({
       },
       () => {
         alertify.error("İşlem iptal edildi.");
-      }
+      },
     );
   };
 
   const handleUpdate = () => {
     // ...existing code...
+    if (
+      updatedPersonel?.birimeBaslamaTarihi &&
+      updatedPersonel?.goreveBaslamaTarihi &&
+      updatedPersonel.birimeBaslamaTarihi < updatedPersonel.goreveBaslamaTarihi
+    ) {
+      const msg =
+        "Birime başlama tarihi, göreve başlama tarihinden önce olamaz.";
+      setBirimeBaslamaTarihiError(msg);
+      alertify.error(msg);
+      return;
+    }
+
     setLoadSpinner(true);
 
     const configuration = {
@@ -304,6 +366,23 @@ export default function PersonelDetay({
       });
   };
 
+  useEffect(() => {
+    if (
+      updatedPersonel?.birimeBaslamaTarihi &&
+      updatedPersonel?.goreveBaslamaTarihi &&
+      updatedPersonel.birimeBaslamaTarihi < updatedPersonel.goreveBaslamaTarihi
+    ) {
+      setBirimeBaslamaTarihiError(
+        "Birime başlama tarihi, göreve başlama tarihinden önce olamaz.",
+      );
+    } else {
+      setBirimeBaslamaTarihiError("");
+    }
+  }, [
+    updatedPersonel?.birimeBaslamaTarihi,
+    updatedPersonel?.goreveBaslamaTarihi,
+  ]);
+
   const getPersonelBySicil = (sicil) => {
     // ...existing code...
     clearUpdatedPersonel();
@@ -322,7 +401,7 @@ export default function PersonelDetay({
         if (!response.data.person.birimID) {
           setLoadSpinner(false);
           alertify.error(
-            "Personel birimi hatalı, sicil numarası ile destek alın."
+            "Personel birimi hatalı, sicil numarası ile destek alın.",
           );
           setPersonel(null);
           setUpdatedPersonel(null);
@@ -378,7 +457,7 @@ export default function PersonelDetay({
           if (!person.birimID) {
             setLoadSpinner(false);
             alertify.error(
-              "Personel birimi hatalı, sicil numarası ile destek alın."
+              "Personel birimi hatalı, sicil numarası ile destek alın.",
             );
             setPersonel(null);
             setUpdatedPersonel(null);
@@ -648,7 +727,7 @@ export default function PersonelDetay({
                                 setPersoneller([]);
                                 window.scrollTo(0, 0);
                                 navigate(
-                                  `/komisyon-portal/personel-detay/${person.sicil}`
+                                  `/komisyon-portal/personel-detay/${person.sicil}`,
                                 );
                               }}
                             >
@@ -733,6 +812,10 @@ export default function PersonelDetay({
                           <DropdownItem onClick={durumDegistirModalToggle}>
                             <i className="fas fa-exchange-alt me-2"></i>Durum
                             Değiştir
+                          </DropdownItem>
+                          <DropdownItem onClick={partTimeModalToggle}>
+                            <i className="fas fa-clock me-2"></i>Yarı Zamanlı
+                            Çalışan
                           </DropdownItem>
                           <DropdownItem divider />
                           <DropdownItem
@@ -867,6 +950,20 @@ export default function PersonelDetay({
                                   <option value="true">Evet</option>
                                   <option value="false">Hayır</option>
                                 </Input>
+
+                                {updatedPersonel?.isTemporary &&
+                                  !personel?.temporaryBirimID && (
+                                    <Alert
+                                      color="warning"
+                                      className="mt-2 mb-0 py-2"
+                                    >
+                                      <i className="fas fa-exclamation-triangle me-2"></i>
+                                      Geçici personel seçtiniz. Kayıt işleminden
+                                      sonra sayfayı yenilemeyi ve İşlemler -&gt;
+                                      Birim Değiştir ekranından geçici birim
+                                      eklemeyi unutma!
+                                    </Alert>
+                                  )}
                               </FormGroup>
                             </Col>
                           </Row>
@@ -902,7 +999,7 @@ export default function PersonelDetay({
                                   type="text"
                                   className="form-control-plaintext fw-bold"
                                   value={renderDate_GGAAYYYY(
-                                    personel.suspensionEndDate
+                                    personel.suspensionEndDate,
                                   )}
                                   disabled
                                 />
@@ -956,6 +1053,53 @@ export default function PersonelDetay({
                                       ? personel.temporaryBirimID.name
                                       : "BELİRTİLMEMİŞ"
                                   }
+                                  disabled
+                                />
+                              </FormGroup>
+                            </Col>
+                          </Row>
+
+                          {/* Yarı Zamanlı Personel Bilgileri */}
+                          <Row className="mb-3" hidden={!personel.isPartTime}>
+                            <Col md={4}>
+                              <FormGroup>
+                                <Label className="text-muted small text-uppercase">
+                                  Yarı Zamanlı - Başlangıç
+                                </Label>
+                                <Input
+                                  type="text"
+                                  className="form-control-plaintext fw-bold"
+                                  value={renderDate_GGAAYYYY(
+                                    personel.partTimeStartDate,
+                                  )}
+                                  disabled
+                                />
+                              </FormGroup>
+                            </Col>
+                            <Col md={4}>
+                              <FormGroup>
+                                <Label className="text-muted small text-uppercase">
+                                  Yarı Zamanlı - Bitiş
+                                </Label>
+                                <Input
+                                  type="text"
+                                  className="form-control-plaintext fw-bold"
+                                  value={renderDate_GGAAYYYY(
+                                    personel.partTimeEndDate,
+                                  )}
+                                  disabled
+                                />
+                              </FormGroup>
+                            </Col>
+                            <Col md={4}>
+                              <FormGroup>
+                                <Label className="text-muted small text-uppercase">
+                                  Yarı Zamanlı - Gerekçe
+                                </Label>
+                                <Input
+                                  type="text"
+                                  className="form-control-plaintext"
+                                  value={personel.partTimeReason || "-"}
                                   disabled
                                 />
                               </FormGroup>
@@ -1077,19 +1221,55 @@ export default function PersonelDetay({
                               </FormGroup>
                             </Col>
                             <Col md={6}>
-                              <FormGroup>
-                                <Label className="fw-bold">
-                                  Birimde Çalıştığı Süre
-                                </Label>
-                                <Input
-                                  type="text"
-                                  value={calculateGorevSuresi(
-                                    personel.birimeBaslamaTarihi
-                                  )}
-                                  disabled
-                                  className="bg-light"
-                                />
-                              </FormGroup>
+                              <Row>
+                                <Col md={6}>
+                                  <FormGroup>
+                                    <Label className="fw-bold">
+                                      Birime Başlama Tarihi
+                                    </Label>
+                                    <Input
+                                      type="date"
+                                      id="birimeBaslamaTarihi"
+                                      name="birimeBaslamaTarihi"
+                                      value={
+                                        updatedPersonel.birimeBaslamaTarihi ||
+                                        ""
+                                      }
+                                      min={
+                                        updatedPersonel.goreveBaslamaTarihi ||
+                                        ""
+                                      }
+                                      onChange={handleInputChange}
+                                    />
+
+                                    {birimeBaslamaTarihiError && (
+                                      <Alert
+                                        color="danger"
+                                        className="mt-2 mb-0 py-2"
+                                      >
+                                        <i className="fas fa-exclamation-triangle me-2"></i>
+                                        {birimeBaslamaTarihiError}
+                                      </Alert>
+                                    )}
+                                  </FormGroup>
+                                </Col>
+                                <Col md={6}>
+                                  <FormGroup>
+                                    <Label className="fw-bold">
+                                      Birimde Çalıştığı Süre
+                                    </Label>
+                                    <Input
+                                      type="text"
+                                      value={calculateGorevSuresi(
+                                        updatedPersonel.birimeBaslamaTarihi ||
+                                          personel.birimeBaslamaTarihi,
+                                      )}
+                                      disabled
+                                      className="bg-light"
+                                    />
+                                  </FormGroup>
+                                </Col>
+                              </Row>
                             </Col>
                           </Row>
 
@@ -1146,7 +1326,7 @@ export default function PersonelDetay({
                                     <Input
                                       type="text"
                                       value={calculateGorevSuresi(
-                                        personel.goreveBaslamaTarihi
+                                        personel.goreveBaslamaTarihi,
                                       )}
                                       disabled
                                       className="bg-light"
@@ -1380,7 +1560,7 @@ export default function PersonelDetay({
                                   value={
                                     updatedPersonel.birthDate
                                       ? calculateGorevSuresi(
-                                          updatedPersonel.birthDate
+                                          updatedPersonel.birthDate,
                                         )
                                       : ""
                                   }
@@ -1549,16 +1729,24 @@ export default function PersonelDetay({
                                       </td>
                                       <td>
                                         {renderDate_GGAAYYYY(
-                                          izin.startDate.split("T")[0]
+                                          izin.startDate.split("T")[0],
                                         )}
                                       </td>
                                       <td>
                                         {renderDate_GGAAYYYY(
-                                          izin.endDate.split("T")[0]
+                                          izin.endDate.split("T")[0],
                                         )}
                                       </td>
                                       <td>{izin.comment}</td>
                                       <td className="text-center">
+                                        <Button
+                                          size="sm"
+                                          color="warning"
+                                          className="me-2"
+                                          onClick={() => handleIzinEdit(izin)}
+                                        >
+                                          <i className="fas fa-edit"></i>
+                                        </Button>
                                         <Button
                                           size="sm"
                                           color="danger"
@@ -1611,18 +1799,18 @@ export default function PersonelDetay({
                                       <td>{birim.unitID.name}</td>
                                       <td>
                                         {renderDate_GGAAYYYY(
-                                          birim.startDate.split("T")[0]
+                                          birim.startDate.split("T")[0],
                                         )}
                                       </td>
                                       <td>
                                         {renderDate_GGAAYYYY(
-                                          birim.endDate.split("T")[0]
+                                          birim.endDate.split("T")[0],
                                         )}
                                       </td>
                                       <td>
                                         {calculateGorevSuresi(
                                           birim.startDate,
-                                          birim.endDate
+                                          birim.endDate,
                                         )}
                                       </td>
                                       <td>{birim.detail || "-"}</td>
@@ -1674,6 +1862,8 @@ export default function PersonelDetay({
             personel={personel}
             token={token}
             refreshPersonel={refreshPersonel}
+            selectedIzin={selectedIzin}
+            onUpdate={handleIzinUpdate}
           />
           <PersonelDurumGuncelleModal
             modal={showDurumDegistirModal}
@@ -1693,6 +1883,13 @@ export default function PersonelDetay({
           <PersonelSilModal
             modal={showDeletePersonelModal}
             toggle={deletePersonelModalToggle}
+            personel={personel}
+            token={token}
+            refreshPersonel={refreshPersonel}
+          />
+          <PersonelPartTimeModal
+            modal={showPartTimeModal}
+            toggle={partTimeModalToggle}
             personel={personel}
             token={token}
             refreshPersonel={refreshPersonel}

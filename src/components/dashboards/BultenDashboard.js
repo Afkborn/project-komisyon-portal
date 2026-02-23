@@ -163,7 +163,7 @@ export default function BultenDashboard() {
 
       // Tüm aktif RSS kaynaklarından veri çekme
       const promises = activeFeeds.map((source) =>
-        axios.get(`api/rss_proxy?url=${encodeURIComponent(source.url)}`)
+        axios.get(`/api/rss_proxy?url=${encodeURIComponent(source.url)}`)
       );
 
       const responses = await Promise.all(promises);

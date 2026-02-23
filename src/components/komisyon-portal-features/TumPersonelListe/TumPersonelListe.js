@@ -20,6 +20,7 @@ import alertify from "alertifyjs";
 import DataTable from "../../common/DataTable";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
+import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
 
 export default function TumPersonelListe({
   selectedKurum,
@@ -121,6 +122,22 @@ export default function TumPersonelListe({
           {item.birimID.name}
         </Badge>
       ),
+    },
+    {
+      key: "goreveBaslamaTarihi",
+      header: "Göreve Başlama",
+      render: (item) =>
+        item?.goreveBaslamaTarihi
+          ? renderDate_GGAAYYYY(item.goreveBaslamaTarihi)
+          : "-",
+    },
+    {
+      key: "birimeBaslamaTarihi",
+      header: "Birime Başlama",
+      render: (item) =>
+        item?.birimeBaslamaTarihi
+          ? renderDate_GGAAYYYY(item.birimeBaslamaTarihi)
+          : "-",
     },
   ];
 

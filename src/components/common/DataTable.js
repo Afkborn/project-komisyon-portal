@@ -95,17 +95,14 @@ const DataTable = ({
         // console.log("Sıralanan sütun:", column.key);
         // console.log("Veri tipi:", dataType);
 
-        // Değerleri al (render fonksiyonu varsa onu kullan)
-        let aValue = column.render ? column.render(a) : a[sortConfig.key];
-        let bValue = column.render ? column.render(b) : b[sortConfig.key];
+        // Değerleri al (render fonksiyonu varsa onu kullan, yoksa key veya sortKey kullan)
+        // sortKey varsa render'dan çok öncelik alır (sort amaçlı custom key)
+        const sortKeyField = column.sortKey || sortConfig.key;
+        let aValue = column.sortKey ? a[sortKeyField] : (column.render ? column.render(a) : a[sortConfig.key]);
+        let bValue = column.sortKey ? b[sortKeyField] : (column.render ? column.render(b) : b[sortConfig.key]);
 
         // console.log("A Değeri:", aValue);
         // console.log("B Değeri:", bValue);
-
-        // Bazı örnekler yazdır
-        // if (typeof aValue === "string" && aValue.includes("Yıl")) {
-        //   console.log("Tarih içeren değer bulundu:", aValue);
-        // }
 
         // String olarak kullanmak için text çıkarıyoruz render fonksiyonu varsa
         if (

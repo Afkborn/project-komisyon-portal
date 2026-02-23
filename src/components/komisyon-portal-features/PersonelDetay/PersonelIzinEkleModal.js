@@ -28,6 +28,8 @@ export default function PersonelIzinEkleModal({
   personel,
   token,
   refreshPersonel,
+  selectedIzin = null,
+  onUpdate = null,
 }) {
   const initialIzinState = {
     reason: "",
@@ -94,14 +96,26 @@ export default function PersonelIzinEkleModal({
     },
   ];
 
-  // Modal açıldığında form değerlerini sıfırla
+  // Modal açıldığında form değerlerini sıfırla veya düzenle modunda doldur
   useEffect(() => {
     if (modal) {
-      setIzin(initialIzinState);
+      if (selectedIzin) {
+        // Düzenleme modu: mevcut izin verilerini yükle
+        setIzin({
+          reason: selectedIzin.reason,
+          startDate: selectedIzin.startDate.split("T")[0],
+          endDate: selectedIzin.endDate.split("T")[0],
+          comment: selectedIzin.comment || "",
+          dayCount: selectedIzin.dayCount || 0,
+        });
+      } else {
+        // Yeni izin ekleme modu
+        setIzin(initialIzinState);
+      }
       setErrors({});
     }
-    // eslint-disable-next-line 
-  }, [modal]);
+    // eslint-disable-next-line
+  }, [modal, selectedIzin]);
 
   // İzin süresini hesapla
   useEffect(() => {
@@ -171,7 +185,7 @@ export default function PersonelIzinEkleModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleUpdate = () => {
+  const handleSave = () => {
     // Form validasyonu
     if (!validateForm()) {
       alertify.error("Lütfen tüm alanları doğru şekilde doldurunuz.");
@@ -180,35 +194,50 @@ export default function PersonelIzinEkleModal({
 
     setLoading(true);
 
-    const configuration = {
-      method: "POST",
-      url: `/api/leaves/${personel._id}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
+    // Düzenleme modu mu yoksa yeni kayıt modu mu kontrol et
+    if (selectedIzin && onUpdate) {
+      // Güncelleme işlemi
+      onUpdate({
+        _id: selectedIzin._id,
         startDate: izin.startDate,
         endDate: izin.endDate,
         reason: izin.reason,
         comment: izin.comment,
         dayCount: izin.dayCount,
-      },
-    };
-
-    axios(configuration)
-      .then((result) => {
-        alertify.success("İzin başarıyla eklendi");
-        refreshPersonel();
-        setLoading(false);
-        toggle();
-      })
-      .catch((error) => {
-        console.log(error);
-        const errorMessage =
-          error.response?.data?.message || "İzin eklenirken bir hata oluştu";
-        alertify.error(errorMessage);
-        setLoading(false);
       });
+      setLoading(false);
+    } else {
+      // Yeni izin ekleme işlemi
+      const configuration = {
+        method: "POST",
+        url: `/api/leaves/${personel._id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          startDate: izin.startDate,
+          endDate: izin.endDate,
+          reason: izin.reason,
+          comment: izin.comment,
+          dayCount: izin.dayCount,
+        },
+      };
+
+      axios(configuration)
+        .then((result) => {
+          alertify.success("İzin başarıyla eklendi");
+          refreshPersonel();
+          setLoading(false);
+          toggle();
+        })
+        .catch((error) => {
+          console.log(error);
+          const errorMessage =
+            error.response?.data?.message || "İzin eklenirken bir hata oluştu";
+          alertify.error(errorMessage);
+          setLoading(false);
+        });
+    }
   };
 
   const handleCancel = () => {
@@ -239,10 +268,16 @@ export default function PersonelIzinEkleModal({
     <Modal isOpen={modal} toggle={!loading && toggle} centered size="lg">
       <ModalHeader
         toggle={!loading && toggle}
-        className="bg-success text-white"
+        className={
+          selectedIzin ? "bg-warning text-dark" : "bg-success text-white"
+        }
       >
-        <i className="fas fa-calendar-plus me-2"></i>
-        Personel İzin Ekleme
+        <i
+          className={
+            selectedIzin ? "fas fa-edit me-2" : "fas fa-calendar-plus me-2"
+          }
+        ></i>
+        {selectedIzin ? "İzin Güncelleme" : "Personel İzin Ekleme"}
       </ModalHeader>
 
       <ModalBody>
@@ -253,28 +288,38 @@ export default function PersonelIzinEkleModal({
               style={{ width: "3rem", height: "3rem" }}
             />
             <p className="mt-3 text-muted">
-              İzin ekleniyor, lütfen bekleyin...
+              {selectedIzin ? "İzin güncelleniyor" : "İzin ekleniyor"}, lütfen
+              bekleyin...
             </p>
           </div>
         ) : (
           <Form>
             {personel && (
               <>
-                <Alert color="info" className="mb-4">
+                <Alert
+                  color={selectedIzin ? "warning" : "info"}
+                  className="mb-4"
+                >
                   <div className="d-flex align-items-center">
                     <i className="fas fa-info-circle me-3 fs-4"></i>
                     <div>
                       <strong>
                         {personel.ad} {personel.soyad}
                       </strong>{" "}
-                      adlı personel için yeni bir izin kaydı ekliyorsunuz.
+                      adlı personel için{" "}
+                      {selectedIzin
+                        ? "izin kaydını güncellemek üzeresiniz"
+                        : "yeni bir izin kaydı ekliyorsunuz"}
+                      .
                       {personel.izindeMi && (
                         <div className="mt-2">
                           <Badge color="danger" pill>
                             UYARI
                           </Badge>{" "}
                           <strong>Bu personel şu an izinde görünüyor.</strong>{" "}
-                          Yeni izin eklemek mevcut izin durumunu etkileyebilir.
+                          {selectedIzin
+                            ? "İzin güncellemesi mevcut durumunu etkileyebilir."
+                            : "Yeni izin eklemek mevcut izin durumunu etkileyebilir."}
                         </div>
                       )}
                     </div>
@@ -515,18 +560,24 @@ export default function PersonelIzinEkleModal({
 
       <ModalFooter>
         <Button
-          color="success"
-          onClick={handleUpdate}
+          color={selectedIzin ? "warning" : "success"}
+          onClick={handleSave}
           disabled={loading}
           className="px-4"
         >
           {loading ? (
             <>
-              <Spinner size="sm" className="me-2" /> İzin Ekleniyor...
+              <Spinner size="sm" className="me-2" />{" "}
+              {selectedIzin ? "Güncelleniyor..." : "Ekleniyor..."}
             </>
           ) : (
             <>
-              <i className="fas fa-save me-2"></i> İzin Ekle
+              <i
+                className={
+                  selectedIzin ? "fas fa-edit me-2" : "fas fa-save me-2"
+                }
+              ></i>{" "}
+              {selectedIzin ? "İzin Güncelle" : "İzin Ekle"}
             </>
           )}
         </Button>{" "}

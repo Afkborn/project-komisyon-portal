@@ -25,6 +25,8 @@ function PersonelEkleModal({
   toggle,
   unvanlar,
   birim,
+  kurumlar,
+  selectedKurum,
   token,
   handleBirimChange,
   personel,
@@ -32,6 +34,13 @@ function PersonelEkleModal({
   const [selectedUnvan, setSelectedUnvan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState(
+    selectedKurum?.id || ""
+  );
+  const [birimOptions, setBirimOptions] = useState([]);
+  const [birimLoading, setBirimLoading] = useState(false);
+  const [selectedBirimLocal, setSelectedBirimLocal] = useState(null);
 
   const [formData, setFormData] = useState({
     birimID: "",
@@ -104,6 +113,7 @@ function PersonelEkleModal({
       description: "",
     });
     setSelectedUnvan(null);
+    setSelectedBirimLocal(birim || null);
     setErrors({});
   };
 
@@ -114,6 +124,9 @@ function PersonelEkleModal({
 
   const validateForm = () => {
     const newErrors = {};
+
+    const effectiveBirimId = birim?._id || formData.birimID;
+    if (!effectiveBirimId) newErrors.birimID = "Birim seçimi zorunludur";
 
     // Zorunlu alanlar
     if (!formData.titleID) newErrors.titleID = "Ünvan seçimi zorunludur";
@@ -148,11 +161,55 @@ function PersonelEkleModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  const getBirimler = (institutionId) => {
+    if (!institutionId) {
+      setBirimOptions([]);
+      return;
+    }
+
+    setBirimLoading(true);
+
+    const configuration = {
+      method: "GET",
+      url: `/api/units/institution/${institutionId}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((result) => {
+        const sortedUnits = (result.data.unitList || []).sort((a, b) => {
+          if (a.unitType.oncelikSirasi !== b.unitType.oncelikSirasi) {
+            return a.unitType.oncelikSirasi - b.unitType.oncelikSirasi;
+          }
+          return a.series - b.series;
+        });
+        setBirimOptions(sortedUnits);
+      })
+      .catch((error) => {
+        console.log(error);
+        alertify.error("Birimler yüklenirken bir hata oluştu.");
+        setBirimOptions([]);
+      })
+      .finally(() => setBirimLoading(false));
+  };
+
   const handleAdd = () => {
+    const effectiveBirimId = birim?._id || formData.birimID;
+    if (!effectiveBirimId) {
+      setErrors((prev) => ({
+        ...prev,
+        birimID: "Birim seçimi zorunludur",
+      }));
+      alertify.error("Lütfen birim seçiniz.");
+      return;
+    }
+
     // Birim ID'sini formData'ya ekle
     const submitData = {
       ...formData,
-      birimID: birim._id,
+      birimID: effectiveBirimId,
     };
 
     if (!validateForm()) {
@@ -176,7 +233,12 @@ function PersonelEkleModal({
         alertify.success("Personel başarıyla eklendi.");
         resetForm();
         toggle();
-        handleBirimChange({ target: { value: birim.name } });
+        if (typeof handleBirimChange === "function") {
+          const birimNameForRefresh = birim?.name || selectedBirimLocal?.name;
+          if (birimNameForRefresh) {
+            handleBirimChange({ target: { value: birimNameForRefresh } });
+          }
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -203,20 +265,121 @@ function PersonelEkleModal({
         ...prev,
         birimID: birim._id,
       }));
+      setSelectedBirimLocal(birim);
     }
     // eslint-disable-next-line
   }, [birim]);
+
+  useEffect(() => {
+    if (!modal) return;
+    if (birim?._id) return;
+
+    const institutionId = selectedInstitutionId || selectedKurum?.id;
+    if (institutionId && birimOptions.length === 0) {
+      getBirimler(institutionId);
+    }
+    // eslint-disable-next-line
+  }, [modal, birim, selectedInstitutionId]);
 
   return (
     <Modal isOpen={modal} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle} className="bg-primary text-white">
         <i className="fas fa-user-plus me-2"></i>
-        Personel Ekle - {birim?.name}
+        Personel Ekle - {birim?.name || selectedBirimLocal?.name || "Birim Seçiniz"}
       </ModalHeader>
 
       <ModalBody className="bg-light">
-        {birim ? (
-          <Form>
+        <Form>
+          {!birim && (
+            <Card className="shadow-sm mb-4">
+              <div className="card-header bg-white">
+                <h5 className="mb-0">
+                  <i className="fas fa-building me-2 text-primary"></i>
+                  Birim Seçimi
+                </h5>
+              </div>
+              <div className="card-body">
+                <Row>
+                  {Array.isArray(kurumlar) && kurumlar.length > 0 && (
+                    <Col md={6}>
+                      <FormGroup>
+                        <Label for="institutionID" className="fw-bold">
+                          <i className="fas fa-university me-1 text-primary"></i>{" "}
+                          Kurum
+                        </Label>
+                        <Input
+                          type="select"
+                          name="institutionID"
+                          id="institutionID"
+                          value={selectedInstitutionId}
+                          onChange={(e) => {
+                            const nextId = e.target.value;
+                            setSelectedInstitutionId(nextId);
+                            setFormData((prev) => ({
+                              ...prev,
+                              birimID: "",
+                            }));
+                            setSelectedBirimLocal(null);
+                            if (errors.birimID) {
+                              setErrors((prev) => ({ ...prev, birimID: null }));
+                            }
+                            getBirimler(nextId);
+                          }}
+                        >
+                          <option value="">Kurum Seçiniz</option>
+                          {kurumlar.map((k) => (
+                            <option key={k.id} value={k.id}>
+                              {k.name}
+                            </option>
+                          ))}
+                        </Input>
+                      </FormGroup>
+                    </Col>
+                  )}
+
+                  <Col md={Array.isArray(kurumlar) && kurumlar.length > 0 ? 6 : 12}>
+                    <FormGroup>
+                      <Label for="birimID" className="fw-bold">
+                        <i className="fas fa-sitemap me-1 text-primary"></i>{" "}
+                        Birim*
+                      </Label>
+                      <Input
+                        type="select"
+                        name="birimID"
+                        id="birimID"
+                        value={formData.birimID}
+                        onChange={(e) => {
+                          const nextUnitId = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            birimID: nextUnitId,
+                          }));
+                          const found = birimOptions.find((u) => u._id === nextUnitId);
+                          setSelectedBirimLocal(found || null);
+                          if (errors.birimID) {
+                            setErrors((prev) => ({ ...prev, birimID: null }));
+                          }
+                        }}
+                        invalid={!!errors.birimID}
+                        disabled={birimLoading || (Array.isArray(kurumlar) && kurumlar.length > 0 && !selectedInstitutionId)}
+                      >
+                        <option value="">
+                          {birimLoading ? "Birimler yükleniyor..." : "Birim Seçiniz"}
+                        </option>
+                        {birimOptions.map((u) => (
+                          <option key={u._id} value={u._id}>
+                            {u.name}
+                          </option>
+                        ))}
+                      </Input>
+                      <FormFeedback>{errors.birimID}</FormFeedback>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </div>
+            </Card>
+          )}
+
             <Card className="shadow-sm mb-4">
               <div className="card-header bg-white">
                 <h5 className="mb-0">
@@ -403,7 +566,7 @@ function PersonelEkleModal({
                           onChange={handleInputChange}
                         >
                           <option value="">Seçiniz (Opsiyonel)</option>
-                          {personel
+                          {(Array.isArray(personel) ? personel : [])
                             .filter(
                               (p) =>
                                 p.title &&
@@ -611,13 +774,7 @@ function PersonelEkleModal({
                 </FormGroup>
               </div>
             </Card>
-          </Form>
-        ) : (
-          <Alert color="warning">
-            <i className="fas fa-exclamation-triangle me-2"></i>
-            Birim bilgisi bulunamadı. Lütfen önce bir birim seçiniz.
-          </Alert>
-        )}
+        </Form>
       </ModalBody>
 
       <ModalFooter className="bg-light">

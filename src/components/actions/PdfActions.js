@@ -131,7 +131,7 @@ export function generatePdf(
   footerDiv.className = "pdf-footer";
   footerDiv.innerHTML = `
     <p>Bu rapor otomatik olarak EPSİS tarafından oluşturulmuştur.</p>
-    <p>© ${new Date().getFullYear()} Eskişehir Adliyesi @ Bilgehan KALAY</p>
+    <p>© ${new Date().getFullYear()} Eskişehir Adliyesi/p>
   `; 
 
   // Başlık, stil ve içeriği birleştir

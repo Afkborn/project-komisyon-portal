@@ -50,6 +50,12 @@ export default function PersonelCalistigiBirimGuncelleModal({
   const [birimler, setBirimler] = useState([]);
   const [tumBirimler, setTumBirimler] = useState([]);
   const [errors, setErrors] = useState({});
+  
+  // Kurum dışı birim arama için state'ler
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Modal açıldığında form durumunu ayarla
   useEffect(() => {
@@ -85,6 +91,11 @@ export default function PersonelCalistigiBirimGuncelleModal({
     setEndDate(new Date().toISOString().split("T")[0]);
     setErrors({});
     setLoading(false);
+    // Arama state'lerini temizle
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsSearching(false);
+    setShowSearchResults(false);
   };
 
   // İptal ve kapatma işlemleri
@@ -178,6 +189,62 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
     setBirimler(filteredBirimler);
   }
+
+  // Kurum dışı birim arama fonksiyonu
+  const searchKurumDisiBirim = (query) => {
+    // Minimum 2 karakter kontrolü
+    if (!query || query.trim().length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    const configuration = {
+      method: "GET",
+      url: `/api/units/search?q=${encodeURIComponent(query.trim())}&limit=20`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(configuration)
+      .then((result) => {
+        setSearchResults(result.data.data.units || []);
+        setShowSearchResults(true);
+        setIsSearching(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        alertify.error("Birim arama sırasında bir hata oluştu");
+        setSearchResults([]);
+        setShowSearchResults(false);
+        setIsSearching(false);
+      });
+  };
+
+  // Arama kutusundaki değişiklikleri handle et (debounce ile)
+  useEffect(() => {
+    if (!showKurumDisiBirim) {
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(() => {
+      searchKurumDisiBirim(searchQuery);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line
+  }, [searchQuery, showKurumDisiBirim]);
+
+  // Arama sonucundan birim seçme
+  const handleSelectSearchResult = (birim) => {
+    setKurumDisiBirimID(birim._id);
+    setSearchQuery("");
+    setShowSearchResults(false);
+    setUpdateButtonDisabled(false);
+  };
 
   // Birimleri getir
   function getBirimler(institutionID) {
@@ -621,36 +688,134 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
                     {/* Kurum dışı birim ID alanı */}
                     {showKurumDisiBirim && (
-                      <FormGroup className="mb-3">
-                        <Label for="kurumDisiBirimID" className="fw-bold">
-                          Kurum Dışı Birim ID
-                          <Badge color="danger" pill className="ms-2">
-                            Zorunlu
-                          </Badge>
-                        </Label>
-                        <InputGroup>
-                          <InputGroupText>
-                            <i className="fas fa-fingerprint"></i>
-                          </InputGroupText>
-                          <Input
-                            id="kurumDisiBirimID"
-                            name="kurumDisiBirimID"
-                            placeholder="Birim ID değerini girin"
-                            value={kurumDisiBirimID || ""}
-                            onChange={(e) =>
-                              setKurumDisiBirimID(e.target.value)
-                            }
-                            className={
-                              errors.kurumDisiBirimID ? "is-invalid" : ""
-                            }
-                          />
-                        </InputGroup>
-                        {errors.kurumDisiBirimID && (
-                          <div className="invalid-feedback d-block">
-                            {errors.kurumDisiBirimID}
-                          </div>
-                        )}
-                      </FormGroup>
+                      <>
+                        <FormGroup className="mb-3">
+                          <Label for="kurumDisiBirimID" className="fw-bold">
+                            Kurum Dışı Birim ID
+                            <Badge color="danger" pill className="ms-2">
+                              Zorunlu
+                            </Badge>
+                          </Label>
+                          <InputGroup>
+                            <InputGroupText>
+                              <i className="fas fa-fingerprint"></i>
+                            </InputGroupText>
+                            <Input
+                              id="kurumDisiBirimID"
+                              name="kurumDisiBirimID"
+                              placeholder="Birim ID değerini girin"
+                              value={kurumDisiBirimID || ""}
+                              onChange={(e) =>
+                                setKurumDisiBirimID(e.target.value)
+                              }
+                              className={
+                                errors.kurumDisiBirimID ? "is-invalid" : ""
+                              }
+                            />
+                          </InputGroup>
+                          {errors.kurumDisiBirimID && (
+                            <div className="invalid-feedback d-block">
+                              {errors.kurumDisiBirimID}
+                            </div>
+                          )}
+                        </FormGroup>
+
+                        {/* Kurum dışı birim arama kutusu */}
+                        <Card className="border-primary mb-3">
+                          <CardBody className="bg-light">
+                            <div className="mb-2">
+                              <i className="fas fa-info-circle text-primary me-2"></i>
+                              <small className="text-muted">
+                                Kurum dışı birimin ID bilgisini bilmiyorsanız
+                                buradan arama yapabilirsiniz.
+                              </small>
+                            </div>
+                            <FormGroup className="mb-0">
+                              <Label for="searchBirim" className="fw-bold">
+                                Birim Ara
+                              </Label>
+                              <InputGroup>
+                                <InputGroupText>
+                                  <i className="fas fa-search"></i>
+                                </InputGroupText>
+                                <Input
+                                  id="searchBirim"
+                                  name="searchBirim"
+                                  placeholder="Birim veya kurum adına göre arama yapın (min. 2 karakter)"
+                                  value={searchQuery}
+                                  onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                  }
+                                  disabled={isSearching}
+                                />
+                                {isSearching && (
+                                  <InputGroupText>
+                                    <Spinner size="sm" color="primary" />
+                                  </InputGroupText>
+                                )}
+                              </InputGroup>
+                            </FormGroup>
+
+                            {/* Arama sonuçları */}
+                            {showSearchResults && (
+                              <div
+                                className="mt-2 border rounded bg-white"
+                                style={{
+                                  maxHeight: "250px",
+                                  overflowY: "auto",
+                                }}
+                              >
+                                {searchResults.length > 0 ? (
+                                  <div className="list-group list-group-flush">
+                                    {searchResults.map((birim) => (
+                                      <button
+                                        key={birim._id}
+                                        type="button"
+                                        className="list-group-item list-group-item-action text-start"
+                                        onClick={() =>
+                                          handleSelectSearchResult(birim)
+                                        }
+                                      >
+                                        <div className="d-flex justify-content-between align-items-start">
+                                          <div className="flex-grow-1">
+                                            <h6 className="mb-1">
+                                              {birim.name}
+                                            </h6>
+                                            <small className="text-muted">
+                                              <i className="fas fa-building me-1"></i>
+                                              {birim.institutionID?.name ||
+                                                "Kurum bilgisi yok"}
+                                              {birim.unitType?.name && (
+                                                <>
+                                                  {" "}
+                                                  • {birim.unitType.name}
+                                                </>
+                                              )}
+                                            </small>
+                                          </div>
+                                          <Badge color="info" pill>
+                                            <small>
+                                              <i className="fas fa-fingerprint me-1"></i>
+                                              {birim._id.substring(0, 8)}...
+                                            </small>
+                                          </Badge>
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="p-3 text-center text-muted">
+                                    <i className="fas fa-search-minus fa-2x mb-2"></i>
+                                    <p className="mb-0">
+                                      Arama sonucu bulunamadı
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </CardBody>
+                        </Card>
+                      </>
                     )}
 
                     {/* Seçili birim bilgisi */}
@@ -825,36 +990,141 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
                         {/* Kurum dışı birim ID alanı */}
                         {showKurumDisiBirim && (
-                          <FormGroup className="mb-3">
-                            <Label for="kurumDisiBirimID2" className="fw-bold">
-                              Kurum Dışı Birim ID
-                              <Badge color="danger" pill className="ms-2">
-                                Zorunlu
-                              </Badge>
-                            </Label>
-                            <InputGroup>
-                              <InputGroupText>
-                                <i className="fas fa-fingerprint"></i>
-                              </InputGroupText>
-                              <Input
-                                id="kurumDisiBirimID2"
-                                name="kurumDisiBirimID"
-                                placeholder="Birim ID değerini girin"
-                                value={kurumDisiBirimID || ""}
-                                onChange={(e) =>
-                                  setKurumDisiBirimID(e.target.value)
-                                }
-                                className={
-                                  errors.kurumDisiBirimID ? "is-invalid" : ""
-                                }
-                              />
-                            </InputGroup>
-                            {errors.kurumDisiBirimID && (
-                              <div className="invalid-feedback d-block">
-                                {errors.kurumDisiBirimID}
-                              </div>
-                            )}
-                          </FormGroup>
+                          <>
+                            <FormGroup className="mb-3">
+                              <Label for="kurumDisiBirimID2" className="fw-bold">
+                                Kurum Dışı Birim ID
+                                <Badge color="danger" pill className="ms-2">
+                                  Zorunlu
+                                </Badge>
+                              </Label>
+                              <InputGroup>
+                                <InputGroupText>
+                                  <i className="fas fa-fingerprint"></i>
+                                </InputGroupText>
+                                <Input
+                                  id="kurumDisiBirimID2"
+                                  name="kurumDisiBirimID"
+                                  placeholder="Birim ID değerini girin"
+                                  value={kurumDisiBirimID || ""}
+                                  onChange={(e) =>
+                                    setKurumDisiBirimID(e.target.value)
+                                  }
+                                  className={
+                                    errors.kurumDisiBirimID ? "is-invalid" : ""
+                                  }
+                                />
+                              </InputGroup>
+                              {errors.kurumDisiBirimID && (
+                                <div className="invalid-feedback d-block">
+                                  {errors.kurumDisiBirimID}
+                                </div>
+                              )}
+                            </FormGroup>
+
+                            {/* Kurum dışı birim arama kutusu */}
+                            <Card className="border-primary mb-3">
+                              <CardBody className="bg-light">
+                                <div className="mb-2">
+                                  <i className="fas fa-info-circle text-primary me-2"></i>
+                                  <small className="text-muted">
+                                    Kurum dışı birimin ID bilgisini
+                                    bilmiyorsanız buradan arama
+                                    yapabilirsiniz.
+                                  </small>
+                                </div>
+                                <FormGroup className="mb-0">
+                                  <Label for="searchBirim2" className="fw-bold">
+                                    Birim Ara
+                                  </Label>
+                                  <InputGroup>
+                                    <InputGroupText>
+                                      <i className="fas fa-search"></i>
+                                    </InputGroupText>
+                                    <Input
+                                      id="searchBirim2"
+                                      name="searchBirim"
+                                      placeholder="Birim veya kurum adına göre arama yapın (min. 2 karakter)"
+                                      value={searchQuery}
+                                      onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                      }
+                                      disabled={isSearching}
+                                    />
+                                    {isSearching && (
+                                      <InputGroupText>
+                                        <Spinner size="sm" color="primary" />
+                                      </InputGroupText>
+                                    )}
+                                  </InputGroup>
+                                </FormGroup>
+
+                                {/* Arama sonuçları */}
+                                {showSearchResults && (
+                                  <div
+                                    className="mt-2 border rounded bg-white"
+                                    style={{
+                                      maxHeight: "250px",
+                                      overflowY: "auto",
+                                    }}
+                                  >
+                                    {searchResults.length > 0 ? (
+                                      <div className="list-group list-group-flush">
+                                        {searchResults.map((birim) => (
+                                          <button
+                                            key={birim._id}
+                                            type="button"
+                                            className="list-group-item list-group-item-action text-start"
+                                            onClick={() =>
+                                              handleSelectSearchResult(birim)
+                                            }
+                                          >
+                                            <div className="d-flex justify-content-between align-items-start">
+                                              <div className="flex-grow-1">
+                                                <h6 className="mb-1">
+                                                  {birim.name}
+                                                </h6>
+                                                <small className="text-muted">
+                                                  <i className="fas fa-building me-1"></i>
+                                                  {birim.institutionID?.name ||
+                                                    "Kurum bilgisi yok"}
+                                                  {birim.unitType?.name && (
+                                                    <>
+                                                      {" "}
+                                                      • {birim.unitType.name}
+                                                    </>
+                                                  )}
+                                                  {birim.series && (
+                                                    <>
+                                                      {" "}
+                                                      • Seri: {birim.series}
+                                                    </>
+                                                  )}
+                                                </small>
+                                              </div>
+                                              <Badge color="info" pill>
+                                                <small>
+                                                  <i className="fas fa-fingerprint me-1"></i>
+                                                  {birim._id.substring(0, 8)}...
+                                                </small>
+                                              </Badge>
+                                            </div>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div className="p-3 text-center text-muted">
+                                        <i className="fas fa-search-minus fa-2x mb-2"></i>
+                                        <p className="mb-0">
+                                          Arama sonucu bulunamadı
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </CardBody>
+                            </Card>
+                          </>
                         )}
 
                         {/* Seçili ikinci birim bilgisi */}
@@ -989,36 +1259,141 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
                         {/* Kurum dışı birim ID alanı */}
                         {showKurumDisiBirim && (
-                          <FormGroup className="mb-3">
-                            <Label for="kurumDisiBirimID3" className="fw-bold">
-                              Kurum Dışı Birim ID
-                              <Badge color="danger" pill className="ms-2">
-                                Zorunlu
-                              </Badge>
-                            </Label>
-                            <InputGroup>
-                              <InputGroupText>
-                                <i className="fas fa-fingerprint"></i>
-                              </InputGroupText>
-                              <Input
-                                id="kurumDisiBirimID3"
-                                name="kurumDisiBirimID"
-                                placeholder="Birim ID değerini girin"
-                                value={kurumDisiBirimID || ""}
-                                onChange={(e) =>
-                                  setKurumDisiBirimID(e.target.value)
-                                }
-                                className={
-                                  errors.kurumDisiBirimID ? "is-invalid" : ""
-                                }
-                              />
-                            </InputGroup>
-                            {errors.kurumDisiBirimID && (
-                              <div className="invalid-feedback d-block">
-                                {errors.kurumDisiBirimID}
-                              </div>
-                            )}
-                          </FormGroup>
+                          <>
+                            <FormGroup className="mb-3">
+                              <Label for="kurumDisiBirimID3" className="fw-bold">
+                                Kurum Dışı Birim ID
+                                <Badge color="danger" pill className="ms-2">
+                                  Zorunlu
+                                </Badge>
+                              </Label>
+                              <InputGroup>
+                                <InputGroupText>
+                                  <i className="fas fa-fingerprint"></i>
+                                </InputGroupText>
+                                <Input
+                                  id="kurumDisiBirimID3"
+                                  name="kurumDisiBirimID"
+                                  placeholder="Birim ID değerini girin"
+                                  value={kurumDisiBirimID || ""}
+                                  onChange={(e) =>
+                                    setKurumDisiBirimID(e.target.value)
+                                  }
+                                  className={
+                                    errors.kurumDisiBirimID ? "is-invalid" : ""
+                                  }
+                                />
+                              </InputGroup>
+                              {errors.kurumDisiBirimID && (
+                                <div className="invalid-feedback d-block">
+                                  {errors.kurumDisiBirimID}
+                                </div>
+                              )}
+                            </FormGroup>
+
+                            {/* Kurum dışı birim arama kutusu */}
+                            <Card className="border-primary mb-3">
+                              <CardBody className="bg-light">
+                                <div className="mb-2">
+                                  <i className="fas fa-info-circle text-primary me-2"></i>
+                                  <small className="text-muted">
+                                    Kurum dışı birimin ID bilgisini
+                                    bilmiyorsanız buradan arama
+                                    yapabilirsiniz.
+                                  </small>
+                                </div>
+                                <FormGroup className="mb-0">
+                                  <Label for="searchBirim3" className="fw-bold">
+                                    Birim Ara
+                                  </Label>
+                                  <InputGroup>
+                                    <InputGroupText>
+                                      <i className="fas fa-search"></i>
+                                    </InputGroupText>
+                                    <Input
+                                      id="searchBirim3"
+                                      name="searchBirim"
+                                      placeholder="Birim veya kurum adına göre arama yapın (min. 2 karakter)"
+                                      value={searchQuery}
+                                      onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                      }
+                                      disabled={isSearching}
+                                    />
+                                    {isSearching && (
+                                      <InputGroupText>
+                                        <Spinner size="sm" color="primary" />
+                                      </InputGroupText>
+                                    )}
+                                  </InputGroup>
+                                </FormGroup>
+
+                                {/* Arama sonuçları */}
+                                {showSearchResults && (
+                                  <div
+                                    className="mt-2 border rounded bg-white"
+                                    style={{
+                                      maxHeight: "250px",
+                                      overflowY: "auto",
+                                    }}
+                                  >
+                                    {searchResults.length > 0 ? (
+                                      <div className="list-group list-group-flush">
+                                        {searchResults.map((birim) => (
+                                          <button
+                                            key={birim._id}
+                                            type="button"
+                                            className="list-group-item list-group-item-action text-start"
+                                            onClick={() =>
+                                              handleSelectSearchResult(birim)
+                                            }
+                                          >
+                                            <div className="d-flex justify-content-between align-items-start">
+                                              <div className="flex-grow-1">
+                                                <h6 className="mb-1">
+                                                  {birim.name}
+                                                </h6>
+                                                <small className="text-muted">
+                                                  <i className="fas fa-building me-1"></i>
+                                                  {birim.institutionID?.name ||
+                                                    "Kurum bilgisi yok"}
+                                                  {birim.unitType?.name && (
+                                                    <>
+                                                      {" "}
+                                                      • {birim.unitType.name}
+                                                    </>
+                                                  )}
+                                                  {birim.series && (
+                                                    <>
+                                                      {" "}
+                                                      • Seri: {birim.series}
+                                                    </>
+                                                  )}
+                                                </small>
+                                              </div>
+                                              <Badge color="info" pill>
+                                                <small>
+                                                  <i className="fas fa-fingerprint me-1"></i>
+                                                  {birim._id.substring(0, 8)}...
+                                                </small>
+                                              </Badge>
+                                            </div>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div className="p-3 text-center text-muted">
+                                        <i className="fas fa-search-minus fa-2x mb-2"></i>
+                                        <p className="mb-0">
+                                          Arama sonucu bulunamadı
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </CardBody>
+                            </Card>
+                          </>
                         )}
 
                         {/* Seçili geçici birim bilgisi */}

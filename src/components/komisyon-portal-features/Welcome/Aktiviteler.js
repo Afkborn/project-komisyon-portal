@@ -25,11 +25,12 @@ export default function Aktiviteler({
   showPersonelDetay,
   showBirimPersonelListe,
   personelHareketleri,
+  pageSize: pageSizeFromProps,
 }) {
   const [lastActivityList, setLastActivityList] = useState([]);
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(pageSizeFromProps || 10);
   const [isLoading, setIsLoading] = useState(false);
 
   const [userList, setUserList] = useState([]);
@@ -45,6 +46,10 @@ export default function Aktiviteler({
 
   const handleFilterTypeChange = (e) => {
     setFilterType(e.target.value);
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
   };
 
   const handleStartDateChange = (e) => {
@@ -73,10 +78,16 @@ export default function Aktiviteler({
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     getLastActivityList();
     if (userList.length === 0) {
       getUserList();
     }
+    // eslint-disable-next-line
+  }, [pageSize]);
+
+  useEffect(() => {
+    getLastActivityList();
     // eslint-disable-next-line
   }, [currentPage]);
 
@@ -216,7 +227,16 @@ export default function Aktiviteler({
       selectedUser || filterType || startDate || endDate || personelHareketleri;
     setFiltreVarMi(hasFilter);
 
-    let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&maxPageCount=10&app=EPSİS`;
+    let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&app=EPSİS`;
+
+    console.log(
+      "API isteği - Page:",
+      currentPage,
+      "PageSize:",
+      pageSize,
+      "URL:",
+      url,
+    );
 
     if (filterType && !personelHareketleri) {
       url += `&filterType=${filterType}`;
@@ -250,7 +270,7 @@ export default function Aktiviteler({
       .then((response) => {
         setLastActivityList(response.data.activityList);
         setPageCount(response.data.pageCount);
-   
+
         setIsLoading(false);
       })
       .catch((error) => {
@@ -332,6 +352,27 @@ export default function Aktiviteler({
                   </FormGroup>
                 </Col>
 
+                <Col md={3} >
+                  <FormGroup>
+                    <Label for="pageSizeSelect" className="fw-bold">
+                      <i className="fas fa-bars me-1 text-primary"></i> Sayfa
+                      Başına
+                    </Label>
+                    <Input
+                      type="select"
+                      name="select"
+                      id="pageSizeSelect"
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                      className="form-select"
+                    >
+                      <option value={10}>10 Veri</option>
+                      <option value={25}>25 Veri</option>
+                      <option value={50}>50 Veri</option>
+                    </Input>
+                  </FormGroup>
+                </Col>
+
                 <Col md={3}>
                   <FormGroup>
                     <Label for="startDateTime" className="fw-bold">
@@ -400,10 +441,10 @@ export default function Aktiviteler({
                         {filterType === "person"
                           ? "Personel"
                           : filterType === "unit"
-                          ? "Birim"
-                          : filterType === "title"
-                          ? "Ünvan"
-                          : "Rapor"}
+                            ? "Birim"
+                            : filterType === "title"
+                              ? "Ünvan"
+                              : "Rapor"}
                       </Badge>
                     )}
                     {startDate && (

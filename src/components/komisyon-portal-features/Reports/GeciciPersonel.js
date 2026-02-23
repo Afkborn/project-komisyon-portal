@@ -12,6 +12,7 @@ import DataTable from "../../common/DataTable";
 
 export default function GeciciPersonel({ token, showPersonelDetay }) {
   const [geciciPersonelList, setGeciciPersonelList] = useState([]);
+  const [warnings, setWarnings] = useState([]);
   const [raporGetiriliyorMu, setRaporGetiriliyorMu] = useState(false);
 
   const renderText = (text1, text2) => {
@@ -34,35 +35,51 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
     {
       key: "unvan",
       header: "Ünvan",
-      render: (item) => item.title.name,
+      render: (item) => item?.title?.name || "-",
     },
     {
       key: "asilBirim",
       header: "Asıl Kurum - Birim",
       render: (item) =>
-        renderText(item.birimID.name, item.birimID.institution.name),
+        item?.birimID?.name && item?.birimID?.institution?.name
+          ? renderText(item.birimID.name, item.birimID.institution.name)
+          : "-",
     },
     {
       key: "geciciBirim",
       header: "Geçici Birim - Kurum",
       render: (item) =>
-        renderText(
-          item.temporaryBirimID.name,
-          item.temporaryBirimID.institution.name
-        ),
+        item?.temporaryBirimID?.name && item?.temporaryBirimID?.institution?.name
+          ? renderText(
+              item.temporaryBirimID.name,
+              item.temporaryBirimID.institution.name
+            )
+          : "-",
     },
     {
       key: "gerekce",
       header: "Gerekçe",
-      render: (item) => item.temporaryReason,
+      render: (item) => item?.temporaryReason || "-",
     },
     {
       key: "bitisTarihi",
       header: "Bitiş Tarihi",
       render: (item) =>
-        `${renderDate_GGAAYYYY(
-          item.temporaryEndDate
-        )} (${calculateKalanGorevSuresi(item.temporaryEndDate)})`,
+        item?.temporaryEndDate ? renderDate_GGAAYYYY(item.temporaryEndDate) : "-",
+    },
+    {
+      key: "kalanGun",
+      header: "Kalan Gün",
+      dataType: "number",
+      sortKey: "kalanGunNumeric",
+      render: (item) => {
+        if (!item.temporaryEndDate) return "-";
+        const remaining = Math.ceil(
+          (new Date(item.temporaryEndDate) - new Date()) / (1000 * 60 * 60 * 24)
+        );
+        if (remaining < 0) return "Gecikti";
+        return `${remaining} gün`;
+      },
     },
   ];
 
@@ -78,10 +95,42 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
     axios(configuration)
       .then((response) => {
         setRaporGetiriliyorMu(false);
-        if (response.data.personList.length === 0) {
+        setWarnings(response?.data?.warnings || []);
+
+        const list = response?.data?.personList || [];
+        if (list.length === 0) {
           alertify.error("Geçici personel bulunamadı.");
+          setGeciciPersonelList([]);
         } else {
-          setGeciciPersonelList(response.data.personList);
+          // Her kayda kalan gün numeric değeri ekle (sorting için)
+          const listWithSorted = list.map((item) => {
+            let kalanGunNumeric;
+            
+            if (!item.temporaryEndDate) {
+              // Bitiş tarihi yok: 1000000 (sona)
+              kalanGunNumeric = 1000000;
+            } else {
+              const diff = new Date(item.temporaryEndDate) - new Date();
+              const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+              
+              if (days < 0) {
+                // Gecikti: negatif (en başa)
+                kalanGunNumeric = days;
+              } else {
+                // Normal: 1000 + gün sayısı (artan sıra)
+                kalanGunNumeric = 1000 + days;
+              }
+            }
+            
+            return { ...item, kalanGunNumeric };
+          });
+
+          // Bitiş tarihine göre sorta (gecikti başta, sonra bitiş tarihi yok, sonra normal)
+          const sortedList = [...listWithSorted].sort((a, b) => {
+            return a.kalanGunNumeric - b.kalanGunNumeric;
+          });
+
+          setGeciciPersonelList(sortedList);
         }
       })
       .catch((error) => {
@@ -141,6 +190,22 @@ export default function GeciciPersonel({ token, showPersonelDetay }) {
           ) : (
             geciciPersonelList.length > 0 && (
               <div className="mt-4">
+                {warnings.length > 0 && (
+                  <Alert color="warning" className="mb-3">
+                    <div className="fw-bold mb-2">
+                      <i className="fas fa-exclamation-triangle me-2"></i>
+                      Uyarılar (Geçici birimi eklenmemiş personeller)
+                    </div>
+                    <ul className="mb-0">
+                      {warnings.map((w) => (
+                        <li key={w.sicil || w.message}>
+                          {w.message ||
+                            `${w.sicil} - ${w.ad || ""} ${w.soyad || ""}`}
+                        </li>
+                      ))}
+                    </ul>
+                  </Alert>
+                )}
                 <DataTable
                   data={geciciPersonelList}
                   columns={columns}
