@@ -3,9 +3,10 @@ import { Badge, Button, Card, CardBody } from "reactstrap";
 import { renderDate_GGAAYYYY } from "../actions/TimeActions";
 
 const getPriorityBadge = (priority) => {
-  if (priority === "acil") return { color: "danger", label: "Acil" };
-  if (priority === "dusuk") return { color: "info", label: "Düşük" };
-  return { color: "secondary", label: "Normal" };
+  if (priority === "Acil") return { color: "danger", label: "Acil" };
+  if (priority === "Düşük") return { color: "info", label: "Düşük" };
+  if (priority === "Yüksek") return { color: "secondary", label: "Yüksek" };
+  return { color: "secondary", label: priority || "Normal" };
 };
 
 export default function NoteCard({ note, onComplete }) {
@@ -24,10 +25,10 @@ export default function NoteCard({ note, onComplete }) {
                 {priority.label}
               </Badge>
 
-              {note.fileNo && (
+              {note.fileNumber && (
                 <Badge color="light" className="border text-dark" pill>
                   <i className="fas fa-folder-open me-1"></i>
-                  {note.fileNo}
+                  {note.fileNumber}
                 </Badge>
               )}
 
@@ -50,11 +51,22 @@ export default function NoteCard({ note, onComplete }) {
             onClick={() => onComplete(note)}
           >
             <i className="fas fa-check me-1"></i>
-            Tamamlandı
+            Tamamlandı İşaretle
           </Button>
         </div>
 
         <div className="mt-3">
+          {note.creator && (
+            <div className="text-muted small mb-2">
+              <i className="fas fa-user me-1"></i>
+              {note.creator.name} {note.creator.surname} - {note.creator.person?.sicil}
+            </div>
+          )}
+          {note.title && (
+            <div className={`fw-bold ${isCompleted ? "text-decoration-line-through" : ""}`}>
+              {note.title}
+            </div>
+          )}
           <div className={isCompleted ? "text-decoration-line-through" : ""}>
             {note.content || "-"}
           </div>

@@ -22,14 +22,16 @@ export default function AddNoteModal({
   isOpen,
   toggle,
   selectedUnit,
+  defaultBirimId,
   onSave,
   saving,
 }) {
   const initialState = useMemo(
     () => ({
+      title: "",
       content: "",
-      fileNo: "",
-      priority: "normal",
+      fileNumber: "",
+      priority: "Normal",
       reminderEnabled: false,
       reminderDate: "",
       alertTarget: "ben",
@@ -55,15 +57,24 @@ export default function AddNoteModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const isPersonal = selectedUnit?.key === "personal";
+    const birimID = isPersonal ? defaultBirimId : selectedUnit?.id;
+
     onSave({
+      title: form.title,
       content: form.content,
-      fileNo: form.fileNo,
+      fileNumber: form.fileNumber,
       priority: form.priority,
-      reminderEnabled: form.reminderEnabled,
+      isPrivate: isPersonal,
+      birimID,
+      hasReminder: form.reminderEnabled,
       reminderDate: form.reminderEnabled ? form.reminderDate : null,
-      alertTarget: form.reminderEnabled ? form.alertTarget : null,
-      birimId: selectedUnit?.id || null,
-      isPersonal: selectedUnit?.key === "personal",
+      reminderTarget: form.reminderEnabled
+        ? form.alertTarget === "birim"
+          ? "UNIT"
+          : "SELF"
+        : null,
     });
   };
 
@@ -88,6 +99,22 @@ export default function AddNoteModal({
           <Row className="g-3">
             <Col md={12}>
               <FormGroup>
+                <Label className="fw-bold" for="title">
+                  Başlık*
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  required
+                  placeholder="Kısa başlık"
+                />
+              </FormGroup>
+            </Col>
+
+            <Col md={12}>
+              <FormGroup>
                 <Label className="fw-bold" for="content">
                   Not İçeriği*
                 </Label>
@@ -105,7 +132,7 @@ export default function AddNoteModal({
 
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold" for="fileNo">
+                <Label className="fw-bold" for="fileNumber">
                   Dosya No
                 </Label>
                 <InputGroup>
@@ -113,9 +140,9 @@ export default function AddNoteModal({
                     <i className="fas fa-folder-open"></i>
                   </InputGroupText>
                   <Input
-                    id="fileNo"
-                    name="fileNo"
-                    value={form.fileNo}
+                    id="fileNumber"
+                    name="fileNumber"
+                    value={form.fileNumber}
                     onChange={handleChange}
                     placeholder="Örn: 2026/123"
                   />
@@ -135,17 +162,18 @@ export default function AddNoteModal({
                   value={form.priority}
                   onChange={handleChange}
                 >
-                  <option value="acil">Acil</option>
-                  <option value="normal">Normal</option>
-                  <option value="dusuk">Düşük</option>
+                  <option value="Acil">Acil</option>
+                  <option value="Yüksek">Yüksek</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Düşük">Düşük</option>
                 </Input>
                 <div className="mt-2">
-                  {form.priority === "acil" && (
+                  {form.priority === "Acil" && (
                     <Badge color="danger" pill>
                       Acil notlar kırmızı etiketle gösterilir
                     </Badge>
                   )}
-                  {form.priority === "dusuk" && (
+                  {form.priority === "Düşük" && (
                     <Badge color="info" pill>
                       Düşük öncelikler mavi etiketle gösterilir
                     </Badge>

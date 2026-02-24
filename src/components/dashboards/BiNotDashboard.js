@@ -164,7 +164,11 @@ export default function BiNotDashboard() {
               />
             </Col>
             <Col md={9}>
-              <NoteList token={token} selectedUnit={selectedUnit} />
+              <NoteList
+                token={token}
+                selectedUnit={selectedUnit}
+                defaultBirimId={person?.birimID?._id || null}
+              />
             </Col>
           </Row>
         )}

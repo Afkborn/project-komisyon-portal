@@ -12,7 +12,7 @@ import {
 import AddNoteModal from "./AddNoteModal";
 import NoteCard from "./NoteCard";
 
-export default function NoteList({ token, selectedUnit }) {
+export default function NoteList({ token, selectedUnit, defaultBirimId }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -25,23 +25,23 @@ export default function NoteList({ token, selectedUnit }) {
 
     setLoading(true);
 
+    const isPersonal = selectedUnit.key === "personal";
+
     const configuration = {
       method: "GET",
       url: "/api/binot/list",
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      params:
-        selectedUnit.key === "personal"
-          ? {}
-          : {
-              birimId: selectedUnit.id,
-            },
+      params: isPersonal
+        ? { isPrivate: true }
+        : { birimId: selectedUnit.id },
     };
 
     axios(configuration)
       .then((res) => {
-        setNotes(res.data?.noteList || []);
+        const list = res.data?.list || res.data?.noteList || [];
+        setNotes(Array.isArray(list) ? list : []);
         setLoading(false);
       })
       .catch((err) => {
@@ -61,7 +61,7 @@ export default function NoteList({ token, selectedUnit }) {
 
     const configuration = {
       method: "POST",
-      url: "/api/binot",
+      url: "/api/binot/add",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -86,7 +86,7 @@ export default function NoteList({ token, selectedUnit }) {
     // UI hemen güncellensin
     setNotes((prev) =>
       prev.map((n) =>
-        n._id === note._id ? { ...n, completed: true, isCompleted: true } : n,
+        n._id === note._id ? { ...n, isCompleted: true } : n,
       ),
     );
 
@@ -97,7 +97,6 @@ export default function NoteList({ token, selectedUnit }) {
         Authorization: `Bearer ${token}`,
       },
       data: {
-        completed: true,
         isCompleted: true,
       },
     }).catch((err) => {
@@ -107,7 +106,7 @@ export default function NoteList({ token, selectedUnit }) {
       setNotes((prev) =>
         prev.map((n) =>
           n._id === note._id
-            ? { ...n, completed: false, isCompleted: false }
+            ? { ...n, isCompleted: false }
             : n,
         ),
       );
@@ -153,6 +152,7 @@ export default function NoteList({ token, selectedUnit }) {
           isOpen={addModalOpen}
           toggle={toggleAddModal}
           selectedUnit={selectedUnit}
+          defaultBirimId={defaultBirimId}
           onSave={handleAddNote}
           saving={saving}
         />
