@@ -32,7 +32,7 @@ export default function PersonelDurumGuncelleModal({
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(true);
   const [newDeactivationReason, setNewDeactivationReason] = useState("");
   const [newDeactivationDate, setNewDeactivationDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [suspensionEndDate, setSuspensionEndDate] = useState("");
   const [suspensionReason, setSuspensionReason] = useState("");
@@ -139,39 +139,53 @@ export default function PersonelDurumGuncelleModal({
 
     setLoading(true);
 
-    const configuration = {
-      method: "PUT",
-      url: `/api/persons/${personel._id}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        status: !personel.status,
-        deactivationReason: newDeactivationReason,
-        deactivationDate: newDeactivationDate,
-        deactivationComment: deactivationComment, // Açıklama alanını ekle
-      },
-    };
+    let requestData = {};
 
     // Personel şu an uzaklaştırma durumunda ise, uzaklaştırmayı kaldır
     if (personel.isSuspended) {
-      configuration.data = {
+      requestData = {
         status: true,
         isSuspended: false,
         suspensionEndDate: null,
         suspensionReason: null,
       };
     }
-
     // Yeni durum uzaklaştırma ise, gerekli alanları ekle
-    if (newDeactivationReason === "Uzaklastirma") {
-      configuration.data = {
+    else if (newDeactivationReason === "Uzaklastirma") {
+      requestData = {
         status: true,
         isSuspended: true,
         suspensionEndDate: suspensionEndDate,
         suspensionReason: suspensionReason,
       };
     }
+    // Personel pasiften aktife alınıyor
+    else if (!personel.status) {
+      requestData = {
+        status: true,
+        deactivationReason: "",
+        deactivationDate: null,
+        deactivationComment: "",
+      };
+    }
+    // Personel aktiften pasife alınıyor
+    else {
+      requestData = {
+        status: false,
+        deactivationReason: newDeactivationReason,
+        deactivationDate: newDeactivationDate,
+        deactivationComment: deactivationComment,
+      };
+    }
+
+    const configuration = {
+      method: "PUT",
+      url: `/api/persons/${personel._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: requestData,
+    };
 
     axios(configuration)
       .then((response) => {
@@ -204,7 +218,7 @@ export default function PersonelDurumGuncelleModal({
   // Ayrılış gerekçesi değişince state'i güncelle
   const handleTypeChange = (event) => {
     setNewDeactivationReason(
-      event.target.value === "Seçiniz" ? "" : event.target.value
+      event.target.value === "Seçiniz" ? "" : event.target.value,
     );
   };
 
@@ -328,7 +342,7 @@ export default function PersonelDurumGuncelleModal({
                           value={
                             personel.deactivationDate
                               ? new Date(
-                                  personel.deactivationDate
+                                  personel.deactivationDate,
                                 ).toLocaleDateString()
                               : "Belirtilmemiş"
                           }
@@ -382,7 +396,7 @@ export default function PersonelDurumGuncelleModal({
                         value={
                           personel.suspensionEndDate
                             ? new Date(
-                                personel.suspensionEndDate
+                                personel.suspensionEndDate,
                               ).toLocaleDateString()
                             : "Belirtilmemiş"
                         }
@@ -428,13 +442,12 @@ export default function PersonelDurumGuncelleModal({
                     <option key={3} value="Diğer">
                       Diğer
                     </option>
-                    <option key={5} value="Uzaklastirma">
-                      Uzaklaştırma
-                    </option>
                     <option key={6} value="Göreve Son Verme">
                       Göreve Son Verme
                     </option>
-
+                    <option key={5} value="Uzaklastirma">
+                      Uzaklaştırma
+                    </option>
                   </Input>
                   {errors.deactivationReason && (
                     <div className="invalid-feedback">
@@ -592,10 +605,10 @@ export default function PersonelDurumGuncelleModal({
             personel?.isSuspended
               ? "success"
               : newDeactivationReason === "Uzaklastirma"
-              ? "warning"
-              : personel?.status
-              ? "danger"
-              : "success"
+                ? "warning"
+                : personel?.status
+                  ? "danger"
+                  : "success"
           }
           onClick={handleUpdate}
           disabled={updateButtonDisabled || loading}
