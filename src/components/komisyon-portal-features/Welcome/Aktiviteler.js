@@ -40,6 +40,7 @@ export default function Aktiviteler({
   const [filterType, setFilterType] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [showReports, setShowReports] = useState(true);
   const [filtreVarMi, setFiltreVarMi] = useState(false);
 
   const [showFilters, setShowFilters] = useState(false);
@@ -69,6 +70,7 @@ export default function Aktiviteler({
     setFilterType("");
     setStartDate(null);
     setEndDate(null);
+    setShowReports(true);
     setCurrentPage(1);
   };
 
@@ -224,7 +226,12 @@ export default function Aktiviteler({
 
     // Filtre var mı kontrolü
     const hasFilter =
-      selectedUser || filterType || startDate || endDate || personelHareketleri;
+      selectedUser ||
+      filterType ||
+      startDate ||
+      endDate ||
+      personelHareketleri ||
+      !showReports;
     setFiltreVarMi(hasFilter);
 
     let url = `/api/activities/?page=${currentPage}&pageSize=${pageSize}&app=EPSİS`;
@@ -256,6 +263,10 @@ export default function Aktiviteler({
 
     if (selectedUser) {
       url += `&userID=${selectedUser}`;
+    }
+
+    if (!showReports) {
+      url += `&hideReports=true`;
     }
 
     let configuration = {
@@ -352,7 +363,7 @@ export default function Aktiviteler({
                   </FormGroup>
                 </Col>
 
-                <Col md={3} >
+                <Col md={3}>
                   <FormGroup>
                     <Label for="pageSizeSelect" className="fw-bold">
                       <i className="fas fa-bars me-1 text-primary"></i> Sayfa
@@ -404,6 +415,21 @@ export default function Aktiviteler({
                       value={endDate || ""}
                       className={endDate ? "border-primary" : ""}
                     />
+                  </FormGroup>
+                </Col>
+
+                <Col md={3}  hidden={personelHareketleri}>
+                  <FormGroup check className="mt-4 pt-2">
+                    <Input
+                      type="checkbox"
+                      id="showReportsCheckbox"
+                      checked={showReports}
+                      onChange={(e) => setShowReports(e.target.checked)}
+                    />
+                    <Label check for="showReportsCheckbox" className="fw-bold">
+                      <i className="fas fa-file-chart-line me-1 text-primary"></i>{" "}
+                      Raporları Göster
+                    </Label>
                   </FormGroup>
                 </Col>
               </Row>
@@ -460,6 +486,11 @@ export default function Aktiviteler({
                     {personelHareketleri && (
                       <Badge color="primary" className="me-1 px-2">
                         Sadece Personel Hareketleri
+                      </Badge>
+                    )}
+                    {!showReports && (
+                      <Badge color="secondary" className="me-1 px-2">
+                        Raporlar Gizlendi
                       </Badge>
                     )}
                   </div>
