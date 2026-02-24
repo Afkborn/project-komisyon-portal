@@ -61,6 +61,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
   });
 
   const [formData, setFormData] = useState({
+    sicil: "",
     username: "",
     password: "",
     name: "",
@@ -68,7 +69,10 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
     email: "",
     phoneNumber: "",
     roles: [],
+    personId: null, // Person referansı
   });
+
+  const [sicilSearchLoading, setSicilSearchLoading] = useState(false);
 
   // Sürükle-Bırak işlemleri için state'ler
   const [draggingRole, setDraggingRole] = useState(null);
@@ -185,6 +189,56 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
     }));
   };
 
+  // Sicil numarasına göre personel bilgilerini çek
+  const handleSicilSearch = async () => {
+    if (!formData.sicil.trim()) {
+      alertify.warning("Lütfen sicil numarası giriniz");
+      return;
+    }
+
+    setSicilSearchLoading(true);
+
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `/api/persons/bySicil/${formData.sicil}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const person = response.data.person;
+
+      if (person) {
+        // Personel bulundu, bilgilerini doldur
+        setFormData((prev) => ({
+          ...prev,
+          name: person.ad || "",
+          surname: person.soyad || "",
+          email: person.email || "",
+          phoneNumber: person.phoneNumber || "",
+          personId: person._id, // Person referansını kaydet
+          // Kullanıcı adı otomatik oluştur (ab + sicil)
+          username:
+            editUser && editUser.username
+              ? editUser.username
+              : `ab${formData.sicil}`,
+        }));
+        alertify.success("Personel bilgileri yüklendi");
+      } else {
+        alertify.warning("Sicil numarası sistemde bulunamadı");
+      }
+    } catch (error) {
+      console.error("Personel arama hatası:", error);
+      alertify.error(
+        error.response?.data?.message ||
+          "Personel bilgileri çekilirken bir hata oluştu"
+      );
+    } finally {
+      setSicilSearchLoading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const url = editUser ? `/api/users/${editUser._id}` : "/api/users/register";
@@ -198,8 +252,16 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       delete apiData.password;
     }
 
+    // Sicil alanını API'ye gönderme (isteğe bağlı)
+    // Eğer backend sicil alanı desteklemiyorsa silebiliriz
+
     // Roles array'ini sadece role name'lerden oluşan array'e dönüştür
     apiData.roles = formData.roles.map((role) => role.name);
+
+    // Person referansını ekle
+    if (formData.personId) {
+      apiData.person = formData.personId;
+    }
 
     axios({
       method,
@@ -225,8 +287,10 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
   const handleEdit = (user) => {
     setEditUser(user);
     setFormData({
+      sicil: user.sicil || "",
       ...user,
       password: "",
+      personId: user.person || null, // User'daki person referansını kullan
       roles: user.roles.map(
         (roleName) =>
           availableRoles.find((r) => r.name === roleName) || {
@@ -267,6 +331,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
 
   const resetForm = () => {
     setFormData({
+      sicil: "",
       username: "",
       password: "",
       name: "",
@@ -274,6 +339,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
       email: "",
       phoneNumber: "",
       roles: [],
+      personId: null,
     });
     setEditUser(null);
   };
@@ -571,6 +637,53 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
             <Row>
               <Col md={6}>
                 <FormGroup>
+                  <Label for="sicil" className="fw-bold">
+                    Sicil Numarası*
+                  </Label>
+                  <InputGroup>
+                    <Input
+                      id="sicil"
+                      name="sicil"
+                      value={formData.sicil}
+                      onChange={handleInputChange}
+                      disabled={editUser}
+                      className={editUser ? "bg-light" : ""}
+                      placeholder="Sicil numarası girin"
+                      required
+                    />
+                    <Button
+                      color="info"
+                      onClick={handleSicilSearch}
+                      disabled={editUser || sicilSearchLoading || !formData.sicil}
+                      outline
+                    >
+                      {sicilSearchLoading ? (
+                        <>
+                          <Spinner size="sm" className="me-2" />
+                          Aranıyor...
+                        </>
+                      ) : (
+                        <>
+                          <FaSearch className="me-1" />
+                          Ara
+                        </>
+                      )}
+                    </Button>
+                  </InputGroup>
+                  <small className="text-muted mt-1 d-block">
+                    <i className="fas fa-info-circle me-1"></i>
+                    Sicil numarası girin ve "Ara" butonuna tıklayın{" "}
+                    {formData.personId && (
+                      <Badge color="success" className="ms-2">
+                        <i className="fas fa-check me-1"></i>
+                        Eşleştirildi
+                      </Badge>
+                    )}
+                  </small>
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
                   <Label for="username" className="fw-bold">
                     Kullanıcı Adı*
                   </Label>
@@ -579,12 +692,20 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    required
                     disabled={editUser}
                     className={editUser ? "bg-light" : ""}
+                    placeholder="Sicil aranarak otomatik doldurulur"
+                    required
                   />
+                  <small className="text-muted mt-1 d-block">
+                    <i className="fas fa-info-circle me-1"></i>
+                    Otomatik olarak ab&lt;Sicil&gt; şeklinde doldurulur
+                  </small>
                 </FormGroup>
               </Col>
+            </Row>
+
+            <Row>
               <Col md={6}>
                 <FormGroup>
                   <Label for="password" className="fw-bold">
@@ -603,6 +724,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                   />
                 </FormGroup>
               </Col>
+              <Col md={6}></Col>
             </Row>
 
             <Row>
@@ -617,6 +739,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    placeholder="Personel bilgilerinden otomatik doldurulur"
                   />
                 </FormGroup>
               </Col>
@@ -631,6 +754,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                     value={formData.surname}
                     onChange={handleInputChange}
                     required
+                    placeholder="Personel bilgilerinden otomatik doldurulur"
                   />
                 </FormGroup>
               </Col>
@@ -652,6 +776,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      placeholder="Personel bilgilerinden otomatik doldurulur"
                     />
                   </InputGroup>
                 </FormGroup>

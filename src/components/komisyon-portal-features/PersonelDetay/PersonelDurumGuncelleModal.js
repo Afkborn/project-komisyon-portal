@@ -431,6 +431,10 @@ export default function PersonelDurumGuncelleModal({
                     <option key={5} value="Uzaklastirma">
                       Uzaklaştırma
                     </option>
+                    <option key={6} value="Göreve Son Verme">
+                      Göreve Son Verme
+                    </option>
+
                   </Input>
                   {errors.deactivationReason && (
                     <div className="invalid-feedback">

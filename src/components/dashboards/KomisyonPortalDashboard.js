@@ -332,13 +332,13 @@ export default function KomisyonPortalDashboard() {
       path: "ana-sayfa",
       icon: "fas fa-home",
     },
-    {
-      id: 22,
-      label: "Takvim",
-      type: "item",
-      path: "takvim",
-      icon: "fas fa-calendar-alt",
-    },
+    // {
+    //   id: 22,
+    //   label: "Takvim",
+    //   type: "item",
+    //   path: "takvim",
+    //   icon: "fas fa-calendar-alt",
+    // },
     { id: 1001, label: "Eskişehir Personel Sistemi", type: "heading" },
     // {
     //   id: 1004,

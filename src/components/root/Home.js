@@ -91,6 +91,10 @@ export default function Home() {
     window.location.href = "/ays-kys";
   }
 
+  // binot giriş yapma
+  function handleBiNot() {
+    window.location.href = "/binot";
+  }
 
   // Giriş yapma yönlendirme
   function handleLogin() {
@@ -190,6 +194,21 @@ export default function Home() {
       visible: true,
       color: "dark",
     },
+    {
+      id: 8,
+      label: "BiNot",
+      detail:
+        "BiNot uygulaması adliye personellerinin birim içinde notlarını tutması için oluşturulmuş bir uygulamadır.",
+      type: "item",
+      onClick: handleBiNot,
+      image: admin_user,
+      visible: true,
+      visibleRoles: [
+        "binot-kullanici",
+        "admin",
+      ],
+      color: "secondary",
+    },
   ];
 
   return (
@@ -246,13 +265,13 @@ export default function Home() {
                       item.visibleRoles.length === 0 ||
                       (user &&
                         user.roles.some((role) =>
-                          item.visibleRoles.includes(role)
+                          item.visibleRoles.includes(role),
                         ))) &&
                     (!item.hiddenRoles ||
                       item.hiddenRoles.length === 0 ||
                       (user &&
                         !user.roles.some((role) =>
-                          item.hiddenRoles.includes(role)
+                          item.hiddenRoles.includes(role),
                         ))) &&
                     item.visible;
 

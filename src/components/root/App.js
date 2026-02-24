@@ -13,7 +13,9 @@ import SantralPortalDashboard from "../dashboards/SantralPortalDashboard";
 import KullaniciYonetimSistemRoutes from "../Routes/KullaniciYonetimSistemRoutes";
 import KullaniciYonetimSistemDashboard from "../dashboards/KullaniciYonetimSistemDashboard";
 import SegbisRoutes from "../Routes/SegbisRoutes";
+import BiNotRoutes from "../Routes/BiNotRoutes";
 import SegbisRehberDashboard from "../dashboards/SegbisRehberDashboard";
+import BiNotDashboard from "../dashboards/BiNotDashboard";
 import KullaniciAktiviteleri from "../dashboards/KullaniciAktiviteleri";
 import BultenDashboard from "../dashboards/BultenDashboard";
 import EskBaroLevhaDashboard from "../dashboards/EskBaroLevhaDashboard";
@@ -55,6 +57,12 @@ function App() {
         <Route element={<SegbisRoutes />}>
           <Route path="/segbis-rehber/*" element={<SegbisRehberDashboard />} />
         </Route>
+
+        <Route element={<BiNotRoutes />}>
+          <Route path="/binot/*" element={<BiNotDashboard />} />
+        </Route>
+
+
 
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
