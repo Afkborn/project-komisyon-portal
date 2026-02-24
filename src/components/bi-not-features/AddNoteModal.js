@@ -17,6 +17,7 @@ import {
   Row,
   Spinner,
 } from "reactstrap";
+import alertify from "alertifyjs";
 
 export default function AddNoteModal({
   isOpen,
@@ -43,9 +44,17 @@ export default function AddNoteModal({
 
   useEffect(() => {
     if (isOpen) {
-      setForm(initialState);
+      const newForm = { ...initialState };
+      // Şahsi not ise alertTarget'ı "ben" yap
+      if (selectedUnit?.key === "personal") {
+        newForm.alertTarget = "ben";
+      } else {
+        // Birim notu ise alertTarget'ı "birim" yap
+        newForm.alertTarget = "birim";
+      }
+      setForm(newForm);
     }
-  }, [isOpen, initialState]);
+  }, [isOpen, initialState, selectedUnit?.key]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -54,6 +63,16 @@ export default function AddNoteModal({
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  // Anımsatıcı tarih için minimum tarih-saati hesapla (şu an + 1 dakika)
+  const getMinDateTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1);
+    return now.toISOString().slice(0, 16);
+  };
+
+  // Şahsi not mu kontrol et
+  const isPersonalNote = selectedUnit?.key === "personal";
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -69,7 +88,9 @@ export default function AddNoteModal({
       isPrivate: isPersonal,
       birimID,
       hasReminder: form.reminderEnabled,
-      reminderDate: form.reminderEnabled ? form.reminderDate : null,
+      reminderDate: form.reminderEnabled
+        ? new Date(form.reminderDate).toISOString()
+        : null,
       reminderTarget: form.reminderEnabled
         ? form.alertTarget === "birim"
           ? "UNIT"
@@ -202,16 +223,25 @@ export default function AddNoteModal({
                 <Col md={6}>
                   <FormGroup>
                     <Label className="fw-bold" for="reminderDate">
-                      Anımsatıcı Tarihi*
+                      Anımsatıcı Tarihi ve Saati*
                     </Label>
-                    <Input
-                      id="reminderDate"
-                      name="reminderDate"
-                      type="date"
-                      value={form.reminderDate}
-                      onChange={handleChange}
-                      required
-                    />
+                    <InputGroup>
+                      <InputGroupText className="bg-light">
+                        <i className="fas fa-clock"></i>
+                      </InputGroupText>
+                      <Input
+                        id="reminderDate"
+                        name="reminderDate"
+                        type="datetime-local"
+                        value={form.reminderDate}
+                        onChange={handleChange}
+                        min={getMinDateTime()}
+                        required
+                      />
+                    </InputGroup>
+                    <small className="text-muted mt-1 d-block">
+                      Gelecek bir tarih ve saat seçin
+                    </small>
                   </FormGroup>
                 </Col>
 
@@ -226,11 +256,20 @@ export default function AddNoteModal({
                       type="select"
                       value={form.alertTarget}
                       onChange={handleChange}
+                      disabled={isPersonalNote}
                       required
                     >
                       <option value="ben">Ben</option>
-                      <option value="birim">Birim</option>
+                      {!isPersonalNote && (
+                        <option value="birim">Birim</option>
+                      )}
                     </Input>
+                    {isPersonalNote && (
+                      <small className="text-muted mt-1 d-block">
+                        <i className="fas fa-info-circle me-1"></i>
+                        Şahsi notlar için uyarı sadece size gider
+                      </small>
+                    )}
                   </FormGroup>
                 </Col>
               </>

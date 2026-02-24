@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "reactstrap";
 import AddNoteModal from "./AddNoteModal";
+import EditNoteModal from "./EditNoteModal";
 import NoteCard from "./NoteCard";
 
 export default function NoteList({ token, selectedUnit, defaultBirimId }) {
@@ -17,8 +18,11 @@ export default function NoteList({ token, selectedUnit, defaultBirimId }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
 
   const toggleAddModal = () => setAddModalOpen((v) => !v);
+  const toggleEditModal = () => setEditModalOpen((v) => !v);
 
   const fetchNotes = () => {
     if (!selectedUnit) return;
@@ -113,6 +117,67 @@ export default function NoteList({ token, selectedUnit, defaultBirimId }) {
     });
   };
 
+  const handleDelete = (note) => {
+    if (!window.confirm("Bu notu silmek istediğinizden emin misiniz?")) {
+      return;
+    }
+
+    axios({
+      method: "DELETE",
+      url: `/api/biNot/${note._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => {
+        setNotes((prev) => prev.filter((n) => n._id !== note._id));
+        alertify.success("Not silindi");
+      })
+      .catch((err) => {
+        console.error(err);
+        alertify.error(err.response?.data?.message || "Not silinemedi");
+      });
+  };
+
+  const handleEdit = (note) => {
+    setEditingNote(note);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (payload) => {
+    if (!editingNote) return;
+
+    setSaving(true);
+
+    axios({
+      method: "PUT",
+      url: `/api/biNot/${editingNote._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: payload,
+    })
+      .then(() => {
+        // Listede güncelle
+        setNotes((prev) =>
+          prev.map((n) =>
+            n._id === editingNote._id
+              ? { ...n, ...payload }
+              : n,
+          ),
+        );
+        alertify.success("Not güncellendi");
+        setSaving(false);
+        setEditModalOpen(false);
+        setEditingNote(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        alertify.error(err.response?.data?.message || "Not güncellenemedi");
+        setSaving(false);
+      });
+  };
+
   return (
     <Card className="shadow-sm border-0">
       <CardHeader className="bg-light d-flex justify-content-between align-items-center">
@@ -143,7 +208,13 @@ export default function NoteList({ token, selectedUnit, defaultBirimId }) {
         ) : (
           <div>
             {notes.map((note) => (
-              <NoteCard key={note._id} note={note} onComplete={handleComplete} />
+              <NoteCard
+                key={note._id}
+                note={note}
+                onComplete={handleComplete}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+              />
             ))}
           </div>
         )}
@@ -154,6 +225,14 @@ export default function NoteList({ token, selectedUnit, defaultBirimId }) {
           selectedUnit={selectedUnit}
           defaultBirimId={defaultBirimId}
           onSave={handleAddNote}
+          saving={saving}
+        />
+
+        <EditNoteModal
+          isOpen={editModalOpen}
+          toggle={toggleEditModal}
+          note={editingNote}
+          onSave={handleSaveEdit}
           saving={saving}
         />
       </CardBody>

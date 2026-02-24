@@ -9,7 +9,7 @@ const getPriorityBadge = (priority) => {
   return { color: "secondary", label: priority || "Normal" };
 };
 
-export default function NoteCard({ note, onComplete }) {
+export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
   const priority = getPriorityBadge(note.priority);
   const isCompleted = Boolean(note.completed || note.isCompleted || note.done);
 
@@ -45,14 +45,36 @@ export default function NoteCard({ note, onComplete }) {
             </div>
           </div>
 
-          <Button
-            color={isCompleted ? "secondary" : "success"}
-            size="sm"
-            onClick={() => onComplete(note)}
-          >
-            <i className="fas fa-check me-1"></i>
-            Tamamlandı İşaretle
-          </Button>
+          <div className="d-flex gap-2">
+            {!isCompleted && (
+              <Button
+                color="info"
+                size="sm"
+                outline
+                onClick={() => onEdit(note)}
+              >
+                <i className="fas fa-edit me-1"></i>
+                Düzenle
+              </Button>
+            )}
+            <Button
+              color={isCompleted ? "secondary" : "success"}
+              size="sm"
+              onClick={() => onComplete(note)}
+            >
+              <i className="fas fa-check me-1"></i>
+              Tamamlandı İşaretle
+            </Button>
+            <Button
+              color="danger"
+              size="sm"
+              outline
+              onClick={() => onDelete(note)}
+            >
+              <i className="fas fa-trash me-1"></i>
+              Sil
+            </Button>
+          </div>
         </div>
 
         <div className="mt-3">
