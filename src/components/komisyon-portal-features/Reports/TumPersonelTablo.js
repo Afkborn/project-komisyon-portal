@@ -125,10 +125,74 @@ export default function TumPersonelTablo({
       return;
     }
 
+    const element = document.getElementById("tumPersonelTabloPdf");
+    if (!element) {
+      alertify.error("Tablo bulunamadı.");
+      return;
+    }
+
+    // Yeni pencere aç
+    const newWindow = window.open("", "Print-Window");
+    if (!newWindow) {
+      alertify.error("Yeni pencere açılamadı. Popup engeli kontrol edin.");
+      return;
+    }
+
     const kurumAdi = selectedKurum?.name ? ` - ${selectedKurum.name}` : "";
     const fileName = `Personel Tablosu${kurumAdi} - ${selectedUnitType}`;
 
-    generatePdf(document, "tumPersonelTabloPdf", fileName, null, true);
+    // Yeni pencereye sabit genişlikte (900px) HTML yaz
+    newWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${fileName}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+              background: white;
+            }
+            .print-container {
+              width: 900px;
+              margin: 0 auto;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            @media print {
+              body {
+                margin: 0;
+                padding: 10px;
+              }
+              .print-container {
+                width: 100%;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            ${element.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+
+    newWindow.document.close();
+
+    // Print dialogu açmadan biraz bekle (DOM render edilsin diye)
+    setTimeout(() => {
+      newWindow.print();
+      // PDF kaydedildikten sonra pencereyi kapat
+      setTimeout(() => {
+        newWindow.close();
+      }, 500);
+    }, 500);
   };
 
   // Renk paletini tanımlayalım - modern bir görünüm için
