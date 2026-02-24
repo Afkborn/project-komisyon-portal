@@ -10,6 +10,7 @@ import {
 } from "reactstrap";
 
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
+import NotificationBoard from "../notifications/NotificationBoard";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import logo from "../../assets/logo300.png";
@@ -117,7 +118,10 @@ export default function AYSNavbar() {
           <img alt="logo" src={logo} className="navbar-logo mr-3" />
           <span className="navbar-title">Adliye Yönetim Sistemi</span>
         </NavbarBrand>
-        <div className="navbar-dropdown-container">{renderDropdown()}</div>
+        <div className="navbar-right-container d-flex align-items-center gap-3">
+          <NotificationBoard token={token} />
+          <div className="navbar-dropdown-container">{renderDropdown()}</div>
+        </div>
       </Container>
     </Navbar>
   );
