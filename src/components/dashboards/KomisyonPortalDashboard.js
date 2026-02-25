@@ -28,7 +28,7 @@ import TumPersonelListe from "../komisyon-portal-features/TumPersonelListe/TumPe
 import PersonelListeByBirim from "../komisyon-portal-features/PersonelListeByBirim/PersonelListeByBirim";
 import PersonelDetay from "../komisyon-portal-features/PersonelDetay/PersonelDetay";
 import PersonelEkleModal from "../komisyon-portal-features/PersonelListeByBirim/PersonelEkleModal";
-import ScrollRestoration from "../common/ScrollRestorationNew";
+
 import Unvanlar from "../komisyon-portal-features/Unvanlar";
 import Kurum from "../komisyon-portal-features/Kurum";
 import PersonelOnLeave from "../komisyon-portal-features/Reports/PersonelOnLeave";
@@ -572,8 +572,6 @@ export default function KomisyonPortalDashboard() {
 
   return (
     <div className="dashboard-container d-flex">
-      {/* Scroll pozisyonlarını otomatik yönet */}
-      <ScrollRestoration />
       {/* Sidebar */}
       <div
         className={`sidebar bg-light border-end ${
