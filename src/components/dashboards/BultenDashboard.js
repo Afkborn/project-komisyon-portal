@@ -159,7 +159,7 @@ export default function BultenDashboard() {
         setNews([]);
         setLoading(false);
         return;
-      }
+      } 
 
       // Tüm aktif RSS kaynaklarından veri çekme
       const promises = activeFeeds.map((source) =>

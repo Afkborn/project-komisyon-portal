@@ -19,7 +19,6 @@ import {
 } from "reactstrap";
 import { renderDate_GGAA } from "../../actions/TimeActions";
 import alertify from "alertifyjs";
-import { generatePdf } from "../../actions/PdfActions";
 
 import "../../../styles/TumPersonelTablo.css";
 

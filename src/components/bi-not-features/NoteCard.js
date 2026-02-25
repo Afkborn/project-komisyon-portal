@@ -22,9 +22,10 @@ export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
 
   const priority = getPriorityBadge(note.priority);
   const isCompleted = Boolean(note.completed || note.isCompleted || note.done);
-  const noteNotifications = Array.isArray(note.notifications)
-    ? note.notifications
-    : [];
+  const noteNotifications = useMemo(
+    () => (Array.isArray(note.notifications) ? note.notifications : []),
+    [note.notifications],
+  );
 
   const recipients = useMemo(
     () =>

@@ -15,7 +15,6 @@ import "./NotificationBoard.css";
 export default function NotificationBoard({ token }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 

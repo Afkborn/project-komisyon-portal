@@ -34,7 +34,6 @@ import Kurum from "../komisyon-portal-features/Kurum";
 import PersonelOnLeave from "../komisyon-portal-features/Reports/PersonelOnLeave";
 import YariZamanliCalisanPersonel from "../komisyon-portal-features/Reports/YariZamanliCalisanPersonel";
 import UnitMissingClerk from "../komisyon-portal-features/Reports/UnitMissingClerk";
-import KullaniciAyarlari from "../komisyon-portal-features/KullaniciAyarlari";
 import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
@@ -623,9 +622,6 @@ export default function KomisyonPortalDashboard() {
                   <i className="fas fa-ellipsis-v"></i>
                 </DropdownToggle>
                 <DropdownMenu end>
-                  <DropdownItem onClick={() => navigate("hesap-ayarlari")}>
-                    <i className="fas fa-user-cog me-2"></i>Hesap Ayarları
-                  </DropdownItem>
                   <DropdownItem onClick={logout}>
                     <i className="fas fa-sign-out-alt me-2"></i>Çıkış Yap
                   </DropdownItem>
@@ -794,10 +790,6 @@ export default function KomisyonPortalDashboard() {
                   unvanlar={unvanlar}
                 />
               }
-            />
-            <Route
-              path="hesap-ayarlari"
-              element={<KullaniciAyarlari token={token} getUser={getUser} />}
             />
             <Route
               path="unvanlar"

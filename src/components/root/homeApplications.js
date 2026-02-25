@@ -34,6 +34,9 @@ export const applicationHandlers = {
   handleBulletin: () => {
     window.location.href = "/bulten";
   },
+  handleHesapAyarları: () => {
+    window.location.href = "/hesap-ayarları";
+  },
 };
 
 // Uygulama konfigürasyonu
@@ -92,6 +95,17 @@ export const HOME_APPLICATIONS = [
   },
   {
     id: 5,
+    label: "Hesap Ayarları",
+    detail: "Hesap ayarlarınızı görüntülemek ve düzenlemek için tıklayınız.",
+    type: "item",
+    image: admin_user,
+    actionKey: "handleHesapAyarları",
+    visible: true,
+    visibleWhenLoggedIn: true,
+    color: "dark",
+  },
+  {
+    id: 6,
     label: "Eskişehir Adliyesi",
     detail: "Eskişehir Adliyesi resmi web sayfasına gitmek için tıklayınız.",
     type: "item",
@@ -101,7 +115,7 @@ export const HOME_APPLICATIONS = [
     color: "success",
   },
   {
-    id: 6,
+    id: 7,
     label: "UYAP Mail",
     detail:
       "UYAP Mail hizmeti ile adliye personelleri arasında güvenli bir şekilde mail gönderip alabilirsiniz.",
@@ -112,7 +126,7 @@ export const HOME_APPLICATIONS = [
     color: "warning",
   },
   {
-    id: 7,
+    id: 8,
     label: "Eskişehir Barosu Levhası",
     detail: "Eskişehir Barosu Levhasına ulaşmak için tıklayınız.",
     type: "item",
@@ -122,7 +136,7 @@ export const HOME_APPLICATIONS = [
     color: "dark",
   },
   {
-    id: 8,
+    id: 9,
     label: "Santral Portal",
     detail:
       "Santral portalı ile adliyede çalışan personellerin dahili numaralarını ve bilgilerini görüntüleyebilirsiniz.",

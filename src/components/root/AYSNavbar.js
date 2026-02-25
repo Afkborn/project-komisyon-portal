@@ -90,6 +90,9 @@ export default function AYSNavbar() {
             {user.name} {user.surname}
           </DropdownToggle>
           <DropdownMenu right className="dropdown-menu-custom">
+            <DropdownItem onClick={() => (window.location.href = "/hesap-ayarları")}>
+              <i className="fas fa-user-cog mr-2"></i>Hesap Ayarları
+            </DropdownItem>
             <DropdownItem onClick={(e) => logout()}>
               <i className="fas fa-sign-out-alt mr-2"></i>Çıkış Yap
             </DropdownItem>

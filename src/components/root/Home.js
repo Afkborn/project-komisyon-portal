@@ -121,6 +121,8 @@ export default function Home() {
             <div className="app-cards">
               <Row>
                 {listGroupItems.map((item, index) => {
+                  const isVisibleForLogin =
+                    !item.visibleWhenLoggedIn || Boolean(token);
                   const isVisibleForRole =
                     (!item.visibleRoles ||
                       item.visibleRoles.length === 0 ||
@@ -138,7 +140,7 @@ export default function Home() {
 
                   const isHovered = hoveredIndex === index;
 
-                  if (!isVisibleForRole) return null;
+                  if (!isVisibleForRole || !isVisibleForLogin) return null;
 
                   return (
                     <Col key={index} md="6" lg="4" className="mb-4">

@@ -17,7 +17,6 @@ import {
   Row,
   Spinner,
 } from "reactstrap";
-import alertify from "alertifyjs";
 
 export default function AddNoteModal({
   isOpen,
