@@ -4,7 +4,6 @@ import { Button, Spinner, Card, CardHeader, CardBody, Alert } from "reactstrap";
 import alertify from "alertifyjs";
 import {
   renderDate_GGAAYYYY,
-  calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";

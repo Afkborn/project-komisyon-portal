@@ -45,6 +45,7 @@ import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHar
 import UzaklastirilmisPersonel from "../komisyon-portal-features/Reports/UzaklastirilmisPersonel";
 import SehitGaziYakiniPersonel from "../komisyon-portal-features/Reports/SehitGaziYakiniPersonel";
 import EngelliPersonel from "../komisyon-portal-features/Reports/EngelliPersonel";
+import GorevSure4BPersonel from "../komisyon-portal-features/Reports/GorevSure4BPersonel";
 import Nobet from "../komisyon-portal-features/SucUstuNobet/Nobet";
 import Takvim from "../komisyon-portal-features/Takvim/Takvim";
 import Cookies from "universal-cookie";
@@ -146,7 +147,7 @@ export default function KomisyonPortalDashboard() {
             (error.response.status === 401 || error.response.status === 403)
           ) {
             forceLogout(
-              "Oturum süreniz doldu veya hesabınızla ilgili bir değişiklik yapıldı."
+              "Oturum süreniz doldu veya hesabınızla ilgili bir değişiklik yapıldı.",
             );
           }
         } finally {
@@ -215,7 +216,7 @@ export default function KomisyonPortalDashboard() {
     try {
       const result = await axios(GET_institutions);
       const sortedInstitutions = result.data.InstitutionList.sort(
-        (a, b) => a.id - b.id
+        (a, b) => a.id - b.id,
       );
       setKurumlar(sortedInstitutions);
 
@@ -239,7 +240,7 @@ export default function KomisyonPortalDashboard() {
     try {
       const result = await axios(GET_titles(token));
       const sortedTitles = result.data.titleList.sort(
-        (a, b) => a.oncelikSirasi - b.oncelikSirasi
+        (a, b) => a.oncelikSirasi - b.oncelikSirasi,
       );
       setUnvanlar(sortedTitles);
     } catch (error) {
@@ -462,6 +463,13 @@ export default function KomisyonPortalDashboard() {
       icon: "fas fa-wheelchair",
     },
     {
+      id: 30,
+      label: "Kadroya Geçişler",
+      type: "item",
+      path: "gorev-suresi-4b-personel",
+      icon: "fas fa-hourglass-start",
+    },
+    {
       id: 17,
       label: "Personel Hareketleri",
       type: "item",
@@ -635,7 +643,7 @@ export default function KomisyonPortalDashboard() {
         {/* Sidebar Footer */}
         <div className="sidebar-footer text-center p-3 border-top">
           <small className="text-muted">
-            &copy; {new Date().getFullYear()} EPSİS - Designed by{" "} Bilgehan KALAY
+            &copy; {new Date().getFullYear()} EPSİS - Designed by Bilgehan KALAY
             {/* <a
               href="https://github.com/Afkborn"
               target="_blank"
@@ -694,7 +702,7 @@ export default function KomisyonPortalDashboard() {
                   <i className="fas fa-exchange-alt me-1"></i>
                   Kurum Değiştir
                 </Button>
-                
+
                 <Button
                   color="light"
                   size="sm"
@@ -947,6 +955,18 @@ export default function KomisyonPortalDashboard() {
                 />
               }
             />
+
+            <Route
+              path="gorev-suresi-4b-personel"
+              element={
+                <GorevSure4BPersonel
+                  token={token}
+                  showPersonelDetay={showPersonelDetay}
+                  selectedKurum={selectedKurum}
+                />
+              }
+            />
+
             <Route
               path="personel-aktar"
               element={
