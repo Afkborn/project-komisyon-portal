@@ -15,10 +15,8 @@ import {
   Alert,
 } from "reactstrap";
 import AYSNavbar from "../root/AYSNavbar";
-import { getBackendBaseUrl } from "../../utils/backendUrl";
 
 export default function EskBaroLevhaDashboard() {
-  const backendBaseUrl = getBackendBaseUrl();
   const [search, setSearch] = useState({
     sicil: "",
     name: "",
@@ -47,8 +45,7 @@ export default function EskBaroLevhaDashboard() {
     setError("");
     setResults([]);
     try {
-      const url = `${backendBaseUrl}/api/barolevha_proxy/list`;
-      const res = await fetch(backendBaseUrl ? url : "/api/barolevha_proxy/list", {
+      const res = await fetch("/api/barolevha_proxy/list", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,8 +79,7 @@ export default function EskBaroLevhaDashboard() {
     setDetailLoading(true);
     setShowModal(true);
     try {
-      const url = `${backendBaseUrl}/api/barolevha_proxy/info`;
-      const res = await fetch(backendBaseUrl ? url : "/api/barolevha_proxy/info", {
+      const res = await fetch("/api/barolevha_proxy/info", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +105,6 @@ export default function EskBaroLevhaDashboard() {
   const closeModal = () => {
     setShowModal(false);
     setDetail(null);
-
   };
 
   return (
