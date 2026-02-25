@@ -1,5 +1,13 @@
-import React from "react";
-import { Badge, Button, Card, CardBody } from "reactstrap";
+import React, { useMemo, useState } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  Modal,
+  ModalHeader,
+  ModalBody,
+} from "reactstrap";
 import { renderDate_GGAAYYYY } from "../actions/TimeActions";
 
 const getPriorityBadge = (priority) => {
@@ -10,8 +18,31 @@ const getPriorityBadge = (priority) => {
 };
 
 export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+
   const priority = getPriorityBadge(note.priority);
   const isCompleted = Boolean(note.completed || note.isCompleted || note.done);
+  const noteNotifications = Array.isArray(note.notifications)
+    ? note.notifications
+    : [];
+
+  const recipients = useMemo(
+    () =>
+      noteNotifications
+        .flatMap((notification) => notification.recipients || [])
+        .filter((recipient) => recipient?.user),
+    [noteNotifications],
+  );
+
+  const readCount = recipients.filter((recipient) => recipient.isRead).length;
+
+  const handleCompleteClick = () => {
+    if (!window.confirm("Bu notu tamamlandı olarak işaretlemek istiyor musunuz?")) {
+      return;
+    }
+
+    onComplete(note);
+  };
 
   return (
     <Card
@@ -42,10 +73,28 @@ export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
                   )}
                 </Badge>
               )}
+
+              {noteNotifications.length > 0 && (
+                <Badge color="primary" pill>
+                  <i className="fas fa-bell me-1"></i>
+                  Anımsatıcı Bildirimi
+                </Badge>
+              )}
             </div>
           </div>
 
           <div className="d-flex gap-2">
+            {noteNotifications.length > 0 && (
+              <Button
+                color="primary"
+                size="sm"
+                outline
+                onClick={() => setIsNotificationModalOpen(true)}
+              >
+                <i className="fas fa-eye me-1"></i>
+                Bildirim Durumu
+              </Button>
+            )}
             {!isCompleted && (
               <Button
                 color="info"
@@ -60,10 +109,10 @@ export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
             <Button
               color={isCompleted ? "secondary" : "success"}
               size="sm"
-              onClick={() => onComplete(note)}
+              onClick={handleCompleteClick}
             >
               <i className="fas fa-check me-1"></i>
-              Tamamlandı İşaretle
+              {isCompleted ? "Tamamlandı" : "Tamamla"}
             </Button>
             <Button
               color="danger"
@@ -94,6 +143,55 @@ export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
           </div>
         </div>
       </CardBody>
+
+      <Modal
+        isOpen={isNotificationModalOpen}
+        toggle={() => setIsNotificationModalOpen(false)}
+      >
+        <ModalHeader toggle={() => setIsNotificationModalOpen(false)}>
+          Bildirim Durumu
+        </ModalHeader>
+        <ModalBody>
+          <div className="mb-3">
+            <Badge color="secondary" className="me-2">
+              Toplam: {recipients.length}
+            </Badge>
+            <Badge color="success" className="me-2">
+              Okundu: {readCount}
+            </Badge>
+            <Badge color="warning">Okunmadı: {recipients.length - readCount}</Badge>
+          </div>
+
+          {recipients.length === 0 ? (
+            <div className="text-muted">Bu not için bildirim alıcısı bulunamadı.</div>
+          ) : (
+            recipients.map((recipient) => {
+              const user = recipient.user;
+
+              return (
+                <div
+                  key={recipient._id || user._id}
+                  className="d-flex justify-content-between align-items-center border rounded p-2 mb-2"
+                >
+                  <div>
+                    <div className="fw-bold">
+                      {user.name} {user.surname} ({user.username})
+                    </div>
+                    {recipient.isRead && recipient.readAt && (
+                      <div className="small text-muted">
+                        Okunma Zamanı: {new Date(recipient.readAt).toLocaleString("tr-TR")}
+                      </div>
+                    )}
+                  </div>
+                  <Badge color={recipient.isRead ? "success" : "warning"}>
+                    {recipient.isRead ? "Okundu" : "Okunmadı"}
+                  </Badge>
+                </div>
+              );
+            })
+          )}
+        </ModalBody>
+      </Modal>
     </Card>
   );
 }

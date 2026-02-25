@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NotFound from "../common/NotFound";
 import Unauthorized from "../common/Unauthorized";
 
@@ -21,7 +22,31 @@ import BultenDashboard from "../dashboards/BultenDashboard";
 import EskBaroLevhaDashboard from "../dashboards/EskBaroLevhaDashboard";
 import "../../styles/App.css";
 
+function getPageTitle(pathname) {
+  const path = (pathname || "").toLowerCase();
+
+  if (path.startsWith("/binot")) return "AYS - BiNot";
+  if (path.startsWith("/ays-kys/aktiviteler")) return "AYS - Kullanıcı Aktiviteleri";
+  if (path.startsWith("/ays-kys")) return "AYS - Kullanıcı Yönetim Sistemi";
+  if (path.startsWith("/segbis-rehber")) return "AYS - SEGBİS Rehber";
+  if (path.startsWith("/komisyon-portal")) return "EPSİS";
+  if (path.startsWith("/santral-portal")) return "AYS - Santral Portal";
+  if (path.startsWith("/bulten")) return "AYS - Bülten";
+  if (path.startsWith("/eskisehir-baro-levha")) return "AYS - Eskişehir Baro Levha";
+  if (path.startsWith("/login")) return "AYS - Giriş";
+  if (path.startsWith("/unauthorized")) return "AYS - Yetkisiz Erişim";
+  if (path === "/") return "Adliye Yönetim Sistemi";
+
+  return "AYS";
+}
+
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+  }, [location.pathname]);
+
   return (
     <div className="app-wrapper">
       <Routes>

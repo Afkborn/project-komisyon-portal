@@ -39,7 +39,11 @@ export default function BirimSidebar({ units, selectedKey, onSelect }) {
                 </span>
 
                 {unit.kind && (
-                  <Badge color={isActive ? "light" : "secondary"} pill>
+                  <Badge
+                    color={isActive ? "light" : "secondary"}
+                    className={isActive ? "text-dark" : ""}
+                    pill
+                  >
                     {unit.kind}
                   </Badge>
                 )}

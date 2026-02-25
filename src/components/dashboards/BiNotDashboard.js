@@ -39,6 +39,7 @@ export default function BiNotDashboard() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [person, setPerson] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const [selectedUnit, setSelectedUnit] = useState({
     key: "personal",
@@ -132,7 +133,7 @@ export default function BiNotDashboard() {
       <AYSNavbar />
       <Container fluid className="p-4">
         <Row className="mb-4">
-          <Col>
+          <Col md={8}>
             <h3 className="text-primary fw-bold">
               <i className="fas fa-sticky-note me-2"></i>
               BiNot
@@ -141,6 +142,16 @@ export default function BiNotDashboard() {
               Birim bazlı veya şahsi notlarınızı görüntüleyebilir ve
               yönetebilirsiniz.
             </p>
+          </Col>
+          <Col md={4} className="d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => setRefreshKey((prev) => prev + 1)}
+            >
+              <i className="fas fa-sync me-2"></i>
+              Yenile
+            </button>
           </Col>
         </Row>
 
@@ -168,6 +179,7 @@ export default function BiNotDashboard() {
                 token={token}
                 selectedUnit={selectedUnit}
                 defaultBirimId={person?.birimID?._id || null}
+                refreshKey={refreshKey}
               />
             </Col>
           </Row>

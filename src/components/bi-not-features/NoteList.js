@@ -13,7 +13,7 @@ import AddNoteModal from "./AddNoteModal";
 import EditNoteModal from "./EditNoteModal";
 import NoteCard from "./NoteCard";
 
-export default function NoteList({ token, selectedUnit, defaultBirimId }) {
+export default function NoteList({ token, selectedUnit, defaultBirimId, refreshKey = 0 }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -58,7 +58,7 @@ export default function NoteList({ token, selectedUnit, defaultBirimId }) {
   useEffect(() => {
     fetchNotes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUnit?.key, selectedUnit?.id]);
+  }, [selectedUnit?.key, selectedUnit?.id, refreshKey]);
 
   const handleAddNote = (payload) => {
     setSaving(true);

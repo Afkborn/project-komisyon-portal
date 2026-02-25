@@ -33,10 +33,22 @@ export default function NotificationBoard({ token }) {
           },
         });
 
-        const notifications = response.data?.notifications || [];
+        const notifications =
+          response.data?.notifications || response.data?.list || [];
+        const now = new Date();
+
+        const filteredNotifications = notifications.filter((notif) => {
+          const reminderDate = notif?.reminderDate || notif?.derkenar?.reminderDate;
+
+          if (!reminderDate) {
+            return true;
+          }
+
+          return new Date(reminderDate) <= now;
+        });
 
         // Her bildirime kaynak bilgisi ekle
-        return notifications.map((notif) => ({
+        return filteredNotifications.map((notif) => ({
           ...notif,
           source: source.id,
           sourceLabel: source.label,
@@ -125,10 +137,6 @@ export default function NotificationBoard({ token }) {
     }
   };
 
-  const handleNotificationClick = (notification) => {
-    markAsRead(notification);
-  };
-
   return (
     <UncontrolledDropdown className="notification-dropdown">
       <DropdownToggle
@@ -180,31 +188,54 @@ export default function NotificationBoard({ token }) {
                   className={`notification-item ${
                     notification.isRead ? "read" : "unread"
                   }`}
-                  onClick={() => handleNotificationClick(notification)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      handleNotificationClick(notification);
-                    }
-                  }}
                 >
                   <div className="notification-content">
-                    <div className="notification-title">
-                      <i
-                        className={`${notification.sourceIcon} me-2`}
-                        style={{
-                          color: `var(--bs-${notification.sourceColor})`,
-                        }}
-                      ></i>
-                      <strong>{notification.title || notification.sourceLabel}</strong>
+                    {console.log(notification)}
+                    <div className="notification-title d-flex align-items-center justify-content-between">
+                      <div>
+                        <i
+                          className={`${notification.sourceIcon} me-2`}
+                          style={{
+                            color: `var(--bs-${notification.sourceColor})`,
+                          }}
+                        ></i>
+                        <strong>{notification.derkenar?.title || notification.sourceLabel}</strong>
+                        {!notification.isRead && (
+                          <span className="ms-2 notification-dot"></span>
+                        )}
+                      </div>
                       {!notification.isRead && (
-                        <span className="ms-2 notification-dot"></span>
+                        <Button
+                          color="link"
+                          size="sm"
+                          className="p-0 ms-2"
+                          onClick={() => markAsRead(notification)}
+                          title="Okundu olarak işaretle"
+                        >
+                          <i className="fas fa-eye"></i>
+                        </Button>
                       )}
                     </div>
-                    <div className="notification-message">
-                      {notification.message}
-                    </div>
+                    {/* {notification.derkenar?.title && (
+                      <div className="notification-message">
+                        <strong>Başlık:</strong> {notification.derkenar.title}
+                      </div>
+                    )} */}
+                    {notification.derkenar?.content && (
+                      <div className="notification-message">
+                        <strong>İçerik:</strong> {notification.derkenar.content}
+                      </div>
+                    )}
+                    {notification.derkenar?.fileNumber && (
+                      <div className="notification-message">
+                        <strong>Dosya No:</strong> {notification.derkenar.fileNumber}
+                      </div>
+                    )}
+                    {notification.birim?.name && (
+                      <div className="notification-message">
+                        <strong>Birim:</strong> {notification.birim.name}
+                      </div>
+                    )}
                     <div className="notification-source">
                       <small>{notification.sourceLabel}</small>
                     </div>

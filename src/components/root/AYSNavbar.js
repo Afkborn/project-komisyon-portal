@@ -119,7 +119,7 @@ export default function AYSNavbar() {
           <span className="navbar-title">Adliye Yönetim Sistemi</span>
         </NavbarBrand>
         <div className="navbar-right-container d-flex align-items-center gap-3">
-          <NotificationBoard token={token} />
+          {token && <NotificationBoard token={token} />}
           <div className="navbar-dropdown-container">{renderDropdown()}</div>
         </div>
       </Container>

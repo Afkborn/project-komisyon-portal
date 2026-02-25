@@ -13,13 +13,8 @@ import {
 import { GET_USER_DETAILS } from "../constants/AxiosConfiguration";
 import Cookies from "universal-cookie";
 import axios from "axios";
-import guide_red from "../../assets/guide-red.svg";
-import courthouse_red from "../../assets/courthouse-red.svg";
-import email_red from "../../assets/email-red.svg";
-import admin_user from "../../assets/admin-user.svg";
-import epsisLogo from "../../assets/epsis-logo.png";
-import eskBaro from "../../assets/esk-baro.png";
 import AYSNavbar from "./AYSNavbar";
+import { HOME_APPLICATIONS, applicationHandlers } from "./homeApplications";
 import "../../styles/Home.css";
 
 export default function Home() {
@@ -54,49 +49,9 @@ export default function Home() {
 
   // Bülten sayfasına yönlendirme
   function handleBulletinClick() {
-    window.location.href = "/bulten";
+    applicationHandlers.handleBulletin();
   }
 
-  // Uygulama yönlendirme fonksiyonları
-  function handleKomisyonPortal() {
-    window.location.href = "/komisyon-portal/ana-sayfa";
-  }
-
-  // Santral portal yönlendirme
-  function handleSantralPortal() {
-    window.location.href = "/santral-portal";
-  }
-
-  // SEGBİS rehber yönlendirme
-  function handleSegbisRehber() {
-    window.location.href = "/segbis-rehber";
-  }
-
-  function handleBaroLevha() {
-    window.location.href = "/eskisehir-baro-levha";
-  }
-
-  // Eskişehir Adliyesi web sayfasına yönlendirme
-  function handleEskisehirAdliyesiWebPage() {
-    window.open("https://eskisehir.adalet.gov.tr/", "_blank");
-  }
-
-  // UYAP Mail yönlendirme
-  function handleUyapMail() {
-    window.open("https://eposta.uyap.gov.tr/", "_blank");
-  }
-
-  // AYS Kullanıcı Yönetim Sistemi yönlendirme
-  function handleAysKullaniciYonetimSistemi() {
-    window.location.href = "/ays-kys";
-  }
-
-  // binot giriş yapma
-  function handleBiNot() {
-    window.location.href = "/binot";
-  }
-
-  // Giriş yapma yönlendirme
   function handleLogin() {
     window.location.href = "/login";
   }
@@ -111,105 +66,11 @@ export default function Home() {
     setHoveredIndex(null);
   };
 
-  const listGroupItems = [
-    {
-      id: 1,
-      label: "EPSİS",
-      detail:
-        "Eskişehir Personel Sistemi ile adliye personellerinin bilgilerini görüntüleyebilirsiniz.",
-      type: "item",
-      visibleRoles: [
-        "komisyonbaskan",
-        "komisyonuye",
-        "komisyonkatip",
-        "komisyonmudur",
-        "admin",
-      ],
-      image: epsisLogo,
-      onClick: handleKomisyonPortal,
-      visible: true,
-      color: "danger",
-    },
-    {
-      id: 2,
-      label: "Santral Portal",
-      detail:
-        "Santral portalı ile adliyede çalışan personellerin dahili numaralarını ve bilgilerini görüntüleyebilirsiniz.",
-      type: "item",
-      image: guide_red,
-      onClick: handleSantralPortal,
-      visible: false,
-      color: "primary",
-    },
-    {
-      id: 3,
-      label: "Eskişehir Adliyesi",
-      detail: "Eskişehir Adliyesi resmi web sayfasına gitmek için tıklayınız.",
-      type: "item",
-      image: courthouse_red,
-      onClick: handleEskisehirAdliyesiWebPage,
-      visible: true,
-      color: "success",
-    },
-    {
-      id: 4,
-      label: "UYAP Mail",
-      detail:
-        "UYAP Mail hizmeti ile adliye personelleri arasında güvenli bir şekilde mail gönderip alabilirsiniz.",
-      type: "item",
-      image: email_red,
-      onClick: handleUyapMail,
-      visible: true,
-      color: "warning",
-    },
-    {
-      id: 5,
-      label: "SEGBİS Rehber",
-      detail: "SEGBİS rehberine ulaşmak için tıklayınız.",
-      type: "item",
-      onClick: handleSegbisRehber,
-      image: guide_red,
-      visible: true,
-      color: "info",
-    },
-    {
-      id: 6,
-      label: "AYS Kullanıcı Yönetim Sistemi",
-      detail:
-        "Adliye Yönetim Sistemi kullanıcı yönetim paneline gitmek için tıklayınız.",
-      type: "item",
-      visibleRoles: ["admin"],
-      image: admin_user,
-      onClick: handleAysKullaniciYonetimSistemi,
-      visible: true,
-      color: "dark",
-    },
-    {
-      id: 7,
-      label: "Eskişehir Barosu Levhası",
-      detail: "Eskişehir Barosu Levhasına ulaşmak için tıklayınız.",
-      type: "item",
-      onClick: handleBaroLevha,
-      image: eskBaro,
-      visible: true,
-      color: "dark",
-    },
-    {
-      id: 8,
-      label: "BiNot",
-      detail:
-        "BiNot uygulaması adliye personellerinin birim içinde notlarını tutması için oluşturulmuş bir uygulamadır.",
-      type: "item",
-      onClick: handleBiNot,
-      image: admin_user,
-      visible: true,
-      visibleRoles: [
-        "binot-kullanici",
-        "admin",
-      ],
-      color: "secondary",
-    },
-  ];
+  // Add onClick handlers to applications
+  const listGroupItems = HOME_APPLICATIONS.map((item) => ({
+    ...item,
+    onClick: applicationHandlers[item.actionKey] || (() => {}),
+  }));
 
   return (
     <div className="home-page">
@@ -362,7 +223,7 @@ export default function Home() {
                       </div>
                       <div className="quick-info-content">
                         <h5>Çalışma Saatleri</h5>
-                        <p>Pazartesi-Cuma: 08:00-17:00</p>
+                        <p>Pazartesi-Cuma: 08:00-12:00 ve 13:00-17:00</p>
                       </div>
                     </div>
 

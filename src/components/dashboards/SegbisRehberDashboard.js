@@ -247,7 +247,7 @@ export default function SegbisRehberDashboard() {
       case "Güneydoğu Anadolu":
         return "secondary";
       default:
-        return "light";
+        return "secondary";
     }
   };
 
