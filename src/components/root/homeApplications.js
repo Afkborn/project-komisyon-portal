@@ -37,6 +37,9 @@ export const applicationHandlers = {
   handleHesapAyarları: () => {
     window.location.href = "/hesap-ayarları";
   },
+  handleBiChat: () => {
+    window.location.href = "/bichat";
+  },
 };
 
 // Uygulama konfigürasyonu
@@ -144,6 +147,18 @@ export const HOME_APPLICATIONS = [
     image: guide_red,
     actionKey: "handleSantralPortal",
     visible: false,
+    color: "primary",
+  },
+  {
+    id: 10,
+    label: "BiChat",
+    detail:
+      "Adliye personellerinin birbirleriyle iletişim kurabileceği bir sohbet uygulamasıdır.",
+    type: "item",
+    image: guide_red,
+    actionKey: "handleBiChat",
+    visible: true,
+    visibleRoles: ["bichat-kullanici", "admin"],
     color: "primary",
   },
 ];

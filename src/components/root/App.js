@@ -15,6 +15,8 @@ import KullaniciYonetimSistemDashboard from "../dashboards/KullaniciYonetimSiste
 import HesapAyarlari from "../dashboards/HesapAyarlari";
 import SegbisRoutes from "../Routes/SegbisRoutes";
 import BiNotRoutes from "../Routes/BiNotRoutes";
+import BiChatRoutes from "../Routes/BiChatRoutes";
+import BiChatDashboard from "../dashboards/BiChatDashboard";
 import ProtectedRoutes from "../Routes/ProtectedRoutes";
 import SegbisRehberDashboard from "../dashboards/SegbisRehberDashboard";
 import BiNotDashboard from "../dashboards/BiNotDashboard";
@@ -88,6 +90,10 @@ function App() {
 
         <Route element={<BiNotRoutes />}>
           <Route path="/binot/*" element={<BiNotDashboard />} />
+        </Route>
+
+        <Route element={<BiChatRoutes />}>
+          <Route path="/bichat/*" element={<BiChatDashboard />} />
         </Route>
 
         <Route element={<ProtectedRoutes />}>
