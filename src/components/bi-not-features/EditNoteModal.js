@@ -18,6 +18,14 @@ import {
   Spinner,
 } from "reactstrap";
 
+const formatDateTimeForInput = (dateValue) => {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+};
+
 export default function EditNoteModal({
   isOpen,
   toggle,
@@ -31,6 +39,9 @@ export default function EditNoteModal({
       content: note?.content || "",
       fileNumber: note?.fileNumber || "",
       priority: note?.priority || "Normal",
+      reminderEnabled: Boolean(note?.hasReminder),
+      reminderDate: note?.reminderDate ? formatDateTimeForInput(note.reminderDate) : "",
+      alertTarget: note?.reminderTarget === "UNIT" ? "birim" : "ben",
     }),
     [note],
   );
@@ -44,9 +55,14 @@ export default function EditNoteModal({
         content: note.content || "",
         fileNumber: note.fileNumber || "",
         priority: note.priority || "Normal",
+        reminderEnabled: Boolean(note.hasReminder),
+        reminderDate: note.reminderDate ? formatDateTimeForInput(note.reminderDate) : "",
+        alertTarget: note.reminderTarget === "UNIT" ? "birim" : "ben",
       });
     }
   }, [isOpen, note]);
+
+  const isPersonalNote = Boolean(note?.isPrivate);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,11 +75,24 @@ export default function EditNoteModal({
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (form.reminderEnabled && !form.reminderDate) {
+      return;
+    }
+
     onSave({
       title: form.title,
       content: form.content,
       fileNumber: form.fileNumber,
       priority: form.priority,
+      hasReminder: form.reminderEnabled,
+      reminderDate: form.reminderEnabled
+        ? new Date(form.reminderDate).toISOString()
+        : null,
+      reminderTarget: form.reminderEnabled
+        ? form.alertTarget === "birim"
+          ? "UNIT"
+          : "SELF"
+        : null,
     });
   };
 
@@ -168,6 +197,74 @@ export default function EditNoteModal({
                 </div>
               </FormGroup>
             </Col>
+
+            <Col md={12}>
+              <FormGroup check>
+                <Input
+                  type="checkbox"
+                  id="edit-reminderEnabled"
+                  name="reminderEnabled"
+                  checked={form.reminderEnabled}
+                  onChange={handleChange}
+                />
+                <Label check for="edit-reminderEnabled" className="fw-bold">
+                  Anımsatıcı Kur
+                </Label>
+              </FormGroup>
+            </Col>
+
+            {form.reminderEnabled && (
+              <>
+                <Col md={6}>
+                  <FormGroup>
+                    <Label className="fw-bold" for="edit-reminderDate">
+                      Anımsatıcı Tarihi ve Saati*
+                    </Label>
+                    <InputGroup>
+                      <InputGroupText className="bg-light">
+                        <i className="fas fa-clock"></i>
+                      </InputGroupText>
+                      <Input
+                        id="edit-reminderDate"
+                        name="reminderDate"
+                        type="datetime-local"
+                        value={form.reminderDate}
+                        onChange={handleChange}
+                        required
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                </Col>
+
+                <Col md={6}>
+                  <FormGroup>
+                    <Label className="fw-bold" for="edit-alertTarget">
+                      Kime Uyarı Gitsin*
+                    </Label>
+                    <Input
+                      id="edit-alertTarget"
+                      name="alertTarget"
+                      type="select"
+                      value={form.alertTarget}
+                      onChange={handleChange}
+                      disabled={isPersonalNote}
+                      required
+                    >
+                      <option value="ben">Ben</option>
+                      {!isPersonalNote && (
+                        <option value="birim">Birim</option>
+                      )}
+                    </Input>
+                    {isPersonalNote && (
+                      <small className="text-muted mt-1 d-block">
+                        <i className="fas fa-info-circle me-1"></i>
+                        Şahsi notlar için uyarı sadece size gider
+                      </small>
+                    )}
+                  </FormGroup>
+                </Col>
+              </>
+            )}
           </Row>
         </Form>
       </ModalBody>

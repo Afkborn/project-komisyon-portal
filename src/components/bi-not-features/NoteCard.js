@@ -17,6 +17,21 @@ const getPriorityBadge = (priority) => {
   return { color: "secondary", label: priority || "Normal" };
 };
 
+const formatReminderDateWithDayTime = (reminderDate) => {
+  if (!reminderDate) return "";
+
+  const dateValue = new Date(reminderDate);
+  const dayName = dateValue.toLocaleDateString("tr-TR", {
+    weekday: "long",
+  });
+  const timeValue = dateValue.toLocaleTimeString("tr-TR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${renderDate_GGAAYYYY(dateValue)} ${dayName} ${timeValue}`;
+};
+
 export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
@@ -67,11 +82,7 @@ export default function NoteCard({ note, onComplete, onDelete, onEdit }) {
               {note.reminderDate && (
                 <Badge color="warning" pill>
                   <i className="fas fa-bell me-1"></i>
-                  {renderDate_GGAAYYYY(
-                    typeof note.reminderDate === "string"
-                      ? note.reminderDate.split("T")[0]
-                      : note.reminderDate,
-                  )}
+                  {formatReminderDateWithDayTime(note.reminderDate)}
                 </Badge>
               )}
 
