@@ -33,6 +33,11 @@ export default function GorevSure4BPersonel({ token, showPersonelDetay, selected
       render: (item) => item?.birim || "-",
     },
     {
+      key: "institutionName",
+      header: "Kurum",
+      render: (item) => item?.institutionName || "-",
+    },
+    {
       key: "goreveBaslamaTarihi",
       header: "Göreve Başlama Tarihi",
       render: (item) =>
@@ -61,16 +66,9 @@ export default function GorevSure4BPersonel({ token, showPersonelDetay, selected
   ];
 
   const getExpiring4BPersonel = (e) => {
-    const institutionId = selectedKurum?.id;
-
-    if (!institutionId) {
-      alertify.error("Kurum bilgisi alınamadı.");
-      return;
-    }
-
     const configuration = {
       method: "GET",
-      url: `/api/reports/expiring4BPersonnel?institutionId=${institutionId}`,
+      url: "/api/reports/expiring4BPersonnel",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -109,8 +107,6 @@ export default function GorevSure4BPersonel({ token, showPersonelDetay, selected
         
         if (error?.response?.status === 404) {
           alertify.error("Endpoint bulunamadı. Lütfen backend'i kontrol edin.");
-        } else if (error?.response?.status === 400) {
-          alertify.error("Hatalı istek. Kurum ID'si olunamadı.");
         } else {
           alertify.error("Rapor getirilirken bir hata oluştu.");
         }
