@@ -32,6 +32,9 @@ const getRoomId = (room) =>
 const getMessageRoomId = (message) =>
   message?.roomId || message?.roomID || message?.room || message?.chatRoomId;
 
+const getMessageId = (message) =>
+  message?._id || message?.id || message?.messageId || message?.messageID;
+
 const getDisplayNameFromRoom = (room, currentUserId) => {
   const participants = Array.isArray(room?.participants) ? room.participants : [];
   const roomType = (room?.type || "").toUpperCase();
@@ -134,6 +137,23 @@ export default function BiChatDashboard() {
         });
 
         const list = Array.isArray(res.data?.messages) ? res.data.messages : [];
+        const participants = Array.isArray(res.data?.participants)
+          ? res.data.participants
+          : null;
+
+        if (participants) {
+          setRooms((prev) =>
+            prev.map((room) =>
+              getRoomId(room) === roomId
+                ? {
+                    ...room,
+                    participants,
+                  }
+                : room
+            )
+          );
+        }
+
         setMessages(list);
       } catch (error) {
         console.error(error);
@@ -227,6 +247,27 @@ export default function BiChatDashboard() {
       );
     });
 
+    socket.on("message_deleted", (payload) => {
+      const messageId =
+        payload?.messageId ||
+        payload?.messageID ||
+        payload?._id ||
+        payload?.id;
+
+      if (!messageId) return;
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          String(getMessageId(message)) === String(messageId)
+            ? {
+                ...message,
+                isDeletedForAll: true,
+              }
+            : message
+        )
+      );
+    });
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
@@ -263,6 +304,51 @@ export default function BiChatDashboard() {
   };
 
   const handleTyping = () => {};
+
+  const handleDeleteForMe = async (messageId) => {
+    if (!messageId) return;
+
+    try {
+      await axios({
+        method: "PATCH",
+        url: `/api/chat/messages/${messageId}/delete-for-me`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMessages((prev) =>
+        prev.filter((message) => String(getMessageId(message)) !== String(messageId))
+      );
+    } catch (error) {
+      console.error(error);
+      alertify.error(error.response?.data?.message || "Mesaj silinemedi");
+    }
+  };
+
+  const handleDeleteForEveryone = async (messageId) => {
+    if (!messageId) return;
+
+    try {
+      await axios({
+        method: "PATCH",
+        url: `/api/chat/messages/${messageId}/delete-for-everyone`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          String(getMessageId(message)) === String(messageId)
+            ? {
+                ...message,
+                isDeletedForAll: true,
+              }
+            : message
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alertify.error(error.response?.data?.message || "Mesaj herkesten silinemedi");
+    }
+  };
 
   const handleCreateDirectRoom = async (userID) => {
     if (!userID) {
@@ -381,6 +467,8 @@ export default function BiChatDashboard() {
                     typingText={typingText}
                     onTyping={handleTyping}
                     onSend={handleSendMessage}
+                    onDeleteForMe={handleDeleteForMe}
+                    onDeleteForEveryone={handleDeleteForEveryone}
                   />
                   {typingText && (
                     <div className="mt-2 text-muted small">

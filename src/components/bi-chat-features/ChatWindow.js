@@ -18,6 +18,13 @@ const roomName = (room) => room?.name || room?.displayName || room?.title || "So
 
 const roomStatus = (room) => room?.status || room?.presence || "Aktif";
 
+const isGroupRoom = (room) => (room?.type || "").toUpperCase() === "GROUP";
+
+const getParticipantName = (participant) => {
+  const fullName = `${participant?.name || ""} ${participant?.surname || ""}`.trim();
+  return fullName || participant?.username || "";
+};
+
 export default function ChatWindow({
   room,
   messages,
@@ -26,6 +33,8 @@ export default function ChatWindow({
   typingText,
   onTyping,
   onSend,
+  onDeleteForMe,
+  onDeleteForEveryone,
 }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
@@ -36,6 +45,18 @@ export default function ChatWindow({
       (a, b) => new Date(a.createdAt || a.date || 0) - new Date(b.createdAt || b.date || 0)
     );
   }, [messages]);
+
+  const participantText = useMemo(() => {
+    if (!isGroupRoom(room)) return "";
+
+    const participants = Array.isArray(room?.participants) ? room.participants : [];
+    const names = participants
+      .map(getParticipantName)
+      .filter(Boolean)
+      .join(", ");
+
+    return names;
+  }, [room]);
 
   const clearInput = () => {
     setText("");
@@ -65,6 +86,12 @@ export default function ChatWindow({
             {roomName(room)}
           </h5>
           <small className="text-muted">{roomStatus(room)}</small>
+          {participantText && (
+            <div className="small text-muted mt-1">
+              <i className="fas fa-users me-1"></i>
+              {participantText}
+            </div>
+          )}
         </div>
 
         {typingText && (
@@ -84,7 +111,13 @@ export default function ChatWindow({
             <div className="text-center text-muted py-5">Henüz mesaj yok.</div>
           ) : (
             sortedMessages.map((message, index) => (
-              <MessageItem key={message._id || message.id || index} message={message} currentUser={currentUser} />
+              <MessageItem
+                key={message._id || message.id || index}
+                message={message}
+                currentUser={currentUser}
+                onDeleteForMe={onDeleteForMe}
+                onDeleteForEveryone={onDeleteForEveryone}
+              />
             ))
           )}
         </div>
