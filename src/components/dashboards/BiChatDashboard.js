@@ -80,6 +80,7 @@ export default function BiChatDashboard() {
 
   const typingText = "";
 
+  const getUserId = (user) => user?._id || user?.id || user?.userId || user?.person?._id;
   const fetchUsers = useCallback(async () => {
     try {
       const res = await axios({
@@ -268,11 +269,42 @@ export default function BiChatDashboard() {
       );
     });
 
+    socket.on("user_left_group", (payload) => {
+      const payloadRoomId =
+        payload?.roomId || payload?.roomID || payload?.room || payload?.chatRoomId;
+      const leftUserId = payload?.userId || payload?.leftUserId || payload?.user?._id;
+
+      if (!payloadRoomId || String(payloadRoomId) !== String(activeRoomId)) {
+        return;
+      }
+
+      if (String(leftUserId) === String(getUserId(currentUser))) {
+        return;
+      }
+
+      const leftUserName =
+        payload?.userName ||
+        payload?.name ||
+        `${payload?.user?.name || ""} ${payload?.user?.surname || ""}`.trim();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `system-user-left-${Date.now()}`,
+          isSystemMessage: true,
+          content: leftUserName
+            ? `${leftUserName} gruptan ayrıldı`
+            : "Kullanıcı gruptan ayrıldı",
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    });
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [token, activeRoomId]);
+  }, [token, activeRoomId, currentUser]);
 
   const handleSendMessage = async ({ content, file }) => {
     if (!socketRef.current || !activeRoomId) return;
@@ -304,6 +336,59 @@ export default function BiChatDashboard() {
   };
 
   const handleTyping = () => {};
+
+  const handleClearChat = async (roomId) => {
+    // console.log("Sohbet temizleme isteği gönderiliyor... Room ID:", roomId);
+    if (!roomId) return;
+
+    try {
+      await axios({
+        method: "PATCH",
+        url: `/api/chat/rooms/${roomId}/clear`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMessages([]);
+      setRooms((prev) =>
+        prev.map((room) =>
+          getRoomId(room) === roomId
+            ? {
+                ...room,
+                lastMessage: "Henüz mesaj yok",
+              }
+            : room
+        )
+      );
+      alertify.success("Sohbet temizlendi");
+    } catch (error) {
+      console.error(error);
+      alertify.error(error.response?.data?.message || "Sohbet temizlenemedi");
+    }
+  };
+
+  const handleLeaveGroup = async (roomId) => {
+    if (!roomId) return;
+
+    try {
+      await axios({
+        method: "PATCH",
+        url: `/api/chat/rooms/${roomId}/leave`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setRooms((prev) => prev.filter((room) => getRoomId(room) !== roomId));
+
+      if (String(activeRoomId) === String(roomId)) {
+        setActiveRoomId(null);
+        setMessages([]);
+      }
+
+      alertify.success("Gruptan ayrıldınız");
+    } catch (error) {
+      console.error(error);
+      alertify.error(error.response?.data?.message || "Gruptan ayrılamadınız");
+    }
+  };
 
   const handleDeleteForMe = async (messageId) => {
     if (!messageId) return;
@@ -467,6 +552,7 @@ export default function BiChatDashboard() {
                     typingText={typingText}
                     onTyping={handleTyping}
                     onSend={handleSendMessage}
+                    onClearChat={handleClearChat}
                     onDeleteForMe={handleDeleteForMe}
                     onDeleteForEveryone={handleDeleteForEveryone}
                   />
@@ -495,6 +581,8 @@ export default function BiChatDashboard() {
       <CreateDirectMessageModal
         isOpen={isDirectModalOpen}
         toggle={() => setIsDirectModalOpen((prev) => !prev)}
+                      onClearChat={handleClearChat}
+                      onLeaveGroup={handleLeaveGroup}
         users={users.filter((user) => String(user?._id) !== String(currentUser?._id))}
         creating={creatingDirect}
         onCreate={handleCreateDirectRoom}

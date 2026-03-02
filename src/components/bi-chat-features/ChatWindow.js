@@ -5,10 +5,14 @@ import {
   Card,
   CardBody,
   CardHeader,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
   Input,
   InputGroup,
   InputGroupText,
   Spinner,
+  UncontrolledDropdown,
 } from "reactstrap";
 import MessageItem from "./MessageItem";
 
@@ -19,6 +23,9 @@ const roomName = (room) => room?.name || room?.displayName || room?.title || "So
 const roomStatus = (room) => room?.status || room?.presence || "Aktif";
 
 const isGroupRoom = (room) => (room?.type || "").toUpperCase() === "GROUP";
+
+const messageId = (message, index) =>
+  message?._id || message?.id || message?.messageId || message?.messageID || `msg-${index}`;
 
 const getParticipantName = (participant) => {
   const fullName = `${participant?.name || ""} ${participant?.surname || ""}`.trim();
@@ -35,6 +42,8 @@ export default function ChatWindow({
   onSend,
   onDeleteForMe,
   onDeleteForEveryone,
+  onClearChat,
+  onLeaveGroup,
 }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
@@ -78,6 +87,23 @@ export default function ChatWindow({
     clearInput();
   };
 
+  const handleClearChatClick = async () => {
+    // console.log("Sohbet temizleme isteği gönderiliyor...");
+    // console.log("Room ID:", roomId(room));
+    // console.log("onClearChat fonksiyonu:", onClearChat);
+    if (!roomId(room) || !onClearChat) return;
+    const confirmed = window.confirm("Bu sohbetin mesajları temizlensin mi?");
+    if (!confirmed) return;
+    await onClearChat(roomId(room));
+  };
+
+  const handleLeaveGroupClick = async () => {
+    if (!roomId(room) || !onLeaveGroup || !isGroupRoom(room)) return;
+    const confirmed = window.confirm("Bu gruptan ayrılmak istediğinize emin misiniz?");
+    if (!confirmed) return;
+    await onLeaveGroup(roomId(room));
+  };
+
   return (
     <Card className="shadow-sm border-0">
       <CardHeader className="bg-white border-0 d-flex justify-content-between align-items-center">
@@ -99,6 +125,24 @@ export default function ChatWindow({
             {typingText}
           </Badge>
         )}
+
+        <UncontrolledDropdown>
+          <DropdownToggle color="link" className="text-muted p-1 shadow-none">
+            <i className="fas fa-ellipsis-v"></i>
+          </DropdownToggle>
+          <DropdownMenu end>
+            <DropdownItem onClick={handleClearChatClick}>
+              <i className="fas fa-broom me-2"></i>
+              Sohbeti Temizle
+            </DropdownItem>
+            {isGroupRoom(room) && (
+              <DropdownItem onClick={handleLeaveGroupClick} className="text-danger">
+                <i className="fas fa-sign-out-alt me-2"></i>
+                Gruptan Ayrıl
+              </DropdownItem>
+            )}
+          </DropdownMenu>
+        </UncontrolledDropdown>
       </CardHeader>
 
       <CardBody className="d-flex flex-column" style={{ minHeight: "68vh" }}>
@@ -110,15 +154,29 @@ export default function ChatWindow({
           ) : sortedMessages.length === 0 ? (
             <div className="text-center text-muted py-5">Henüz mesaj yok.</div>
           ) : (
-            sortedMessages.map((message, index) => (
-              <MessageItem
-                key={message._id || message.id || index}
-                message={message}
-                currentUser={currentUser}
-                onDeleteForMe={onDeleteForMe}
-                onDeleteForEveryone={onDeleteForEveryone}
-              />
-            ))
+            sortedMessages.map((message, index) => {
+              if (message?.isSystemMessage) {
+                return (
+                  <div
+                    key={messageId(message, index)}
+                    className="text-center text-muted small my-2"
+                    style={{ opacity: 0.8 }}
+                  >
+                    {message?.content || "Kullanıcı gruptan ayrıldı"}
+                  </div>
+                );
+              }
+
+              return (
+                <MessageItem
+                  key={messageId(message, index)}
+                  message={message}
+                  currentUser={currentUser}
+                  onDeleteForMe={onDeleteForMe}
+                  onDeleteForEveryone={onDeleteForEveryone}
+                />
+              );
+            })
           )}
         </div>
 
