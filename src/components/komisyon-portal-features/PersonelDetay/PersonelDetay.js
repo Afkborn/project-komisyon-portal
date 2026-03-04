@@ -355,6 +355,12 @@ export default function PersonelDetay({
     axios(configuration)
       .then((response) => {
         setLoadSpinner(false);
+        if (response?.data?.person) {
+          setPersonel(response.data.person);
+          setUpdatedPersonel(updatedPersonelAttributes(response.data.person));
+        } else {
+          refreshPersonel(false);
+        }
         alertify.success("Personel bilgisi güncellendi.");
       })
       .catch((error) => {
@@ -789,7 +795,6 @@ export default function PersonelDetay({
                             : "Aktif"
                           : "Pasif"}
                       </Badge>
-
                       <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
                         <DropdownToggle
                           color="danger"
@@ -826,6 +831,14 @@ export default function PersonelDetay({
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
+                      <Button
+                        onClick={(e) => handleUpdate(e)}
+                        color="success"
+                        className="ms-2"
+                      >
+                        <i className="fas fa-save me-2"></i>
+                        Değişiklikleri Kaydet
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1660,7 +1673,7 @@ export default function PersonelDetay({
                           <hr className="my-4" />
 
                           {/* Değişiklikleri Kaydet Butonu */}
-                          <div className="d-flex justify-content-end">
+                          {/* <div className="d-flex justify-content-end">
                             <Button
                               onClick={(e) => handleUpdate(e)}
                               color="success"
@@ -1669,7 +1682,7 @@ export default function PersonelDetay({
                               <i className="fas fa-save me-2"></i>
                               Değişiklikleri Kaydet
                             </Button>
-                          </div>
+                          </div> */}
                         </CardBody>
                       </Card>
                     </TabPane>

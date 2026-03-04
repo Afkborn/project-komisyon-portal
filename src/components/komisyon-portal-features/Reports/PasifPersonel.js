@@ -32,6 +32,11 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
           : item.deactivationReason,
     },
     {
+      key: "gorevYeri",
+      header: "Görev Yeri",
+      render: (item) => item.birimID && item.birimID.name,
+    },
+    {
       key: "aciklama",
       header: "Açıklama",
       render: (item) =>
@@ -73,7 +78,7 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
       })
       .catch((error) => {
         alertify.error(
-          "Devren giden personel listesi getirilirken bir hata oluştu."
+          "Devren giden personel listesi getirilirken bir hata oluştu.",
         );
         setRaporGetiriliyorMu(false);
       });
@@ -85,7 +90,7 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
       "pasifPersonelTable",
       "Devren Giden Personel Listesi",
       "detayTD",
-      true
+      true,
     );
   };
 
