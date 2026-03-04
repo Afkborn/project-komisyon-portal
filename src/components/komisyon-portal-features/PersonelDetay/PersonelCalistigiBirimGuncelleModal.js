@@ -523,7 +523,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
     if (type === "ikinciBirim") {
       return (
-        personel.kind === "yaziislerimudürü" || personel.kind === "mubasir"
+        personel.kind === "yaziislerimudürü" ||
+        personel.kind === "mubasir" ||
+        personel.kind === "zabitkatibi"
       );
     } else if (type === "geciciBirim") {
       return personel.isTemporary;

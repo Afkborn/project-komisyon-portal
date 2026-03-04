@@ -1417,7 +1417,8 @@ export default function PersonelDetay({
 
                                   {(personel.title.kind ===
                                     "yaziislerimudürü" ||
-                                    personel.title.kind === "mubasir") && (
+                                    personel.title.kind === "mubasir" ||
+                                    personel.title.kind === "zabitkatibi") && (
                                     <Col md={6}>
                                       <FormGroup>
                                         <Label className="fw-bold">
