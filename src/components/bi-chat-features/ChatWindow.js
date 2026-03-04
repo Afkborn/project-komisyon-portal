@@ -171,6 +171,7 @@ export default function ChatWindow({
                 <MessageItem
                   key={messageId(message, index)}
                   message={message}
+                  room={room}
                   currentUser={currentUser}
                   onDeleteForMe={onDeleteForMe}
                   onDeleteForEveryone={onDeleteForEveryone}

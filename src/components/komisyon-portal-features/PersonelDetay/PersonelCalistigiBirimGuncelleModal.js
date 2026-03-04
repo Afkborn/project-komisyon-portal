@@ -44,13 +44,19 @@ export default function PersonelCalistigiBirimGuncelleModal({
   const [kurumDisiBirimID, setKurumDisiBirimID] = useState(null);
   const [selectValue, setSelectValue] = useState("");
   const [endDate, setEndDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [detail, setDetail] = useState("");
   const [birimler, setBirimler] = useState([]);
   const [tumBirimler, setTumBirimler] = useState([]);
   const [errors, setErrors] = useState({});
-  
+  const [kurumIciNaklenAtamaMi, setKurumIciNaklenAtamaMi] = useState(false);
+  const [kurumIciNaklenAtamaAciklama, setKurumIciNaklenAtamaAciklama] =
+    useState("");
+  const [kurumIciNaklenAtamaTarihi, setKurumIciNaklenAtamaTarihi] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+
   // Kurum dışı birim arama için state'ler
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -74,7 +80,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
         setBirimSira("birinciBirim");
       }
     }
-     // eslint-disable-next-line 
+    // eslint-disable-next-line
   }, [modal, selectedKurum]);
 
   // Form sıfırlama fonksiyonu
@@ -88,6 +94,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
     setShowKurumDisiBirim(false);
     setKurumDisiBirimID(null);
     setDetail("");
+    setKurumIciNaklenAtamaMi(false);
+    setKurumIciNaklenAtamaAciklama("");
+    setKurumIciNaklenAtamaTarihi(new Date().toISOString().split("T")[0]);
     setEndDate(new Date().toISOString().split("T")[0]);
     setErrors({});
     setLoading(false);
@@ -123,6 +132,24 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
       if (showKurumDisiBirim && !kurumDisiBirimID) {
         newErrors.kurumDisiBirimID = "Kurum dışı birim ID gereklidir";
+      }
+
+      if (
+        showKurumDisiBirim &&
+        kurumIciNaklenAtamaMi &&
+        !kurumIciNaklenAtamaAciklama.trim()
+      ) {
+        newErrors.kurumIciNaklenAtamaAciklama =
+          "Kurum içi naklen atama açıklaması gereklidir";
+      }
+
+      if (
+        showKurumDisiBirim &&
+        kurumIciNaklenAtamaMi &&
+        !kurumIciNaklenAtamaTarihi
+      ) {
+        newErrors.kurumIciNaklenAtamaTarihi =
+          "Kurum içi naklen atama tarihi gereklidir";
       }
 
       // Aynı birime güncelleme kontrolü
@@ -166,6 +193,9 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
     if (event.target.value === "Seçiniz") {
       setBirimler([]);
+      setKurumIciNaklenAtamaMi(false);
+      setKurumIciNaklenAtamaAciklama("");
+      setKurumIciNaklenAtamaTarihi(new Date().toISOString().split("T")[0]);
       setUpdateButtonDisabled(true);
       return;
     }
@@ -173,18 +203,24 @@ export default function PersonelCalistigiBirimGuncelleModal({
     if (event.target.value === "Kurum Dışı") {
       setBirimler([{ _id: "kurumdisi", name: "Kurum Dışı" }]);
       setShowKurumDisiBirim(true);
+      setKurumIciNaklenAtamaMi(false);
+      setKurumIciNaklenAtamaAciklama("");
+      setKurumIciNaklenAtamaTarihi(new Date().toISOString().split("T")[0]);
       return;
     }
 
     setShowKurumDisiBirim(false);
+    setKurumIciNaklenAtamaMi(false);
+    setKurumIciNaklenAtamaAciklama("");
+    setKurumIciNaklenAtamaTarihi(new Date().toISOString().split("T")[0]);
 
     // Seçilen tipe göre birimleri filtrele
     let typeId = selectedKurum.types.find(
-      (type) => type.name === event.target.value
+      (type) => type.name === event.target.value,
     ).id;
 
     const filteredBirimler = tumBirimler.filter(
-      (birim) => birim.unitType.institutionTypeId === typeId
+      (birim) => birim.unitType.institutionTypeId === typeId,
     );
 
     setBirimler(filteredBirimler);
@@ -297,7 +333,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
 
     // Seçilen birimi bul
     const selectedBirim = birimler.find(
-      (birim) => birim.name === event.target.value
+      (birim) => birim.name === event.target.value,
     );
 
     setNewCalistigiBirim(selectedBirim);
@@ -310,6 +346,27 @@ export default function PersonelCalistigiBirimGuncelleModal({
   }
 
   // Güncelleme işlemi
+  const updateKurumIciNaklenAtamaBilgisi = () => {
+    const configuration = {
+      method: "PUT",
+      url: `/api/persons/${personel._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        kurumIciNaklenAtamaVarmi: kurumIciNaklenAtamaMi,
+        kurumIciNaklenAtamaAciklama: kurumIciNaklenAtamaMi
+          ? kurumIciNaklenAtamaAciklama.trim()
+          : null,
+        kurumIciNaklenAtamaTarihi: kurumIciNaklenAtamaMi
+          ? kurumIciNaklenAtamaTarihi
+          : null,
+      },
+    };
+
+    return axios(configuration);
+  };
+
   const handleUpdate = () => {
     // Form validasyonu
     if (!validateForm()) {
@@ -338,7 +395,18 @@ export default function PersonelCalistigiBirimGuncelleModal({
       };
 
       axios(configuration)
-        .then((result) => {
+        .then(async () => {
+          if (showKurumDisiBirim) {
+            try {
+              await updateKurumIciNaklenAtamaBilgisi();
+            } catch (naklenAtamaError) {
+              console.log(naklenAtamaError);
+              alertify.warning(
+                "Birim güncellendi, naklen atama bilgisi kaydedilemedi",
+              );
+            }
+          }
+
           alertify.success("Çalıştığı birim başarıyla güncellendi");
           refreshPersonel();
           setLoading(false);
@@ -377,7 +445,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
           alertify.success(
             `${
               birimSira === "ikinciBirim" ? "İkinci" : "Geçici"
-            } birim başarıyla güncellendi`
+            } birim başarıyla güncellendi`,
           );
           setLoading(false);
           toggle();
@@ -448,8 +516,6 @@ export default function PersonelCalistigiBirimGuncelleModal({
         setLoading(false);
       });
   };
-
-
 
   // Personelin belirli bir birim tipine sahip olup olmadığını kontrol et
   const hasPersonelBirimType = (type) => {
@@ -551,7 +617,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                     "Ana Birim",
                     "primary",
                     true,
-                    "Mevcut"
+                    "Mevcut",
                   )}
                 </NavLink>
               </NavItem>
@@ -569,7 +635,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                       "İkinci Birim",
                       "info",
                       personel.ikinciBirimID,
-                      "Mevcut"
+                      "Mevcut",
                     )}
                   </NavLink>
                 </NavItem>
@@ -588,7 +654,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                       "Geçici Birim",
                       "warning",
                       personel.temporaryBirimID,
-                      "Mevcut"
+                      "Mevcut",
                     )}
                   </NavLink>
                 </NavItem>
@@ -622,7 +688,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                               </Label>
                               <p className="form-control-plaintext fw-bold">
                                 {new Date(
-                                  personel.birimeBaslamaTarihi
+                                  personel.birimeBaslamaTarihi,
                                 ).toLocaleDateString()}
                               </p>
                             </FormGroup>
@@ -786,10 +852,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                               {birim.institutionID?.name ||
                                                 "Kurum bilgisi yok"}
                                               {birim.unitType?.name && (
-                                                <>
-                                                  {" "}
-                                                  • {birim.unitType.name}
-                                                </>
+                                                <> • {birim.unitType.name}</>
                                               )}
                                             </small>
                                           </div>
@@ -812,6 +875,114 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                   </div>
                                 )}
                               </div>
+                            )}
+                          </CardBody>
+                        </Card>
+
+                        <Card className="border-0 bg-light mb-3">
+                          <CardBody>
+                            <FormGroup check className="mb-2">
+                              <Input
+                                id="kurumIciNaklenAtamaMi"
+                                name="kurumIciNaklenAtamaMi"
+                                type="checkbox"
+                                checked={kurumIciNaklenAtamaMi}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setKurumIciNaklenAtamaMi(checked);
+                                  if (!checked) {
+                                    setKurumIciNaklenAtamaAciklama("");
+                                    setKurumIciNaklenAtamaTarihi(
+                                      new Date().toISOString().split("T")[0],
+                                    );
+                                    setErrors((prevErrors) => ({
+                                      ...prevErrors,
+                                      kurumIciNaklenAtamaAciklama: undefined,
+                                      kurumIciNaklenAtamaTarihi: undefined,
+                                    }));
+                                  }
+                                }}
+                              />
+                              <Label
+                                check
+                                for="kurumIciNaklenAtamaMi"
+                                className="fw-bold"
+                              >
+                                Kurum İçi Naklen Atama Mı?
+                              </Label>
+                            </FormGroup>
+
+                            {kurumIciNaklenAtamaMi && (
+                              <FormGroup className="mb-0 mt-3">
+                                <Label
+                                  for="kurumIciNaklenAtamaTarihi"
+                                  className="fw-bold"
+                                >
+                                  Naklen Atama Tarihi
+                                  <Badge color="danger" pill className="ms-2">
+                                    Zorunlu
+                                  </Badge>
+                                </Label>
+                                <InputGroup className="mb-3">
+                                  <InputGroupText>
+                                    <i className="fas fa-calendar-alt"></i>
+                                  </InputGroupText>
+                                  <Input
+                                    id="kurumIciNaklenAtamaTarihi"
+                                    name="kurumIciNaklenAtamaTarihi"
+                                    type="date"
+                                    value={kurumIciNaklenAtamaTarihi}
+                                    onChange={(e) =>
+                                      setKurumIciNaklenAtamaTarihi(
+                                        e.target.value,
+                                      )
+                                    }
+                                    className={
+                                      errors.kurumIciNaklenAtamaTarihi
+                                        ? "is-invalid"
+                                        : ""
+                                    }
+                                  />
+                                </InputGroup>
+                                {errors.kurumIciNaklenAtamaTarihi && (
+                                  <div className="invalid-feedback d-block mb-2">
+                                    {errors.kurumIciNaklenAtamaTarihi}
+                                  </div>
+                                )}
+
+                                <Label
+                                  for="kurumIciNaklenAtamaAciklama"
+                                  className="fw-bold"
+                                >
+                                  Naklen Atama Açıklaması
+                                  <Badge color="danger" pill className="ms-2">
+                                    Zorunlu
+                                  </Badge>
+                                </Label>
+                                <Input
+                                  id="kurumIciNaklenAtamaAciklama"
+                                  name="kurumIciNaklenAtamaAciklama"
+                                  type="textarea"
+                                  rows="3"
+                                  placeholder="Naklen atama ile ilgili açıklama girin"
+                                  value={kurumIciNaklenAtamaAciklama}
+                                  onChange={(e) =>
+                                    setKurumIciNaklenAtamaAciklama(
+                                      e.target.value,
+                                    )
+                                  }
+                                  className={
+                                    errors.kurumIciNaklenAtamaAciklama
+                                      ? "is-invalid"
+                                      : ""
+                                  }
+                                />
+                                {errors.kurumIciNaklenAtamaAciklama && (
+                                  <div className="invalid-feedback d-block">
+                                    {errors.kurumIciNaklenAtamaAciklama}
+                                  </div>
+                                )}
+                              </FormGroup>
                             )}
                           </CardBody>
                         </Card>
@@ -992,7 +1163,10 @@ export default function PersonelCalistigiBirimGuncelleModal({
                         {showKurumDisiBirim && (
                           <>
                             <FormGroup className="mb-3">
-                              <Label for="kurumDisiBirimID2" className="fw-bold">
+                              <Label
+                                for="kurumDisiBirimID2"
+                                className="fw-bold"
+                              >
                                 Kurum Dışı Birim ID
                                 <Badge color="danger" pill className="ms-2">
                                   Zorunlu
@@ -1029,8 +1203,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                   <i className="fas fa-info-circle text-primary me-2"></i>
                                   <small className="text-muted">
                                     Kurum dışı birimin ID bilgisini
-                                    bilmiyorsanız buradan arama
-                                    yapabilirsiniz.
+                                    bilmiyorsanız buradan arama yapabilirsiniz.
                                   </small>
                                 </div>
                                 <FormGroup className="mb-0">
@@ -1095,10 +1268,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                                     </>
                                                   )}
                                                   {birim.series && (
-                                                    <>
-                                                      {" "}
-                                                      • Seri: {birim.series}
-                                                    </>
+                                                    <> • Seri: {birim.series}</>
                                                   )}
                                                 </small>
                                               </div>
@@ -1261,7 +1431,10 @@ export default function PersonelCalistigiBirimGuncelleModal({
                         {showKurumDisiBirim && (
                           <>
                             <FormGroup className="mb-3">
-                              <Label for="kurumDisiBirimID3" className="fw-bold">
+                              <Label
+                                for="kurumDisiBirimID3"
+                                className="fw-bold"
+                              >
                                 Kurum Dışı Birim ID
                                 <Badge color="danger" pill className="ms-2">
                                   Zorunlu
@@ -1298,8 +1471,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                   <i className="fas fa-info-circle text-primary me-2"></i>
                                   <small className="text-muted">
                                     Kurum dışı birimin ID bilgisini
-                                    bilmiyorsanız buradan arama
-                                    yapabilirsiniz.
+                                    bilmiyorsanız buradan arama yapabilirsiniz.
                                   </small>
                                 </div>
                                 <FormGroup className="mb-0">
@@ -1364,10 +1536,7 @@ export default function PersonelCalistigiBirimGuncelleModal({
                                                     </>
                                                   )}
                                                   {birim.series && (
-                                                    <>
-                                                      {" "}
-                                                      • Seri: {birim.series}
-                                                    </>
+                                                    <> • Seri: {birim.series}</>
                                                   )}
                                                 </small>
                                               </div>

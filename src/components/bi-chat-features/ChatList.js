@@ -22,10 +22,36 @@ const roomName = (room) =>
   room?.name || room?.displayName || room?.title || "İsimsiz Sohbet";
 
 const roomLastMessage = (room) =>
-  room?.lastMessage || room?.lastMessageText || room?.latestMessage?.content || "Henüz mesaj yok";
+  (() => {
+    if (typeof room?.lastMessage === "string" && room.lastMessage.trim()) {
+      return room.lastMessage;
+    }
+
+    if (room?.lastMessage && typeof room.lastMessage === "object") {
+      const objectText =
+        room.lastMessage?.content ||
+        room.lastMessage?.text ||
+        room.lastMessage?.message ||
+        room.lastMessage?.body;
+
+      if (typeof objectText === "string" && objectText.trim()) {
+        return objectText;
+      }
+    }
+
+    const fallback =
+      room?.lastMessageText || room?.latestMessage?.content || room?.latestMessage?.text;
+
+    if (typeof fallback === "string" && fallback.trim()) {
+      return fallback;
+    }
+
+    return "Henüz mesaj yok";
+  })();
 
 export default function ChatList({
   rooms,
+  unreadCounts,
   activeRoomId,
   onSelectRoom,
   onOpenGroupModal,
@@ -73,7 +99,7 @@ export default function ChatList({
             {filteredRooms.map((room) => {
               const id = roomId(room);
               const isActive = id === activeRoomId;
-              const unreadCount = Number(room?.unreadCount || 0);
+              const unreadCount = Number(unreadCounts?.[id] ?? room?.unreadCount ?? 0);
 
               return (
                 <ListGroupItem

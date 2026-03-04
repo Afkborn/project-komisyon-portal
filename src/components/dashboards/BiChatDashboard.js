@@ -35,6 +35,35 @@ const getMessageRoomId = (message) =>
 const getMessageId = (message) =>
   message?._id || message?.id || message?.messageId || message?.messageID;
 
+const getRoomLastMessageText = (room) => {
+  const lastMessageCandidate = room?.lastMessage;
+
+  if (typeof lastMessageCandidate === "string" && lastMessageCandidate.trim()) {
+    return lastMessageCandidate;
+  }
+
+  if (lastMessageCandidate && typeof lastMessageCandidate === "object") {
+    const nestedText =
+      lastMessageCandidate?.content ||
+      lastMessageCandidate?.text ||
+      lastMessageCandidate?.message ||
+      lastMessageCandidate?.body;
+
+    if (typeof nestedText === "string" && nestedText.trim()) {
+      return nestedText;
+    }
+  }
+
+  const fallbackText =
+    room?.lastMessageText || room?.latestMessage?.content || room?.latestMessage?.text;
+
+  if (typeof fallbackText === "string" && fallbackText.trim()) {
+    return fallbackText;
+  }
+
+  return "Henüz mesaj yok";
+};
+
 const getDisplayNameFromRoom = (room, currentUserId) => {
   const participants = Array.isArray(room?.participants) ? room.participants : [];
   const roomType = (room?.type || "").toUpperCase();
@@ -70,8 +99,39 @@ export default function BiChatDashboard() {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isDirectModalOpen, setIsDirectModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   const socketRef = useRef(null);
+
+  const normalizeUnreadCounts = (rawData) => {
+    if (!rawData) return {};
+
+    if (rawData.unreadCounts && typeof rawData.unreadCounts === "object") {
+      return rawData.unreadCounts;
+    }
+
+    if (Array.isArray(rawData.unreadCounts)) {
+      return rawData.unreadCounts.reduce((acc, item) => {
+        const id = item?.roomId || item?.roomID || item?.room || item?.chatRoomId;
+        if (id) {
+          acc[id] = Number(item?.count || item?.unreadCount || 0);
+        }
+        return acc;
+      }, {});
+    }
+
+    if (Array.isArray(rawData.rooms)) {
+      return rawData.rooms.reduce((acc, item) => {
+        const id = getRoomId(item);
+        if (id) {
+          acc[id] = Number(item?.count || item?.unreadCount || 0);
+        }
+        return acc;
+      }, {});
+    }
+
+    return {};
+  };
 
   const activeRoom = useMemo(
     () => rooms.find((room) => getRoomId(room) === activeRoomId) || null,
@@ -81,6 +141,26 @@ export default function BiChatDashboard() {
   const typingText = "";
 
   const getUserId = (user) => user?._id || user?.id || user?.userId || user?.person?._id;
+
+  const emitMarkAsRead = useCallback((roomId) => {
+    if (!roomId || !socketRef.current) return;
+    socketRef.current.emit("mark_as_read", { roomId });
+  }, []);
+
+  const fetchUnreadCounts = useCallback(async () => {
+    try {
+      const res = await axios({
+        method: "GET",
+        url: "/api/chat/unread-counts",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUnreadCounts(normalizeUnreadCounts(res.data));
+    } catch {
+      setUnreadCounts({});
+    }
+  }, [token]);
+
   const fetchUsers = useCallback(async () => {
     try {
       const res = await axios({
@@ -105,7 +185,7 @@ export default function BiChatDashboard() {
     const mappedRooms = roomList.map((room) => ({
       ...room,
       displayName: getDisplayNameFromRoom(room, currentUser?._id),
-      lastMessage: room?.lastMessage || room?.lastMessageText || "Henüz mesaj yok",
+      lastMessage: getRoomLastMessageText(room),
       unreadCount: Number(room?.unreadCount || 0),
     }));
 
@@ -180,6 +260,7 @@ export default function BiChatDashboard() {
           axios(GET_USER_DETAILS(token)),
           fetchRooms(),
           fetchUsers(),
+          fetchUnreadCounts(),
         ]);
 
         setCurrentUser(userRes.data?.user || null);
@@ -192,21 +273,21 @@ export default function BiChatDashboard() {
     };
 
     initialize();
-  }, [token, fetchRooms, fetchUsers]);
+  }, [token, fetchRooms, fetchUsers, fetchUnreadCounts]);
 
   useEffect(() => {
     fetchMessages(activeRoomId);
 
     if (activeRoomId) {
+      emitMarkAsRead(activeRoomId);
+      setUnreadCounts((prev) => ({ ...prev, [activeRoomId]: 0 }));
       setRooms((prev) =>
         prev.map((room) =>
-          getRoomId(room) === activeRoomId
-            ? { ...room, unreadCount: 0 }
-            : room
+          getRoomId(room) === activeRoomId ? { ...room, unreadCount: 0 } : room
         )
       );
     }
-  }, [activeRoomId, fetchMessages]);
+  }, [activeRoomId, fetchMessages, emitMarkAsRead]);
 
   useEffect(() => {
     if (!token) return undefined;
@@ -227,7 +308,16 @@ export default function BiChatDashboard() {
 
       if (incomingRoomId && incomingRoomId === activeRoomId) {
         setMessages((prev) => [...prev, message]);
+        emitMarkAsRead(incomingRoomId);
+        setUnreadCounts((prev) => ({ ...prev, [incomingRoomId]: 0 }));
         return;
+      }
+
+      if (incomingRoomId) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [incomingRoomId]: Number(prev[incomingRoomId] || 0) + 1,
+        }));
       }
 
       setRooms((prev) =>
@@ -245,6 +335,54 @@ export default function BiChatDashboard() {
               room.lastMessage,
           };
         })
+      );
+    });
+
+    socket.on("messages_read", (payload) => {
+      const payloadRoomId =
+        payload?.roomId || payload?.roomID || payload?.room || payload?.chatRoomId;
+      if (!payloadRoomId || String(payloadRoomId) !== String(activeRoomId)) {
+        return;
+      }
+
+      const messageIds = Array.isArray(payload?.messageIds)
+        ? payload.messageIds
+        : payload?.messageId || payload?.messageID
+          ? [payload?.messageId || payload?.messageID]
+          : [];
+      const readerUserId = payload?.userId || payload?.readerId || payload?.readByUserId;
+
+      setMessages((prev) =>
+        prev.map((message) => {
+          const currentMessageId = getMessageId(message);
+          const shouldUpdate =
+            messageIds.length === 0 ||
+            messageIds.some((id) => String(id) === String(currentMessageId));
+
+          if (!shouldUpdate) return message;
+
+          if (Array.isArray(payload?.readBy)) {
+            return {
+              ...message,
+              readBy: payload.readBy,
+            };
+          }
+
+          if (!readerUserId) return message;
+
+          const currentReadBy = Array.isArray(message?.readBy) ? message.readBy : [];
+          const alreadyRead = currentReadBy.some(
+            (entry) =>
+              String(entry?._id || entry?.id || entry) === String(readerUserId),
+          );
+
+          if (alreadyRead) return message;
+
+          return {
+            ...message,
+            readBy: [...currentReadBy, readerUserId],
+          };
+        }),
       );
     });
 
@@ -304,7 +442,7 @@ export default function BiChatDashboard() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [token, activeRoomId, currentUser]);
+  }, [token, activeRoomId, currentUser, emitMarkAsRead]);
 
   const handleSendMessage = async ({ content, file }) => {
     if (!socketRef.current || !activeRoomId) return;
@@ -336,6 +474,15 @@ export default function BiChatDashboard() {
   };
 
   const handleTyping = () => {};
+
+  const handleSelectRoom = (roomId) => {
+    setActiveRoomId(roomId);
+
+    if (!roomId) return;
+
+    emitMarkAsRead(roomId);
+    setUnreadCounts((prev) => ({ ...prev, [roomId]: 0 }));
+  };
 
   const handleClearChat = async (roomId) => {
     // console.log("Sohbet temizleme isteği gönderiliyor... Room ID:", roomId);
@@ -529,8 +676,9 @@ export default function BiChatDashboard() {
             <Col md={4}>
               <ChatList
                 rooms={rooms}
+                unreadCounts={unreadCounts}
                 activeRoomId={activeRoomId}
-                onSelectRoom={setActiveRoomId}
+                onSelectRoom={handleSelectRoom}
                 onOpenGroupModal={() => setIsGroupModalOpen(true)}
                 onNewMessage={() => setIsDirectModalOpen(true)}
               />
@@ -553,6 +701,7 @@ export default function BiChatDashboard() {
                     onTyping={handleTyping}
                     onSend={handleSendMessage}
                     onClearChat={handleClearChat}
+                    onLeaveGroup={handleLeaveGroup}
                     onDeleteForMe={handleDeleteForMe}
                     onDeleteForEveryone={handleDeleteForEveryone}
                   />
@@ -581,8 +730,6 @@ export default function BiChatDashboard() {
       <CreateDirectMessageModal
         isOpen={isDirectModalOpen}
         toggle={() => setIsDirectModalOpen((prev) => !prev)}
-                      onClearChat={handleClearChat}
-                      onLeaveGroup={handleLeaveGroup}
         users={users.filter((user) => String(user?._id) !== String(currentUser?._id))}
         creating={creatingDirect}
         onCreate={handleCreateDirectRoom}

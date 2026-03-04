@@ -26,20 +26,30 @@ export default function PasifPersonel({ token, showPersonelDetay }) {
     {
       key: "gerekce",
       header: "Gerekçe",
-      render: (item) => item.deactivationReason,
+      render: (item) =>
+        item.kurumIciNaklenAtamaVarmi === true
+          ? "Kurum İçi Naklen Atama"
+          : item.deactivationReason,
     },
     {
       key: "aciklama",
       header: "Açıklama",
-      render: (item) => item.deactivationComment,
+      render: (item) =>
+        item.kurumIciNaklenAtamaVarmi === true
+          ? item.kurumIciNaklenAtamaAciklama || "-"
+          : item.deactivationComment,
     },
     {
       key: "tarih",
       header: "Tarih",
-      render: (item) =>
-        `${renderDate_GGAAYYYY(item.deactivationDate)} (${calculateGorevSuresi(
-          item.deactivationDate
-        )})`,
+      render: (item) => {
+        const tarih =
+          item.kurumIciNaklenAtamaVarmi === true
+            ? item.kurumIciNaklenAtamaTarihi
+            : item.deactivationDate;
+
+        return `${renderDate_GGAAYYYY(tarih)} (${calculateGorevSuresi(tarih)})`;
+      },
     },
   ];
 

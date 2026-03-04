@@ -42,6 +42,7 @@ const messageId = (message) =>
 
 export default function MessageItem({
   message,
+  room,
   currentUser,
   onDeleteForMe,
   onDeleteForEveryone,
@@ -54,6 +55,12 @@ export default function MessageItem({
   const currentMessageId = messageId(message);
   const bubbleClass = isMine ? "bg-primary text-white" : "bg-white text-dark border";
   const attachmentClass = isMine ? "text-light" : "text-primary";
+  const readBy = Array.isArray(message?.readBy) ? message.readBy : [];
+  const roomParticipants = Array.isArray(room?.participants) ? room.participants : [];
+  const isGroupRoom = (room?.type || room?.roomType || "").toString().toUpperCase() === "GROUP";
+  const readByCount = readBy.length;
+  const showReadText = isMine && isGroupRoom && readByCount > 0;
+  const isRead = isMine && readByCount > 0;
 
   const handleDeleteForMeClick = async () => {
     if (!currentMessageId || !onDeleteForMe || busyAction) return;
@@ -121,15 +128,32 @@ export default function MessageItem({
             </>
           )}
 
-          <div
-            className="text-end mt-1"
-            style={{
-              fontSize: "0.72rem",
-              opacity: 0.75,
-            }}
-          >
-            {new Date(createdAt).toLocaleString("tr-TR")}
+          <div className="d-flex justify-content-end align-items-center mt-1 gap-2">
+            {isMine && !deletedForAll && (
+              <span
+                className={isRead ? "text-info" : "text-secondary"}
+                title={isRead ? "Okundu" : "İletildi"}
+                style={{ fontSize: "0.8rem", lineHeight: 1 }}
+              >
+                {isRead ? "✓✓" : "✓"}
+              </span>
+            )}
+
+            <span
+              style={{
+                fontSize: "0.72rem",
+                opacity: 0.75,
+              }}
+            >
+              {new Date(createdAt).toLocaleString("tr-TR")}
+            </span>
           </div>
+
+          {showReadText && (
+            <div className="text-end" style={{ fontSize: "0.68rem", opacity: 0.75 }}>
+              {`${readByCount}/${Math.max(roomParticipants.length - 1, 1)} kişi okudu`}
+            </div>
+          )}
         </div>
 
         <UncontrolledDropdown>
