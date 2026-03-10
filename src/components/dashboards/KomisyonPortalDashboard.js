@@ -63,6 +63,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import useAuthCheck from "../utils/AuthCheck";
+import UserAvatar from "../common/UserAvatar";
 
 export default function KomisyonPortalDashboard() {
   const [selectedBirimID, setSelectedBirimID] = useState(null);
@@ -601,10 +602,7 @@ export default function KomisyonPortalDashboard() {
         {user && (
           <div className="user-info px-3 py-3 border-bottom">
             <div className="d-flex align-items-center">
-              <div className="user-avatar bg-danger text-white rounded-circle me-2">
-                {user.name?.charAt(0)}
-                {user.surname?.charAt(0)}
-              </div>
+              <UserAvatar user={user} className="user-avatar me-2" size={36} />
               <div className="user-details flex-grow-1">
                 <div className="user-name fw-bold">
                   {user.name} {user.surname}

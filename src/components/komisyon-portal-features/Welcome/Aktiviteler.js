@@ -19,6 +19,7 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
+import UserAvatar from "../../common/UserAvatar";
 
 export default function Aktiviteler({
   token,
@@ -558,10 +559,11 @@ export default function Aktiviteler({
                     </td>
                     <td>
                       <div className="d-flex align-items-center">
-                        <div className="avatar-circle me-2">
-                          {activity.userID && activity.userID.name.charAt(0)}
-                          {activity.userID && activity.userID.surname.charAt(0)}
-                        </div>
+                        <UserAvatar
+                          user={activity.userID}
+                          size={30}
+                          className="me-2"
+                        />
                         <div>
                           {activity.userID && activity.userID.name}{" "}
                           {activity.userID && activity.userID.surname}
@@ -665,19 +667,6 @@ export default function Aktiviteler({
       </Card>
 
       <style jsx>{`
-        .avatar-circle {
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          background-color: #e0e0e0;
-          color: #757575;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: bold;
-        }
-
         .aktiviteler-container {
           animation: fadeIn 0.5s;
         }

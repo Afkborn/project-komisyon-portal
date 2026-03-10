@@ -22,6 +22,7 @@ import {
   renderDate_GGAAYYYY,
   calculateKalanGorevSuresi,
 } from "../../actions/TimeActions";
+import UserAvatar from "../../common/UserAvatar";
 
 // İkonlar için
 import {
@@ -302,11 +303,7 @@ export default function KomisyonPortalWelcome({
                   margin: "0 auto",
                 }}
               >
-                {/* <FaUser size={10} color="#3f51b5" /> */}
-                <span>
-                  {user.name?.charAt(0)}
-                  {user.surname?.charAt(0)}
-                </span>
+                <UserAvatar user={user} size={80} />
               </div>
             </Col>
             <Col md="10">

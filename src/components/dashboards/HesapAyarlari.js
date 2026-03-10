@@ -26,6 +26,8 @@ import axios from "axios";
 import Cookies from "universal-cookie";
 import alertify from "alertifyjs";
 import AYSNavbar from "../root/AYSNavbar";
+import UserAvatar from "../common/UserAvatar";
+import { getUserProfilePictureUrl } from "../common/userAvatarUtils";
 
 export default function HesapAyarlari() {
   const cookies = new Cookies();
@@ -280,38 +282,7 @@ export default function HesapAyarlari() {
 
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
 
-  const getProfilePictureUrl = () => {
-    // Veritabanından gelen ham yolu al
-    const dbPath =
-      userData?.profilePicture ||
-      userData?.profilePictureUrl ||
-      userData?.photoUrl ||
-      userData?.avatarUrl ||
-      userData?.imageUrl ||
-      "";
-
-    if (!dbPath) return "";
-
-    // Eğer yol zaten tam bir URL ise (dışarıdan bir link, Google auth vs.) direkt döndür
-    if (dbPath.startsWith("http")) {
-      return dbPath;
-    }
-
-    // Değilse, başına Backend URL'ini ekle
-    // REACT_APP_BACKEND_URL yoksa varsayılan olarak localhost:8080 kullan
-    const backendUrl =
-      process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
-
-    return `${backendUrl}${dbPath}`;
-  };
-
-  const hasProfilePicture = Boolean(getProfilePictureUrl());
-
-  const getUserInitials = () => {
-    const firstNameInitial = userData?.name?.charAt(0) || "";
-    const lastNameInitial = userData?.surname?.charAt(0) || "";
-    return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
-  };
+  const hasProfilePicture = Boolean(getUserProfilePictureUrl(userData));
 
   const triggerFileInput = () => {
     if (fileInputRef.current && !profilePictureLoading) {
@@ -483,33 +454,7 @@ export default function HesapAyarlari() {
                         <Col md={12}>
                           <div className="d-flex align-items-center mb-3">
                             <div className="me-3 text-center">
-                              <div
-                                className="rounded-circle d-flex justify-content-center align-items-center overflow-hidden"
-                                style={{
-                                  backgroundColor: "#dc3545",
-                                  color: "#fff",
-                                  width: "84px",
-                                  height: "84px",
-                                  fontSize: "24px",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                {hasProfilePicture ? (
-                                  <img
-                                    src={getProfilePictureUrl()}
-                                    alt="Profil"
-                                    style={{
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                ) : (
-                                  getUserInitials() || (
-                                    <i className="fas fa-user"></i>
-                                  )
-                                )}
-                              </div>
+                              <UserAvatar user={userData} size={84} alt="Profil" />
 
                               <div className="d-grid gap-2 mt-2">
                                 <Input
