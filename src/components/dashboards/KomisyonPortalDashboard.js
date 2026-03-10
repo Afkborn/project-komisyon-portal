@@ -38,6 +38,7 @@ import PersonelSayi from "../komisyon-portal-features/Reports/PersonelSayi";
 import TumPersonelTablo from "../komisyon-portal-features/Reports/TumPersonelTablo";
 import PersonelAktar from "../komisyon-portal-features/Aktarim/PersonelAktar";
 import OzellikAktar from "../komisyon-portal-features/Aktarim/OzellikAktar";
+import FotografAktar from "../komisyon-portal-features/Aktarim/FotografAktar";
 import PasifPersonel from "../komisyon-portal-features/Reports/PasifPersonel";
 import GeciciPersonel from "../komisyon-portal-features/Reports/GeciciPersonel";
 import PersonelHareketleri from "../komisyon-portal-features/Reports/PersonelHareketleri";
@@ -499,6 +500,14 @@ export default function KomisyonPortalDashboard() {
       path: "ozellik-aktar",
       icon: "fas fa-cogs",
     },
+    {
+      id: 16,
+      label: "Fotoğraf Aktar",
+      type: "item",
+      visibleRoles: ["admin"],
+      path: "fotograf-aktar",
+      icon: "fas fa-camera",
+    },
   ];
 
   // Render sidebar menu items
@@ -897,6 +906,12 @@ export default function KomisyonPortalDashboard() {
               path="ozellik-aktar"
               element={
                 <OzellikAktar selectedKurum={selectedKurum} token={token} />
+              }
+            />
+            <Route
+              path="fotograf-aktar"
+              element={
+                <FotografAktar selectedKurum={selectedKurum} token={token} />
               }
             />
             <Route
