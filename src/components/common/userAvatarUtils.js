@@ -1,5 +1,6 @@
 export const getUserProfilePictureUrl = (user) => {
   const dbPath =
+    user?.photo ||
     user?.profilePicture ||
     user?.profilePictureUrl ||
     user?.photoUrl ||

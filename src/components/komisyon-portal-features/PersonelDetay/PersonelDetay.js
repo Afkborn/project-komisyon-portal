@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Input,
   Label,
@@ -39,7 +39,6 @@ import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncell
 import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
 import PersonelSilModal from "./PersonelSilModal";
 import PersonelPartTimeModal from "./PersonelPartTimeModal";
-import UserAvatar from "../../common/UserAvatar";
 
 import { getIzinType } from "../../actions/IzinActions";
 import { useParams, useNavigate } from "react-router-dom";
@@ -52,6 +51,7 @@ export default function PersonelDetay({
 }) {
   const { sicil: urlSicil } = useParams();
   const navigate = useNavigate();
+  const personPhotoInputRef = useRef(null);
 
   const [personel, setPersonel] = useState(null);
 
@@ -82,6 +82,7 @@ export default function PersonelDetay({
   const [showIzinEkleModal, setShowIzinEkleModal] = useState(false);
   const [showPartTimeModal, setShowPartTimeModal] = useState(false);
   const [selectedIzin, setSelectedIzin] = useState(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
 
   // Toggle fonksiyonları
   const calistigiKisiGuncelleModalToggle = () =>
@@ -516,6 +517,140 @@ export default function PersonelDetay({
     return "success";
   };
 
+  const getPersonPhotoUrl = (person) => {
+    const dbPath = person?.photo || "";
+
+    if (!dbPath) return "";
+
+    if (
+      dbPath.startsWith("http://") ||
+      dbPath.startsWith("https://") ||
+      dbPath.startsWith("data:") ||
+      dbPath.startsWith("blob:")
+    ) {
+      return dbPath;
+    }
+
+    const backendUrl =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+
+    return `${backendUrl}${dbPath}`;
+  };
+
+  const triggerPersonPhotoInput = () => {
+    if (personPhotoInputRef.current && !photoLoading) {
+      personPhotoInputRef.current.click();
+    }
+  };
+
+  const validatePersonPhoto = (file) => {
+    if (!file) return "Dosya secilemedi";
+
+    const allowedTypes = ["image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Sadece JPEG veya PNG dosyalari yukleyebilirsiniz";
+    }
+
+    if (file.size > maxSize) {
+      return "Dosya boyutu en fazla 5MB olabilir";
+    }
+
+    return null;
+  };
+
+  const handlePersonPhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    const validationError = validatePersonPhoto(file);
+
+    if (validationError) {
+      alertify.error(validationError);
+      event.target.value = "";
+      return;
+    }
+
+    if (!personel?._id) {
+      alertify.error("Personel bilgisi bulunamadi");
+      event.target.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    setPhotoLoading(true);
+
+    try {
+      const response = await axios({
+        method: "PUT",
+        url: `/api/persons/${personel._id}/photo`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: formData,
+      });
+
+      if (response?.data?.person) {
+        setPersonel(response.data.person);
+      } else if (response?.data?.photo) {
+        setPersonel((prevState) => ({
+          ...prevState,
+          photo: response.data.photo,
+        }));
+      } else {
+        const previewUrl = URL.createObjectURL(file);
+        setPersonel((prevState) => ({
+          ...prevState,
+          photo: previewUrl,
+        }));
+      }
+
+      alertify.success("Personel fotografi guncellendi");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Bir hata olustu. Fotograf yuklenemedi.";
+      alertify.error(errorMessage);
+    } finally {
+      setPhotoLoading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handlePersonPhotoDelete = async () => {
+    if (!personel?._id) {
+      alertify.error("Personel bilgisi bulunamadi");
+      return;
+    }
+
+    setPhotoLoading(true);
+
+    try {
+      await axios({
+        method: "DELETE",
+        url: `/api/persons/${personel._id}/photo`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setPersonel((prevState) => ({
+        ...prevState,
+        photo: null,
+      }));
+
+      alertify.success("Personel fotografi kaldirildi");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Bir hata olustu. Fotograf kaldirilamadi.";
+      alertify.error(errorMessage);
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
+
   return (
     <div className="personel-detay-container">
       <Card className="mb-4 shadow-sm">
@@ -755,9 +890,33 @@ export default function PersonelDetay({
             <div className="mt-4">
               <Card className="border-0 shadow-sm mb-4">
                 <CardHeader className="bg-light">
-                  <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                     <div className="d-flex align-items-center">
-                      <UserAvatar user={personel} size={48} className="me-3" />
+                      <div className="me-3">
+                        <div
+                          className="rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                          style={{
+                            width: "84px",
+                            height: "84px",
+                            backgroundColor: "#f1f3f5",
+                            color: "#6c757d",
+                          }}
+                        >
+                          {getPersonPhotoUrl(personel) ? (
+                            <img
+                              src={getPersonPhotoUrl(personel)}
+                              alt="Personel Fotograf"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <i className="fas fa-user fa-2x"></i>
+                          )}
+                        </div>
+                      </div>
                       <div>
                         <h4 className="mb-0">
                           {personel.ad} {personel.soyad}
@@ -768,10 +927,57 @@ export default function PersonelDetay({
                             : "Ünvan Belirtilmemiş"}{" "}
                           | Sicil: {personel.sicil}
                         </div>
+
+                        <Input
+                          type="file"
+                          innerRef={personPhotoInputRef}
+                          accept="image/jpeg,image/png"
+                          className="d-none"
+                          onChange={handlePersonPhotoUpload}
+                        />
+
+                        <div className="d-flex flex-wrap gap-2 mt-2">
+                          <Button
+                            color="primary"
+                            size="sm"
+                            onClick={triggerPersonPhotoInput}
+                            disabled={photoLoading}
+                          >
+                            {photoLoading ? (
+                              <>
+                                <Spinner size="sm" className="me-1" /> Yukleniyor...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fas fa-upload me-1"></i> Fotografi Degistir
+                              </>
+                            )}
+                          </Button>
+
+                          {getPersonPhotoUrl(personel) && (
+                            <Button
+                              color="danger"
+                              size="sm"
+                              outline
+                              onClick={handlePersonPhotoDelete}
+                              disabled={photoLoading}
+                            >
+                              {photoLoading ? (
+                                <>
+                                  <Spinner size="sm" className="me-1" /> Isleniyor...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-trash me-1"></i> Fotografi Kaldir
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="d-flex align-items-center">
+                    <div className="d-flex align-items-center flex-wrap justify-content-lg-end">
                       <Badge
                         color={getStatusColor()}
                         pill
