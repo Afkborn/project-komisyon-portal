@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Form,
@@ -30,7 +30,12 @@ import AYSNavbar from "../root/AYSNavbar";
 export default function HesapAyarlari() {
   const cookies = new Cookies();
   const token = cookies.get("TOKEN");
+  const fileInputRef = useRef(null);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+
   const [loading, setLoading] = useState(true);
+  const [profilePictureLoading, setProfilePictureLoading] = useState(false);
   const [userData, setUserData] = useState(null);
 
   // Form verisi
@@ -275,6 +280,148 @@ export default function HesapAyarlari() {
 
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
 
+  const getProfilePictureUrl = () => {
+    // Veritabanından gelen ham yolu al
+    const dbPath =
+      userData?.profilePicture ||
+      userData?.profilePictureUrl ||
+      userData?.photoUrl ||
+      userData?.avatarUrl ||
+      userData?.imageUrl ||
+      "";
+
+    if (!dbPath) return "";
+
+    // Eğer yol zaten tam bir URL ise (dışarıdan bir link, Google auth vs.) direkt döndür
+    if (dbPath.startsWith("http")) {
+      return dbPath;
+    }
+
+    // Değilse, başına Backend URL'ini ekle
+    // REACT_APP_BACKEND_URL yoksa varsayılan olarak localhost:8080 kullan
+    const backendUrl =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+
+    return `${backendUrl}${dbPath}`;
+  };
+
+  const hasProfilePicture = Boolean(getProfilePictureUrl());
+
+  const getUserInitials = () => {
+    const firstNameInitial = userData?.name?.charAt(0) || "";
+    const lastNameInitial = userData?.surname?.charAt(0) || "";
+    return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current && !profilePictureLoading) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const validateProfilePicture = (file) => {
+    if (!file) {
+      return "Dosya secilemedi";
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return "Sadece JPG, JPEG veya PNG dosyasi yukleyebilirsiniz";
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return "Dosya boyutu en fazla 5MB olmalidir";
+    }
+
+    return null;
+  };
+
+  const handleProfilePictureUpload = async (e) => {
+    const selectedFile = e.target.files?.[0];
+    const validationMessage = validateProfilePicture(selectedFile);
+
+    if (validationMessage) {
+      alertify.error(validationMessage);
+      e.target.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profilePicture", selectedFile);
+
+    setProfilePictureLoading(true);
+
+    try {
+      const response = await axios({
+        method: "PUT",
+        url: "/api/users/profile-picture",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: formData,
+      });
+
+      if (response?.data?.user) {
+        setUserData(response.data.user);
+      } else {
+        getUserDetails();
+      }
+
+      alertify.success("Profil fotografiniz guncellendi");
+    } catch (error) {
+      console.error("Profil fotografi yukleme hatasi:", error);
+      alertify.error(
+        error.response?.data?.message ||
+          "Bir hata olustu. Fotograf yuklenemedi",
+      );
+    } finally {
+      setProfilePictureLoading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleProfilePictureDelete = async () => {
+    const isConfirmed = window.confirm(
+      "Profil fotografinizi kaldirmak istediginize emin misiniz?",
+    );
+
+    if (!isConfirmed) return;
+
+    setProfilePictureLoading(true);
+
+    try {
+      await axios({
+        method: "DELETE",
+        url: "/api/users/profile-picture",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserData((prevState) => {
+        if (!prevState) return prevState;
+
+        return {
+          ...prevState,
+          profilePicture: "",
+          profilePictureUrl: "",
+          photoUrl: "",
+          avatarUrl: "",
+          imageUrl: "",
+        };
+      });
+
+      alertify.success("Profil fotografi kaldirildi");
+    } catch (error) {
+      console.error("Profil fotografi silme hatasi:", error);
+      alertify.error(
+        error.response?.data?.message ||
+          "Bir hata olustu. Fotograf kaldirilamadi",
+      );
+    } finally {
+      setProfilePictureLoading(false);
+    }
+  };
+
   // Yukleme durumu
   if (loading && !userData) {
     return (
@@ -335,20 +482,87 @@ export default function HesapAyarlari() {
                       <Row className="mb-3">
                         <Col md={12}>
                           <div className="d-flex align-items-center mb-3">
-                            <div
-                              className="rounded-circle d-flex justify-content-center align-items-center me-3"
-                              style={{
-                                backgroundColor: "#dc3545",
-                                color: "#fff",
-                                width: "60px",
-                                height: "60px",
-                                fontSize: "24px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {userData.name?.charAt(0)}
-                              {userData.surname?.charAt(0)}
+                            <div className="me-3 text-center">
+                              <div
+                                className="rounded-circle d-flex justify-content-center align-items-center overflow-hidden"
+                                style={{
+                                  backgroundColor: "#dc3545",
+                                  color: "#fff",
+                                  width: "84px",
+                                  height: "84px",
+                                  fontSize: "24px",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {hasProfilePicture ? (
+                                  <img
+                                    src={getProfilePictureUrl()}
+                                    alt="Profil"
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                ) : (
+                                  getUserInitials() || (
+                                    <i className="fas fa-user"></i>
+                                  )
+                                )}
+                              </div>
+
+                              <div className="d-grid gap-2 mt-2">
+                                <Input
+                                  type="file"
+                                  innerRef={fileInputRef}
+                                  accept=".jpg,.jpeg,.png,image/jpeg,image/jpg,image/png"
+                                  onChange={handleProfilePictureUpload}
+                                  className="d-none"
+                                />
+
+                                <Button
+                                  color="primary"
+                                  size="sm"
+                                  onClick={triggerFileInput}
+                                  disabled={profilePictureLoading || loading}
+                                >
+                                  {profilePictureLoading ? (
+                                    <>
+                                      <Spinner size="sm" className="me-1" />{" "}
+                                      Yukleniyor...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="fas fa-upload me-1"></i>{" "}
+                                      Fotografi Degistir
+                                    </>
+                                  )}
+                                </Button>
+
+                                {hasProfilePicture && (
+                                  <Button
+                                    color="danger"
+                                    size="sm"
+                                    outline
+                                    onClick={handleProfilePictureDelete}
+                                    disabled={profilePictureLoading || loading}
+                                  >
+                                    {profilePictureLoading ? (
+                                      <>
+                                        <Spinner size="sm" className="me-1" />{" "}
+                                        Isleniyor...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="fas fa-trash me-1"></i>{" "}
+                                        Fotografi Kaldir
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
                             </div>
+
                             <div>
                               <h5 className="mb-0">
                                 {userData.name} {userData.surname}
@@ -368,6 +582,10 @@ export default function HesapAyarlari() {
                                   </Badge>
                                 ))}
                               </div>
+                              <FormText className="d-block mt-2">
+                                Desteklenen formatlar: JPG, JPEG, PNG (Maks.
+                                5MB)
+                              </FormText>
                             </div>
                           </div>
                         </Col>

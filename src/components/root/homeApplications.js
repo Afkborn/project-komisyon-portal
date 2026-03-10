@@ -40,6 +40,9 @@ export const applicationHandlers = {
   handleBiChat: () => {
     window.location.href = "/bichat";
   },
+  handleUDFOlusturucu: () => {
+    window.location.href = "/udf-olusturucu";
+  },
 };
 
 // Uygulama konfigürasyonu
@@ -160,5 +163,16 @@ export const HOME_APPLICATIONS = [
     visible: true,
     visibleRoles: ["bichat-kullanici", "admin"],
     color: "primary",
+  },
+  {
+    id: 11,
+    label: "UDF Oluşturucu",
+    detail:
+      "UDF Oluşturucu ile adliye personellerinin farklı uygulamalarda kullanabileceği özel veri formatları oluşturabilirsiniz.",
+    type: "item",
+    image: guide_red,
+    actionKey: "handleUDFOlusturucu",
+    visible: true,
+    color: "info",
   },
 ];

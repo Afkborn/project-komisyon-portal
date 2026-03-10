@@ -23,6 +23,7 @@ import BiNotDashboard from "../dashboards/BiNotDashboard";
 import KullaniciAktiviteleri from "../dashboards/KullaniciAktiviteleri";
 import BultenDashboard from "../dashboards/BultenDashboard";
 import EskBaroLevhaDashboard from "../dashboards/EskBaroLevhaDashboard";
+import UDFOlusturucuDashboard from "../dashboards/UDFOlusturucuDashboard";
 import "../../styles/App.css";
 
 function getPageTitle(pathname) {
@@ -38,6 +39,8 @@ function getPageTitle(pathname) {
   if (path.startsWith("/bulten")) return "AYS - Bülten";
   if (path.startsWith("/eskisehir-baro-levha"))
     return "AYS - Eskişehir Baro Levha";
+  if (path.startsWith("/udf-olusturucu"))
+    return "AYS - UDF Oluşturucu";
   if (path.startsWith("/login")) return "AYS - Giriş";
   if (path.startsWith("/unauthorized")) return "AYS - Yetkisiz Erişim";
   if (path === "/") return "Adliye Yönetim Sistemi";
@@ -99,6 +102,8 @@ function App() {
         <Route element={<ProtectedRoutes />}>
           <Route path="/hesap-ayarları" element={<HesapAyarlari />} />
         </Route>
+
+        <Route path="/udf-olusturucu" element={<UDFOlusturucuDashboard />} />
 
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
