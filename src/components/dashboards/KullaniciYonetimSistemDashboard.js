@@ -38,6 +38,7 @@ import {
   FaInfoCircle,
   FaFilter,
 } from "react-icons/fa";
+import UserAvatar from "../common/UserAvatar";
 
 export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
   const navigate = useNavigate();
@@ -547,10 +548,7 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
                         <td>{index + 1}</td>
                         <td>
                           <div className="d-flex align-items-center">
-                            <div className="avatar-circle bg-primary text-white rounded-circle me-2">
-                              {user.name?.charAt(0)}
-                              {user.surname?.charAt(0)}
-                            </div>
+                            <UserAvatar user={user} size={36} className="me-2" />
                             <div>
                               <span className="fw-bold">{user.username}</span>
                               {user.roles.includes("admin") && (
@@ -936,15 +934,6 @@ export default function KullaniciYonetimSistemDashboard({ token: propToken }) {
         .kys-dashboard .table-responsive {
           border-radius: 8px;
           overflow: hidden;
-        }
-
-        .avatar-circle {
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
         }
 
         .role-selection-area .card {

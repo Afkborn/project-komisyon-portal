@@ -18,6 +18,7 @@ import {
 import axios from "axios";
 import alertify from "alertifyjs";
 import DataTable from "../../common/DataTable";
+import UserAvatar from "../../common/UserAvatar";
 import { generatePdf } from "../../actions/PdfActions";
 import { printDocument } from "../../actions/PrintActions";
 import { renderDate_GGAAYYYY } from "../../actions/TimeActions";
@@ -47,23 +48,7 @@ export default function TumPersonelListe({
       header: "Ad Soyad",
       render: (item) => (
         <div className="d-flex align-items-center">
-          <div
-            className="avatar-circle me-2"
-            style={{
-              backgroundColor: stringToColor(item.ad + item.soyad),
-              width: "32px",
-              height: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "50%",
-              color: "white",
-              fontWeight: "bold",
-            }}
-          >
-            {item.ad.charAt(0)}
-            {item.soyad.charAt(0)}
-          </div>
+          <UserAvatar user={item} size={32} className="me-2" />
           <span className="fw-bold">
             {item.ad} {item.soyad}
           </span>
@@ -231,29 +216,6 @@ export default function TumPersonelListe({
     }
 
     return filtered;
-  };
-
-  // İsim ve soyisime göre renk üretme fonksiyonu
-  const stringToColor = (str) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const colors = [
-      "#4e79a7",
-      "#f28e2c",
-      "#e15759",
-      "#76b7b2",
-      "#59a14f",
-      "#edc949",
-      "#af7aa1",
-      "#ff9da7",
-      "#9c755f",
-      "#bab0ab",
-    ];
-
-    return colors[Math.abs(hash) % colors.length];
   };
 
   const filteredData = getFilteredData();

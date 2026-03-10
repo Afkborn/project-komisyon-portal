@@ -21,6 +21,7 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import alertify from "alertifyjs";
+import UserAvatar from "../../common/UserAvatar";
 
 export default function PersonelCalistigiKisiGuncelleModal({
   modal,
@@ -184,20 +185,11 @@ export default function PersonelCalistigiKisiGuncelleModal({
                 <h5 className="mb-3">Mevcut Çalıştığı Kişi</h5>
                 {personel.calistigiKisi ? (
                   <div className="d-flex align-items-center">
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        backgroundColor: "#17a2b8",
-                        color: "#fff",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {personel.calistigiKisi.ad.charAt(0)}
-                      {personel.calistigiKisi.soyad.charAt(0)}
-                    </div>
+                    <UserAvatar
+                      user={personel.calistigiKisi}
+                      size={40}
+                      className="me-3"
+                    />
                     <div>
                       <h6 className="mb-0">
                         {personel.calistigiKisi.ad}{" "}
@@ -272,20 +264,7 @@ export default function PersonelCalistigiKisiGuncelleModal({
                   <CardBody className="bg-light">
                     <Row>
                       <Col xs="auto">
-                        <div
-                          className="rounded-circle d-flex align-items-center justify-content-center"
-                          style={{
-                            width: "48px",
-                            height: "48px",
-                            backgroundColor: "#28a745",
-                            color: "#fff",
-                            fontSize: "18px",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {newCalistigiKisi.ad.charAt(0)}
-                          {newCalistigiKisi.soyad.charAt(0)}
-                        </div>
+                        <UserAvatar user={newCalistigiKisi} size={48} />
                       </Col>
                       <Col>
                         <h5 className="card-title mb-1">

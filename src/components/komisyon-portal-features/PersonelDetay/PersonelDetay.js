@@ -39,6 +39,7 @@ import PersonelCalistigiBirimGuncelleModal from "./PersonelCalistigiBirimGuncell
 import PersonelIzinEkleModal from "./PersonelIzinEkleModal";
 import PersonelSilModal from "./PersonelSilModal";
 import PersonelPartTimeModal from "./PersonelPartTimeModal";
+import UserAvatar from "../../common/UserAvatar";
 
 import { getIzinType } from "../../actions/IzinActions";
 import { useParams, useNavigate } from "react-router-dom";
@@ -756,20 +757,7 @@ export default function PersonelDetay({
                 <CardHeader className="bg-light">
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-center">
-                      <div
-                        className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          backgroundColor: "#e74c3c",
-                          color: "#fff",
-                          fontSize: "20px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {personel.ad.charAt(0)}
-                        {personel.soyad.charAt(0)}
-                      </div>
+                      <UserAvatar user={personel} size={48} className="me-3" />
                       <div>
                         <h4 className="mb-0">
                           {personel.ad} {personel.soyad}

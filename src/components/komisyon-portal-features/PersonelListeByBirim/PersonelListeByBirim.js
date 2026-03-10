@@ -28,6 +28,7 @@ import {
   calculateGorevSuresi,
   calculateBirimGorevSuresi,
 } from "../../actions/TimeActions";
+import UserAvatar from "../../common/UserAvatar";
 
 export default function PersonelListeByBirim({
   unvanlar,
@@ -203,48 +204,6 @@ export default function PersonelListeByBirim({
     if (person.isSuspended) return "table-warning bg-opacity-25"; // Uzaklaştırılmış
     if (person.izindeMi) return "table-info bg-opacity-25"; // İzinde
     return ""; // Normal durum
-  };
-
-  // İsim ve soyisime göre renk üretme fonksiyonu
-  const stringToColor = (str) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const colors = [
-      "#4e79a7",
-      "#f28e2c",
-      "#e15759",
-      "#76b7b2",
-      "#59a14f",
-      "#edc949",
-      "#af7aa1",
-      "#ff9da7",
-      "#9c755f",
-    ];
-
-    return colors[Math.abs(hash) % colors.length];
-  };
-
-  // Kullanıcı avatarı
-  const renderUserAvatar = (ad, soyad) => {
-    return (
-      <div
-        className="rounded-circle d-flex align-items-center justify-content-center me-2"
-        style={{
-          backgroundColor: stringToColor(ad + soyad),
-          width: "30px",
-          height: "30px",
-          color: "white",
-          fontSize: "12px",
-          fontWeight: "bold",
-        }}
-      >
-        {ad.charAt(0)}
-        {soyad.charAt(0)}
-      </div>
-    );
   };
 
   return (
@@ -468,7 +427,11 @@ export default function PersonelListeByBirim({
                               </td>
                               <td>
                                 <div className="d-flex align-items-center">
-                                  {renderUserAvatar(person.ad, person.soyad)}
+                                  <UserAvatar
+                                    user={person}
+                                    size={30}
+                                    className="me-2"
+                                  />
                                   <div>
                                     <span className="fw-bold">
                                       {person.ad} {person.soyad}
